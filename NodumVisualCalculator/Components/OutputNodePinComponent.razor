@@ -1,0 +1,11 @@
+﻿@if (OutputNode.OutputPin.Showed)
+{
+    <img id="@OutputNode.OutputPin.ElementId" src="/image/outputnode.png" class="output-pin" @onclick="@(args => OnNodePinClick(args, OutputNode))">
+}
+
+@code {
+    [Parameter]
+    public IOutputNode OutputNode { get; set; }
+    [Parameter]
+    public Action<MouseEventArgs, IOutputNode> OnNodePinClick { get; set; }
+}

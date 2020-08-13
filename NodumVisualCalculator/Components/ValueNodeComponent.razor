@@ -1,0 +1,64 @@
+﻿@inject IJSRuntime JSRuntime
+
+
+@if (ValueNode != null)
+{
+    if (ValueNode is IValueNode<double> doubleValueNode)
+    {
+        <div class="node">
+            @if (doubleValueNode is IInputNode inputNode)
+            {
+                <InputNpdePinComponent InputNode="@inputNode" OnNodePinClick="@((a, n, i) => OnNodePinConnect(a, n, i))" />
+            }
+
+            <div class="input-container">
+                <label>@doubleValueNode.Name</label>
+                <input type="number" @bind-value="doubleValueNode.Value" />
+            </div>
+
+            <OutputNodePinComponent OutputNode="@doubleValueNode" OnNodePinClick="@((a, n) => OnNodePinSelect(a, n))" />
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public IValueNode ValueNode { get; set; }
+    [Parameter]
+    public Action<MouseEventArgs, IOutputNode> OnNodePinSelect { get; set; }
+    [Parameter]
+    public Action<MouseEventArgs, IInputNode, int> OnNodePinConnect { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (ValueNode is IOutputNode outputNode)
+        {
+            outputNode.OutputPin.Position.UpdatePosition = () => UpdatePinPosition(outputNode.OutputPin);
+        }
+        if (ValueNode is ISingleInputNode singleInputNode)
+        {
+            singleInputNode.InputPin.Position.UpdatePosition = () => UpdatePinPosition(singleInputNode.InputPin);
+        }
+        if (ValueNode is ICommutateInputNode commutateInputNode)
+        {
+            commutateInputNode.InputPin.Position.UpdatePosition = () => UpdatePinPosition(commutateInputNode.InputPin);
+        }
+        if (ValueNode is IMultipleInputNode multipleInputNode)
+        {
+            foreach (var pin in multipleInputNode.InputPins)
+            {
+                pin.Position.UpdatePosition = () => UpdatePinPosition(pin);
+            }
+        }
+    }
+
+
+    private async void UpdatePinPosition(NodePin pin)
+    {
+        double elementX = await JSRuntime.InvokeAsync<double>("getElementOffsetLeft", pin.ElementId) + 8;
+        double elementY = await JSRuntime.InvokeAsync<double>("getElementOffsetTop", pin.ElementId) + 8;
+
+        pin.Position.X = elementX;
+        pin.Position.Y = elementY;
+    }
+}

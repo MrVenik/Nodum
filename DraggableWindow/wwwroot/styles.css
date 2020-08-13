@@ -1,0 +1,11 @@
+﻿.draggablezone {
+    position: absolute;
+}
+
+.draggablewindow {
+    position: absolute;
+}
+
+.draggablewindowheader {
+    cursor: move;
+}

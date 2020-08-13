@@ -1,0 +1,44 @@
+﻿@implements IDisposable
+
+@code {
+    [CascadingParameter]
+    public DraggableZone DraggableZone { get; set; }
+
+    [Parameter]
+    public RenderFragment WindowHeader { get; set; }
+
+    [Parameter]
+    public RenderFragment WindowContent { get; set; }
+
+    [Parameter]
+    public Action<MouseEventArgs, DraggableWindow> OnStartDragingWindow { get; set; }
+    [Parameter]
+    public Action<MouseEventArgs, DraggableWindow> OnDragingWindow { get; set; }
+    [Parameter]
+    public Action<MouseEventArgs, DraggableWindow> OnStopDragingWindow { get; set; }
+    [Parameter]
+    public Action<DraggableWindow> OnDispose { get; set; }
+
+    [Parameter]
+    public bool AllowDrag { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> AllOtherAttributes { get; set; }
+
+    public int ZIndex { get; set; }
+
+    public ElementOffset Offset { get; set; } = new ElementOffset();
+
+    protected override void OnInitialized()
+    {
+        if (DraggableZone == null) throw new InvalidOperationException("");
+
+        DraggableZone.DraggableWindows.Add(this);
+    }
+
+    public void Dispose()
+    {
+        DraggableZone.DraggableWindows.Remove(this);
+        OnDispose?.Invoke(this);
+    }
+}

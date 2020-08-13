@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30406.217
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nodum", "Nodum\Nodum.csproj", "{D189837C-4083-446F-8B2B-005458FF5BAD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodumConsoleApp", "NodumConsoleApp\NodumConsoleApp.csproj", "{9D9A125F-F17D-4BF1-9FEA-8CB5531E2CEB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodumVisualCalculator", "NodumVisualCalculator\NodumVisualCalculator.csproj", "{5BE86001-390E-4887-A4BA-6321E14356B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorDraggableWindow", "BlazorDraggableWindow\BlazorDraggableWindow.csproj", "{57D8342F-207A-4028-BAB2-EBDC3DB4B2BA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D189837C-4083-446F-8B2B-005458FF5BAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D189837C-4083-446F-8B2B-005458FF5BAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D189837C-4083-446F-8B2B-005458FF5BAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D189837C-4083-446F-8B2B-005458FF5BAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D9A125F-F17D-4BF1-9FEA-8CB5531E2CEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D9A125F-F17D-4BF1-9FEA-8CB5531E2CEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D9A125F-F17D-4BF1-9FEA-8CB5531E2CEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D9A125F-F17D-4BF1-9FEA-8CB5531E2CEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BE86001-390E-4887-A4BA-6321E14356B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BE86001-390E-4887-A4BA-6321E14356B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BE86001-390E-4887-A4BA-6321E14356B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BE86001-390E-4887-A4BA-6321E14356B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57D8342F-207A-4028-BAB2-EBDC3DB4B2BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57D8342F-207A-4028-BAB2-EBDC3DB4B2BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57D8342F-207A-4028-BAB2-EBDC3DB4B2BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57D8342F-207A-4028-BAB2-EBDC3DB4B2BA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {844285D1-9B27-48A6-81D4-63A66D05AFE9}
+	EndGlobalSection
+EndGlobal

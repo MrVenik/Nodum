@@ -1,0 +1,25 @@
+﻿@if (Node != null)
+{
+    if (Node is IValueNode valueNode)
+    {
+        <ValueNodeComponent ValueNode="@valueNode" OnNodePinSelect="@((a, n) => OnNodePinSelect(a, n))" OnNodePinConnect="@((a, n, i) => OnNodePinConnect(a, n, i))" />
+    }
+    else if (Node is INodeHolder nodeHolder)
+    {
+        <NodeHolderComponent NodeHolder="@nodeHolder" OnNodePinSelect="@((a, n) => OnNodePinSelect(a, n))" OnNodePinConnect="@((a, n, i) => OnNodePinConnect(a, n, i))"/>
+    }
+}
+
+@code {
+    [Parameter]
+    public INode Node { get; set; }
+    [Parameter]
+    public Action<MouseEventArgs, IOutputNode> OnNodePinSelect { get; set; }
+    [Parameter]
+    public Action<MouseEventArgs, IInputNode, int> OnNodePinConnect { get; set; }
+
+    protected override void OnInitialized()
+    {
+
+    }
+}

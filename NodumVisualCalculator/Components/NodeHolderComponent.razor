@@ -1,0 +1,21 @@
+﻿@if (NodeHolder != null)
+{
+    <div class="node-holder">
+        @foreach (var node in NodeHolder.Nodes)
+        {
+            if (node.Showed)
+            {
+                <NodeComponent Node="@node" OnNodePinSelect="@OnNodePinSelect" OnNodePinConnect="@OnNodePinConnect" />
+            }
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public INodeHolder NodeHolder { get; set; }
+    [Parameter]
+    public Action<MouseEventArgs, IOutputNode> OnNodePinSelect { get; set; }
+    [Parameter]
+    public Action<MouseEventArgs, IInputNode, int> OnNodePinConnect { get; set; }
+}

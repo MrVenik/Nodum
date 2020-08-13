@@ -1,0 +1,236 @@
+﻿@if (_currentMainNode != null)
+{
+    <div class="main-node" @onmousemove="DrawMainLine">
+        <div class="main-node-header">
+            <div class="node-window-header-text">@_currentMainNode.Name</div>
+            <button @onclick="(() => _currentMainNode = _currentMainNode.Holder != null ? _currentMainNode.Holder : MainNode)">Back</button>
+            <button @onclick="CreateNewNodeHolder">Add New Node</button>
+            <button @onclick="CreateNewNumberNode">Add New Number Node</button>
+            <button @onclick="CreateNewAddNode">Add New Add Node</button>
+        </div>
+
+        @foreach (var line in _allLines)
+        {
+            <svg x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: -1;">
+                <path fill="none" stroke="red" stroke-width="8" d="@line.Curve" />
+            </svg>
+        }
+
+        <svg x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: -1;">
+            <path fill="none" stroke="red" stroke-width="3" d="@_mainLine.Curve" />
+        </svg>
+
+        <DraggableZone Height="100%" Width="100%">
+            @foreach (var node in _currentMainNode.Nodes)
+            {
+                <DraggableWindow @key="node" X="@node.Position.X" Y="@node.Position.Y" AllowDrag="true" OnDragingWindow="@((e, w) => OnNodeDragging(e, w, node))">
+                    <WindowHeader>
+                        <div class="node-window-header">
+                            <div class="node-window-header-text">@node.Name (@node.Position.X, @node.Position.Y)</div>
+                            <div class="node-window-header-buttons">
+                                <img class="node-window-header-button" src="/image/OptionsButton.png" @onclick="@(() => EditNode(node))">
+                                <img class="node-window-header-button" src="/image/CloseButton.png" @onclick="@(() => CloseWindow(node))">
+                            </div>
+                        </div>
+                    </WindowHeader>
+                    <WindowContent>
+                        <div class="node-window">
+                            <NodeComponent Node="@node" OnNodePinSelect="@((a, n) => OnNodeSelect(a, n))" OnNodePinConnect="@((a, n, i) => OnNodeConnect(a, n, i))" />
+                        </div>
+                    </WindowContent>
+                </DraggableWindow>
+            }
+        </DraggableZone>
+    </div>
+}
+
+@code {
+    class Line
+    {
+        public double FromX, FromY, ToX, ToY;
+
+        public string Curve
+        {
+            get
+            {
+                string line = string.Empty;
+                int x0, y0, x1, y1, x2, y2, x3, y3;
+
+                x0 = (int)FromX;
+                y0 = (int)FromY;
+
+                x3 = (int)ToX;
+                y3 = (int)ToY;
+
+                x1 = (int)(x0 + ((x3 - x0) / 2.0));
+                y1 = y0;
+
+                x2 = (int)(x0 + ((x1 - x0) / 2.0));
+                y2 = y3;
+
+                line = $"M {x0}, {y0} C {x1}, {y1} {x2}, {y2} {x3}, {y3}";
+
+                return line;
+            }
+
+        }
+    }
+
+    [Parameter]
+    public INodeHolder MainNode { get; set; }
+
+    private bool _isEditor = false;
+
+    private INodeHolder _currentMainNode;
+
+    private IOutputNode _selectedNode;
+
+    private List<Line> _allLines = new List<Line>();
+
+    private Line _mainLine = new Line();
+    private bool _isMainLineDrawing = false;
+
+    protected override void OnInitialized()
+    {
+        _currentMainNode = MainNode;
+    }
+
+    private void UpdateLines()
+    {
+        _currentMainNode?.Position.OnPositionChanged?.Invoke();
+
+        _allLines.Clear();
+        foreach (var node in _currentMainNode.Nodes)
+        {
+            AddLinesFromNode(node);
+        }
+
+        StateHasChanged();
+    }
+
+    private void AddLinesFromNode(INode node)
+    {
+        if (node is INodeHolder holder)
+        {
+            foreach (var n in holder.Nodes)
+            {
+                AddLinesFromNode(n);
+            }
+        }
+        else if (node is IInputNode lineableNodePin)
+        {
+            foreach (var connection in lineableNodePin.GetIncomingConnections())
+            {
+                if (connection != null)
+                {
+                    if (connection.OutputNodePin.Node.Showed && connection.OutputNodePin.Showed && connection.InputNodePin.Node.Showed && connection.InputNodePin.Showed)
+                    {
+                        _allLines.Add(
+                            new Line()
+                            {
+                                FromX = connection.OutputNodePin.Position.X,
+                                FromY = connection.OutputNodePin.Position.Y,
+                                ToX = connection.InputNodePin.Position.X,
+                                ToY = connection.InputNodePin.Position.Y
+                            });
+                    }
+                }
+            }
+        }
+    }
+
+    private void OnNodeSelect(MouseEventArgs args, IOutputNode outputNode)
+    {
+        _mainLine = new Line() { FromX = args.ClientX, FromY = args.ClientY };
+
+        _isMainLineDrawing = true;
+
+        if (_isMainLineDrawing)
+        {
+            _mainLine.ToX = args.ClientX;
+            _mainLine.ToY = args.ClientY;
+        }
+
+        _selectedNode = outputNode;
+
+        UpdateLines();
+    }
+
+    private void DrawMainLine(MouseEventArgs args)
+    {
+        if (_isMainLineDrawing)
+        {
+            _mainLine.ToX = args.ClientX;
+            _mainLine.ToY = args.ClientY;
+        }
+    }
+
+    private void OnNodeConnect(MouseEventArgs args, IInputNode inputNode, int index)
+    {
+        _isMainLineDrawing = false;
+        _mainLine = new Line();
+
+        if (inputNode is ISingleInputNode singleInputNode)
+        {
+            singleInputNode.AddIncomingNode(_selectedNode);
+        }
+        else if (inputNode is ICommutateInputNode commutateInputNode)
+        {
+            commutateInputNode.AddIncomingNode(_selectedNode);
+        }
+        else if (inputNode is IMultipleInputNode multipleInputNode)
+        {
+            multipleInputNode.AddIncomingNode(_selectedNode, index);
+        }
+
+        UpdateLines();
+    }
+
+    private void EditNode(INode window)
+    {
+        if (window is INodeHolder holder)
+        {
+            _currentMainNode = holder;
+        }
+        if (window is IValueNode)
+        {
+            window.Showed = !window.Showed;
+        }
+        StateHasChanged();
+    }
+
+    private void CreateNewNodeHolder()
+    {
+        _currentMainNode.AddNode(new NodeHolder("Holder", _currentMainNode));
+    }
+
+    private void CreateNewNumberNode()
+    {
+        _currentMainNode.AddNode(new InputDoubleNode("Number", _currentMainNode));
+    }
+
+    private void CreateNewAddNode()
+    {
+        _currentMainNode.AddNode(new DoubleAddFuncNode("Add", _currentMainNode));
+    }
+
+    private void CloseWindow(INode window)
+    {
+        _currentMainNode.RemoveNode(window);
+
+        UpdateLines();
+    }
+
+    private void OnNodeStartDragging(MouseEventArgs args, DraggableWindow nodeWindow, INode node)
+    {
+
+    }
+
+    private void OnNodeDragging(MouseEventArgs args, DraggableWindow nodeWindow, INode node)
+    {
+        node.Position.X = nodeWindow.Offset.Left;
+        node.Position.Y = nodeWindow.Offset.Top;
+
+        UpdateLines();
+    }
+}

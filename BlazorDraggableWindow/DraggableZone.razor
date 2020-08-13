@@ -1,0 +1,101 @@
+﻿<div class="draggablezone" style="height: @(Height); width:@(Width);" @onmousemove="_onMouseMove" @onmouseup="_onMouseUp">
+    <CascadingValue Value="this">
+        @ChildContent
+    </CascadingValue>
+
+    <div>Window count is @DraggableWindows.Count</div>
+
+    @if (DraggableWindows.Count > 0)
+    {
+        @foreach (var window in DraggableWindows)
+        {
+            if (window.AllowDrag)
+            {
+                <div @key="window" class="draggablewindow" style="top: @(window.Offset.Top)px; left: @(window.Offset.Left)px; z-index: @(window.ZIndex);" @attributes="window.AllOtherAttributes">
+                    <div class="draggablewindowheader" @onmousedown:preventDefault @onmousedown="(args) => StartDragWindow(args, window)">
+                        <CascadingValue Value="window">
+                            @window.WindowHeader
+                        </CascadingValue>
+                    </div>
+                    <CascadingValue Value="window">
+                        @window.WindowContent
+                    </CascadingValue>
+                </div>
+            }
+            else
+            {
+                <div @key="window" class="draggablewindow" style="top: @(window.Offset.Top)px; left: @(window.Offset.Left)px; z-index: @(window.ZIndex);" @attributes="window.AllOtherAttributes">
+                    <div class="draggablewindowheader" @onmousedown:preventDefault>
+                        <CascadingValue Value="window">
+                            @window.WindowHeader
+                        </CascadingValue>
+                    </div>
+                    <CascadingValue Value="window">
+                        @window.WindowContent
+                    </CascadingValue>
+                </div>
+            }
+        }
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+    [Parameter]
+    public string Height { get; set; }
+    [Parameter]
+    public string Width { get; set; }
+    [Parameter]
+    public string Name { get; set; }
+
+    private Action<MouseEventArgs> _onMouseMove;
+    private Action<MouseEventArgs> _onMouseUp;
+
+    public List<DraggableWindow> DraggableWindows { get; private set; } = new List<DraggableWindow>();
+
+    private ElementOffset _startOffset = new ElementOffset();
+    private ElementOffset _offset = new ElementOffset();
+
+    private bool _isDragging = false;
+
+    private void StartDragWindow(MouseEventArgs args, DraggableWindow window)
+    {
+        window.ZIndex = 1;
+
+        _startOffset.Left = args.ClientX;
+        _startOffset.Top = args.ClientY;
+
+        _isDragging = true;
+
+        _onMouseMove = (e) => DragWindow(e, window);
+        _onMouseUp = (e) => StopDragWindow(e, window);
+
+        window.OnDragingWindow?.Invoke(args, window);
+    }
+
+    private void DragWindow(MouseEventArgs args, DraggableWindow window)
+    {
+        if (_isDragging)
+        {
+            window.Offset.Left += args.ClientX - _startOffset.Left;
+            window.Offset.Top += args.ClientY - _startOffset.Top;
+
+            _startOffset.Left = args.ClientX;
+            _startOffset.Top = args.ClientY;
+
+            window.OnDragingWindow?.Invoke(args, window);
+        }
+    }
+
+    private void StopDragWindow(MouseEventArgs args, DraggableWindow window)
+    {
+        window.ZIndex = 0;
+        _isDragging = false;
+        _onMouseMove = null;
+        _onMouseUp = null;
+
+        window.OnStopDragingWindow?.Invoke(args, window);
+    }
+}
