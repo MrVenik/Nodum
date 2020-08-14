@@ -1,11 +1,11 @@
-﻿@if (OutputNode.OutputPin.Showed)
+﻿@if (VisualNode.OutputNodePin.Showed)
 {
-    <img id="@OutputNode.OutputPin.ElementId" src="/image/outputnode.png" class="output-pin" @onclick="@(args => OnNodePinClick(args, OutputNode))">
+    <img id="@VisualNode.OutputNodePin.ElementId" src="/image/outputnode.png" class="output-pin" @onclick="@(args => OnNodePinClick(args, VisualNode))">
 }
 
 @code {
     [Parameter]
-    public IOutputNode OutputNode { get; set; }
+    public VisualNode VisualNode { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, IOutputNode> OnNodePinClick { get; set; }
+    public Action<MouseEventArgs, VisualNode> OnNodePinClick { get; set; }
 }

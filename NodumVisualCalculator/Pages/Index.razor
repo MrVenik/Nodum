@@ -3,13 +3,10 @@
 <MainNodeComponent MainNode="@_mainNode" />
 
 @code {
-    private NodeHolder _mainNode = new NodeHolder("Main Node");
+    private VisualNodeHolder _mainNode = new VisualNodeHolder("Main Node");
 
     protected override void OnInitialized()
     {
-        _mainNode.AddNode(new InputDoubleNode("Input1", _mainNode));
-        _mainNode.AddNode(new InputDoubleNode("Input2", _mainNode));
 
-        _mainNode.AddNode(new DoubleAddFuncNode("Double add", _mainNode));
     }
 }

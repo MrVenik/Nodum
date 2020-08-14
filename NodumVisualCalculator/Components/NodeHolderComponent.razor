@@ -1,11 +1,11 @@
-﻿@if (NodeHolder != null)
+﻿@if (VisualNodeHolder != null)
 {
     <div class="node-holder">
-        @foreach (var node in NodeHolder.Nodes)
+        @foreach (var visualNode in VisualNodeHolder.VisualNodes)
         {
-            if (node.Showed)
+            if (visualNode.Showed)
             {
-                <NodeComponent Node="@node" OnNodePinSelect="@OnNodePinSelect" OnNodePinConnect="@OnNodePinConnect" />
+                <NodeComponent VisualNode="@visualNode" OnNodePinSelect="@OnNodePinSelect" OnNodePinConnect="@OnNodePinConnect" />
             }
         }
     </div>
@@ -13,9 +13,9 @@
 
 @code {
     [Parameter]
-    public INodeHolder NodeHolder { get; set; }
+    public VisualNodeHolder VisualNodeHolder { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, IOutputNode> OnNodePinSelect { get; set; }
+    public Action<MouseEventArgs, VisualNode> OnNodePinSelect { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, IInputNode, int> OnNodePinConnect { get; set; }
+    public Action<MouseEventArgs, VisualNode, int> OnNodePinConnect { get; set; }
 }

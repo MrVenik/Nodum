@@ -8,8 +8,8 @@ namespace NodumVisualCalculator.Data
 {
     public class InputDoubleNode : SingleInputValueNode<double>
     {
-        public InputDoubleNode(string name, INodeHolder node, bool nodePinShowed = true, bool outputNodePinShowed = true, double value = default)
-            : base(name, node, nodePinShowed, outputNodePinShowed, value)
+        public InputDoubleNode(string name, double value = default)
+            : base(name, value)
         {
         }
     }
@@ -29,8 +29,8 @@ namespace NodumVisualCalculator.Data
             return default;
         }
 
-        public DoubleAddFuncNode(string name, INodeHolder node, bool nodePinShowed = true)
-            : base(name, node, 2, Add, nodePinShowed)
+        public DoubleAddFuncNode(string name)
+            : base(name, 2, Add)
         {
         }
     }

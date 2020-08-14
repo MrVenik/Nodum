@@ -1,55 +1,41 @@
 ﻿@inject IJSRuntime JSRuntime
 
 
-@if (ValueNode != null)
+@if (VisualNode != null)
 {
-    if (ValueNode is IValueNode<double> doubleValueNode)
+    if (VisualNode.Node is IValueNode<double> doubleValueNode)
     {
         <div class="node">
-            @if (doubleValueNode is IInputNode inputNode)
-            {
-                <InputNpdePinComponent InputNode="@inputNode" OnNodePinClick="@((a, n, i) => OnNodePinConnect(a, n, i))" />
-            }
+
+            <InputNpdePinComponent VisualNode="@VisualNode" OnNodePinClick="@((a, n, i) => OnNodePinConnect(a, n, i))" />
 
             <div class="input-container">
-                <label>@doubleValueNode.Name</label>
+                <label>@VisualNode.Name</label>
                 <input type="number" @bind-value="doubleValueNode.Value" />
             </div>
 
-            <OutputNodePinComponent OutputNode="@doubleValueNode" OnNodePinClick="@((a, n) => OnNodePinSelect(a, n))" />
+            <OutputNodePinComponent VisualNode="@VisualNode" OnNodePinClick="@((a, n) => OnNodePinSelect(a, n))" />
         </div>
     }
 }
 
 @code {
     [Parameter]
-    public IValueNode ValueNode { get; set; }
+    public VisualNode VisualNode { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, IOutputNode> OnNodePinSelect { get; set; }
+    public Action<MouseEventArgs, VisualNode> OnNodePinSelect { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, IInputNode, int> OnNodePinConnect { get; set; }
+    public Action<MouseEventArgs, VisualNode, int> OnNodePinConnect { get; set; }
 
     protected override void OnInitialized()
     {
-        if (ValueNode is IOutputNode outputNode)
+        VisualNode.OutputNodePin.Position.UpdatePosition = () => UpdatePinPosition(VisualNode.OutputNodePin);
+
+        foreach (var pin in VisualNode.InputNodePins)
         {
-            outputNode.OutputPin.Position.UpdatePosition = () => UpdatePinPosition(outputNode.OutputPin);
+            pin.Position.UpdatePosition = () => UpdatePinPosition(pin);
         }
-        if (ValueNode is ISingleInputNode singleInputNode)
-        {
-            singleInputNode.InputPin.Position.UpdatePosition = () => UpdatePinPosition(singleInputNode.InputPin);
-        }
-        if (ValueNode is ICommutateInputNode commutateInputNode)
-        {
-            commutateInputNode.InputPin.Position.UpdatePosition = () => UpdatePinPosition(commutateInputNode.InputPin);
-        }
-        if (ValueNode is IMultipleInputNode multipleInputNode)
-        {
-            foreach (var pin in multipleInputNode.InputPins)
-            {
-                pin.Position.UpdatePosition = () => UpdatePinPosition(pin);
-            }
-        }
+
     }
 
 

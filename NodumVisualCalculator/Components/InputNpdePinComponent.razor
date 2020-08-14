@@ -1,28 +1,22 @@
-﻿@if (InputNode is ISingleInputNode singleInputNode)
+﻿@if (VisualNode.InputNodePins.Count == 1)
 {
-    if (singleInputNode.InputPin.Showed)
+    if (VisualNode.InputNodePins[0].Showed)
     {
-        <img id="@singleInputNode.InputPin.ElementId" src="/image/inputnode.png" class="input" @onclick="@(args => OnNodePinClick(args, singleInputNode, 0))">
+        <img id="@VisualNode.InputNodePins[0].ElementId" src="/image/inputnode.png" class="input" @onclick="@(args => OnNodePinClick(args, VisualNode, 0))">
     }
 }
-else if (InputNode is ICommutateInputNode commutateInputNode)
+
+else if (VisualNode.InputNodePins.Count > 1)
 {
-    if (commutateInputNode.InputPin.Showed)
-    {
-        <img id="@commutateInputNode.InputPin.ElementId" src="/image/inputnode.png" class="input" @onclick="@(args => OnNodePinClick(args, commutateInputNode, 0))">
-    }
-}
-else if (InputNode is IMultipleInputNode multipleInputNode)
-{
-    for (int i = 0; i < multipleInputNode.InputPins.Length; i++)
+    for (int i = 0; i < VisualNode.InputNodePins.Count; i++)
     {
 
         int index = i;
-        if (multipleInputNode.InputPins[index].Showed)
+        if (VisualNode.InputNodePins[index].Showed)
         {
             <div class="node" style="text-align: left">
 
-                <img id="@multipleInputNode.InputPins[index].ElementId" src="/image/inputnode.png" class="input" @onclick="@(args => OnNodePinClick(args, multipleInputNode, index))">
+                <img id="@VisualNode.InputNodePins[index].ElementId" src="/image/inputnode.png" class="input" @onclick="@(args => OnNodePinClick(args, VisualNode, index))">
                 <label style="font-size: 12px; color: #fff;">Input @index</label>
             </div>
         }
@@ -32,7 +26,7 @@ else if (InputNode is IMultipleInputNode multipleInputNode)
 
 @code {
     [Parameter]
-    public IInputNode InputNode { get; set; }
+    public VisualNode VisualNode { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, IInputNode, int> OnNodePinClick { get; set; }
+    public Action<MouseEventArgs, VisualNode, int> OnNodePinClick { get; set; }
 }
