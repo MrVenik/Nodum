@@ -49,6 +49,9 @@ namespace NodumVisualCalculator.Data
         }
         public NodePin OutputNodePin { get; private set; }
         public List<NodePin> InputNodePins { get; private set; }
+
+        public List<Line> Lines { get; private set; } = new List<Line>();
+
         public INode Node { get; private set; }
         public VisualNodeHolder Holder { get; private set; }
         public string Name

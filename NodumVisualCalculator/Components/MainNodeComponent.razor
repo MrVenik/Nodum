@@ -1,25 +1,40 @@
 ﻿@if (_currentMainNode != null)
 {
-    <div class="main-node" @onmousemove="DrawMainLine">
+    <div class="main-node" @onmousemove="DrawMainLine" @ondblclick="StopDrawingMainLine">
         <div class="main-node-header">
             <div class="main-node-header-element">
                 <span class="iconify iconify-main" data-icon="mdi:menu" data-inline="false"></span>
             </div>
             <div class="main-node-header-element main-node-header-text">@_currentMainNode.Name</div>
-            <div class="main-node-header-element">
-                <span class="iconify iconify-main" data-icon="mdi:close" data-inline="false"></span>
-            </div>
+            @if (CloseButtonShowed)
+            {
+                <div class="main-node-header-element" @onclick="() => OnCloseButtonClicked?.Invoke()">
+                    <span class="iconify iconify-main" data-icon="mdi:close" data-inline="false"></span>
+                </div>
+            }
         </div>
 
         @foreach (var line in _allLines)
         {
-            <svg x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: -1;">
-                <path fill="none" stroke="red" stroke-width="8" d="@line.Curve" />
+            <svg x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: 0;">
+                <defs>
+                    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color: green; stop-opacity: 1" />
+                        <stop offset="100%" style="stop-color: red; stop-opacity: 1" />
+                    </linearGradient>
+                </defs>
+                <path fill="none" stroke="url(#grad1)" stroke-width="8" d="@line.Curve" />
             </svg>
         }
 
-        <svg x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: -1;">
-            <path fill="none" stroke="red" stroke-width="3" d="@_mainLine.Curve" />
+        <svg x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: 0;">
+            <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color: green; stop-opacity: 1" />
+                    <stop offset="100%" style="stop-color: red; stop-opacity: 1" />
+                </linearGradient>
+            </defs>
+            <path fill="none" stroke="url(#grad1)" stroke-width="3" d="@_mainLine.Curve" />
         </svg>
 
         <DraggableZone Height="100%" Width="100%">
@@ -49,45 +64,18 @@
 }
 
 @code {
-    class Line
-    {
-        public double FromX, FromY, ToX, ToY;
-
-        public string Curve
-        {
-            get
-            {
-                string line = string.Empty;
-                int x0, y0, x1, y1, x2, y2, x3, y3;
-
-                x0 = (int)FromX;
-                y0 = (int)FromY;
-
-                x3 = (int)ToX;
-                y3 = (int)ToY;
-
-                x1 = (int)(x0 + ((x3 - x0) / 2.0));
-                y1 = y0;
-
-                x2 = (int)(x0 + ((x1 - x0) / 2.0));
-                y2 = y3;
-
-                line = $"M {x0}, {y0} C {x1}, {y1} {x2}, {y2} {x3}, {y3}";
-
-                return line;
-            }
-
-        }
-    }
-
     [Parameter]
     public VisualNodeHolder MainNode { get; set; }
+    [Parameter]
+    public bool CloseButtonShowed { get; set; }
+    [Parameter]
+    public Action OnCloseButtonClicked { get; set; }
 
     private bool _isEditor = false;
 
     private VisualNodeHolder _currentMainNode;
 
-    private IOutputNode _selectedNode;
+    private VisualNode _selectedNode;
 
     private List<Line> _allLines = new List<Line>();
 
@@ -98,23 +86,18 @@
     {
         _currentMainNode = MainNode;
         CreateNewAddNode();
+        CreateNewNumberNode();
     }
 
     private void OnNodeSelect(MouseEventArgs args, VisualNode visualNode)
     {
-        _mainLine = new Line() { FromX = args.ClientX, FromY = args.ClientY };
+        _mainLine.From = new Position() { X = args.ClientX, Y = args.ClientY };
 
         _isMainLineDrawing = true;
 
-        if (_isMainLineDrawing)
+        if (visualNode.Node is IOutputNode)
         {
-            _mainLine.ToX = args.ClientX;
-            _mainLine.ToY = args.ClientY;
-        }
-
-        if (visualNode.Node is IOutputNode outputNode)
-        {
-            _selectedNode = outputNode;
+            _selectedNode = visualNode;
         }
     }
 
@@ -122,28 +105,55 @@
     {
         if (_isMainLineDrawing)
         {
-            _mainLine.ToX = args.ClientX;
-            _mainLine.ToY = args.ClientY;
+            _mainLine.To = new Position() { X = args.ClientX, Y = args.ClientY };
+        }
+    }
+
+    private void StopDrawingMainLine(MouseEventArgs args)
+    {
+        if (_isMainLineDrawing)
+        {
+            _isMainLineDrawing = false;
+            _mainLine = new Line();
         }
     }
 
     private void OnNodeConnect(MouseEventArgs args, VisualNode inputNode, int index)
     {
-        _isMainLineDrawing = false;
-        _mainLine = new Line();
+        StopDrawingMainLine(args);
 
         if (inputNode.Node is ISingleInputNode singleInputNode)
         {
-            singleInputNode.AddIncomingNode(_selectedNode);
+            singleInputNode.AddIncomingNode(_selectedNode.Node as IOutputNode);
+            inputNode.Lines.Add(new Line() { From = _selectedNode.OutputNodePin.Position, To = inputNode.InputNodePins[0].Position });
         }
         else if (inputNode.Node is ICommutateInputNode commutateInputNode)
         {
-            commutateInputNode.AddIncomingNode(_selectedNode);
+            commutateInputNode.AddIncomingNode(_selectedNode.Node as IOutputNode);
+            inputNode.Lines.Add(new Line() { From = _selectedNode.OutputNodePin.Position, To = inputNode.InputNodePins[0].Position });
         }
         else if (inputNode.Node is IMultipleInputNode multipleInputNode)
         {
-            multipleInputNode.AddIncomingNode(_selectedNode, index);
+            multipleInputNode.AddIncomingNode(_selectedNode.Node as IOutputNode, index);
+            inputNode.Lines.Add(new Line() { From = _selectedNode.OutputNodePin.Position, To = inputNode.InputNodePins[index].Position });
         }
+
+        UpdateLines();
+    }
+
+    private void UpdateLines()
+    {
+        _currentMainNode.Position.OnPositionChanged?.Invoke();
+        _allLines.Clear();
+        foreach (var vn in _currentMainNode.VisualNodes)
+        {
+            if (vn is VisualNode visualNode)
+            {
+                _allLines.AddRange(visualNode.Lines);
+            }
+        }
+
+        StateHasChanged();
     }
 
     private void CreateNewNodeHolder()
@@ -165,8 +175,7 @@
     {
         _currentMainNode.RemoveNode(window);
 
-        StateHasChanged();
-
+        UpdateLines();
     }
 
     private void OnNodeStartDragging(MouseEventArgs args, DraggableWindow nodeWindow, INode node)
@@ -178,5 +187,7 @@
     {
         node.Position.X = nodeWindow.Offset.Left;
         node.Position.Y = nodeWindow.Offset.Top;
+
+        UpdateLines();
     }
 }

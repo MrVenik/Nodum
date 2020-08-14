@@ -14,8 +14,8 @@
                     if (VisualNode.InputNodePins[index].Showed)
                     {
                         <div class="node-element">
-                            <div class="node-element-content" id="@VisualNode.InputNodePins[index].ElementId" @onclick="@(args => OnNodePinConnect(args, VisualNode, index))">
-                                <span class="iconify iconify-inputpin" data-icon="mdi:circle" data-inline="false"></span>
+                            <div class="node-element-content" @onclick="@(args => OnNodePinConnect(args, VisualNode, index))">
+                                <span id="@VisualNode.InputNodePins[index].ElementId" class="iconify iconify-inputpin" data-icon="mdi:circle" data-inline="false"></span>
                             </div>
                             <div class="node-element-content">
                                 <label style="font-size: 12px; color: #fff;">Input @index</label>
@@ -31,8 +31,8 @@
                 {
                     if (VisualNode.InputNodePins[0].Showed)
                     {
-                        <div class="node-element-content" id="@VisualNode.InputNodePins[0].ElementId" @onclick="@(args => OnNodePinConnect(args, VisualNode, 0))">
-                            <span class="iconify iconify-inputpin" data-icon="mdi:circle" data-inline="false"></span>
+                        <div class="node-element-content" @onclick="@(args => OnNodePinConnect(args, VisualNode, 0))">
+                            <span id="@VisualNode.InputNodePins[0].ElementId" class="iconify iconify-inputpin" data-icon="mdi:circle" data-inline="false"></span>
                         </div>
                     }
                 }
@@ -42,8 +42,8 @@
                 </div>
                 @if (VisualNode.OutputNodePin.Showed)
                 {
-                    <div class="node-element-content" id="@VisualNode.OutputNodePin.ElementId" @onclick="@(args => OnNodePinSelect(args, VisualNode))">
-                        <span class="iconify iconify-outputpin" data-icon="mdi:circle" data-inline="false"></span>
+                    <div class="node-element-content" @onclick="@(args => OnNodePinSelect(args, VisualNode))">
+                        <span id="@VisualNode.OutputNodePin.ElementId" class="iconify iconify-outputpin" data-icon="mdi:circle" data-inline="false"></span>
                     </div>
                 }
             </div>
@@ -73,8 +73,8 @@
 
     private async void UpdatePinPosition(NodePin pin)
     {
-        double elementX = await JSRuntime.InvokeAsync<double>("getElementOffsetLeft", pin.ElementId) + 8;
-        double elementY = await JSRuntime.InvokeAsync<double>("getElementOffsetTop", pin.ElementId) + 8;
+        double elementX = await JSRuntime.InvokeAsync<double>("getElementOffsetLeft", pin.ElementId) + 12;
+        double elementY = await JSRuntime.InvokeAsync<double>("getElementOffsetTop", pin.ElementId) + 12;
 
         pin.Position.X = elementX;
         pin.Position.Y = elementY;
