@@ -6,15 +6,47 @@
     if (VisualNode.Node is IValueNode<double> doubleValueNode)
     {
         <div class="node">
+            @if (VisualNode.InputNodePins.Count > 1)
+            {
+                for (int i = 0; i < VisualNode.InputNodePins.Count; i++)
+                {
+                    int index = i;
+                    if (VisualNode.InputNodePins[index].Showed)
+                    {
+                        <div class="node-element">
+                            <div class="node-element-content" id="@VisualNode.InputNodePins[index].ElementId" @onclick="@(args => OnNodePinConnect(args, VisualNode, index))">
+                                <span class="iconify iconify-inputpin" data-icon="mdi:circle" data-inline="false"></span>
+                            </div>
+                            <div class="node-element-content">
+                                <label style="font-size: 12px; color: #fff;">Input @index</label>
+                            </div>
+                        </div>
+                    }
 
-            <InputNpdePinComponent VisualNode="@VisualNode" OnNodePinClick="@((a, n, i) => OnNodePinConnect(a, n, i))" />
+                }
+            }
 
-            <div class="input-container">
-                <label>@VisualNode.Name</label>
-                <input type="number" @bind-value="doubleValueNode.Value" />
+            <div class="node-element">
+                @if (VisualNode.InputNodePins.Count == 1)
+                {
+                    if (VisualNode.InputNodePins[0].Showed)
+                    {
+                        <div class="node-element-content" id="@VisualNode.InputNodePins[0].ElementId" @onclick="@(args => OnNodePinConnect(args, VisualNode, 0))">
+                            <span class="iconify iconify-inputpin" data-icon="mdi:circle" data-inline="false"></span>
+                        </div>
+                    }
+                }
+                <div class="node-element-content input-container">
+                    <label>@VisualNode.Name</label>
+                    <input type="number" @bind-value="doubleValueNode.Value" />
+                </div>
+                @if (VisualNode.OutputNodePin.Showed)
+                {
+                    <div class="node-element-content" id="@VisualNode.OutputNodePin.ElementId" @onclick="@(args => OnNodePinSelect(args, VisualNode))">
+                        <span class="iconify iconify-outputpin" data-icon="mdi:circle" data-inline="false"></span>
+                    </div>
+                }
             </div>
-
-            <OutputNodePinComponent VisualNode="@VisualNode" OnNodePinClick="@((a, n) => OnNodePinSelect(a, n))" />
         </div>
     }
 }

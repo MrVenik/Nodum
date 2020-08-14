@@ -2,12 +2,12 @@
 {
     <div class="main-node" @onmousemove="DrawMainLine">
         <div class="main-node-header">
-            <div class="main-node-header-left-buttons">
-                <img class="main-node-header-button" src="/image/OptionsButton.png">
+            <div class="main-node-header-element">
+                <span class="iconify iconify-main" data-icon="mdi:menu" data-inline="false"></span>
             </div>
-            <div class="main-node-header-text">@_currentMainNode.Name</div>
-            <div class="main-node-header-right-buttons">
-                <img class="main-node-header-button" src="/image/CloseButton.png">
+            <div class="main-node-header-element main-node-header-text">@_currentMainNode.Name</div>
+            <div class="main-node-header-element">
+                <span class="iconify iconify-main" data-icon="mdi:close" data-inline="false"></span>
             </div>
         </div>
 
@@ -28,12 +28,12 @@
                 <DraggableWindow @key="visualNode" X="@visualNode.Position.X" Y="@visualNode.Position.Y" AllowDrag="true" OnDragingWindow="@((e, w) => OnNodeDragging(e, w, visualNode))">
                     <WindowHeader>
                         <div class="node-window-header">
-                            <div class="node-window-header-left-buttons">
-                                <img class="node-window-header-button" src="/image/OptionsButton.png">
+                            <div class="node-window-header-element">
+                                <span class="iconify iconify-small" data-icon="mdi:menu" data-inline="false"></span>
                             </div>
-                            <div class="node-window-header-text">@visualNode.Name (@visualNode.Position.X, @visualNode.Position.Y)</div>
-                            <div class="node-window-header-right-buttons">
-                                <img class="node-window-header-button" src="/image/CloseButton.png" @onclick="@(() => CloseWindow(visualNode))">
+                            <div class="node-window-header-element node-window-header-text">@visualNode.Name (@visualNode.Position.X, @visualNode.Position.Y)</div>
+                            <div class="node-window-header-element" @onclick="@(() => CloseWindow(visualNode))">
+                                <span class="iconify iconify-small" data-icon="mdi:close" data-inline="false"></span>
                             </div>
                         </div>
                     </WindowHeader>
@@ -164,6 +164,8 @@
     private void CloseWindow(IVisualNode window)
     {
         _currentMainNode.RemoveNode(window);
+
+        StateHasChanged();
 
     }
 
