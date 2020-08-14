@@ -4,31 +4,19 @@ namespace Nodum.Node
 {
     public class SingleInputValueNode<T> : ValueNode<T>, ISingleInputNode
     {
-        public SingleInputValueNode(string name, INodeHolder node, bool nodeShowed = true, bool outputNodePinShowed = true, T value = default)
-            : base(name, node, nodeShowed, outputNodePinShowed, value)
+        public int AmountOfInputs { get => 1; }
+        public SingleInputValueNode(string name, T value = default)
+            : base(name, value)
         {
-            InputPin = new InputNodePin
-            {
-                Node = this,
-                Position = new Position(),
-                ElementId = $"{Name}_Input_{Guid}",
-                Showed = true
-
-            };
-
-            if (Holder != null)
-            {
-                Holder.Position.OnPositionChanged += () => InputPin.Position.UpdatePosition?.Invoke();
-            }
         }
 
-        public InputNodePin InputPin { get; private set; }
+        public IOutputNode IncomingNode { get; private set; }
 
         public override void UpdateValue()
         {
             try
             {
-                if (InputPin.IncomingNode != null && InputPin.IncomingNode is IValueNode valueNodePin)
+                if (IncomingNode != null && IncomingNode is IValueNode valueNodePin)
                 {
                     Value = (T)valueNodePin.Value;
                 }
@@ -47,18 +35,16 @@ namespace Nodum.Node
         {
             if (outputNode != this && CanConnectTo(outputNode))
             {
-                InputPin.IncomingNode?.RemoveOutgoingNode(this);
-                InputPin.IncomingNode = outputNode;
-                InputPin.IncomingNode.AddOutgoingNode(this);
-                InputPin.IncomingConnection = new Connection(InputPin.IncomingNode.OutputPin, InputPin);
+                IncomingNode?.RemoveOutgoingNode(this);
+                IncomingNode = outputNode;
+                IncomingNode.AddOutgoingNode(this);
                 UpdateValue();
             }
         }
 
         public void RemoveIncomingNode()
         {
-            InputPin.IncomingNode = null;
-            InputPin.IncomingConnection = null;
+            IncomingNode = null;
             UpdateValue();
 
         }
@@ -68,11 +54,6 @@ namespace Nodum.Node
             base.Close();
 
             RemoveIncomingNode();
-        }
-
-        public Connection[] GetIncomingConnections()
-        {
-            return new Connection[] { InputPin.IncomingConnection };
         }
     }
 }

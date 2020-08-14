@@ -4,36 +4,22 @@ namespace Nodum.Node
 {
     public class CommutateInputValueNode<T> : ValueNode<T>, ICommutateInputNode
     {
-        public CommutateInputNodePin InputPin { get; private set; } = new CommutateInputNodePin();
+        public int AmountOfInputs { get => 1; }
 
-        public CommutateInputValueNode(string name, INodeHolder node, bool nodeShowed = true, bool outputPinShowed = true, T value = default)
-            : base(name, node, nodeShowed, outputPinShowed, value)
+        public List<IOutputNode> IncomingNodes { get; private set; } = new List<IOutputNode>();
+
+        public CommutateInputValueNode(string name, T value = default)
+            : base(name, value)
         {
-            InputPin = new CommutateInputNodePin
-            {
-                Node = this,
-                Position = new Position(),
-                ElementId = $"{Name}_Input_{Guid}",
-                Showed = true,
-                IncomingNodes = new List<IOutputNode>(),
-                IncomingConnections = new List<Connection>()
-
-            };
-
-            if (Holder != null)
-            {
-                Holder.Position.OnPositionChanged += () => InputPin.Position.UpdatePosition?.Invoke();
-            }
         }
 
         public void AddIncomingNode(IOutputNode outputNode)
         {
-            if (!InputPin.IncomingNodes.Contains(outputNode) && outputNode != this && CanConnectTo(outputNode))
+            if (!IncomingNodes.Contains(outputNode) && outputNode != this && CanConnectTo(outputNode))
             {
                 outputNode.AddOutgoingNode(this);
 
-                InputPin.IncomingNodes.Add(outputNode);
-                InputPin.IncomingConnections.Add(new Connection(outputNode.OutputPin, InputPin));
+                IncomingNodes.Add(outputNode);
 
                 UpdateValue();
             }
@@ -42,44 +28,35 @@ namespace Nodum.Node
 
         public void AddIncomingNode(IOutputNode outputNode, int index)
         {
-            if (index < InputPin.IncomingNodes.Count)
+            if (index < IncomingNodes.Count)
             {
                 if (outputNode != this && CanConnectTo(outputNode))
                 {
-                    InputPin.IncomingNodes[index]?.RemoveOutgoingNode(this);
-                    InputPin.IncomingNodes[index] = outputNode;
-                    InputPin.IncomingNodes[index].AddOutgoingNode(this);
-                    InputPin.IncomingConnections[index] = new Connection(outputNode.OutputPin, InputPin);
+                    IncomingNodes[index]?.RemoveOutgoingNode(this);
+                    IncomingNodes[index] = outputNode;
+                    IncomingNodes[index].AddOutgoingNode(this);
                     UpdateValue();
                 }
             }
         }
 
-        public Connection[] GetIncomingConnections()
-        {
-            return InputPin.IncomingConnections.ToArray();
-        }
-
         public void RemoveAllIncomingNodes()
         {
-            InputPin.IncomingNodes.Clear();
-            InputPin.IncomingConnections.Clear();
+            IncomingNodes.Clear();
 
             UpdateValue();
         }
 
         public void RemoveIncomingNode(IOutputNode outputNode)
         {
-            InputPin.IncomingNodes.RemoveAll(p => p == outputNode);
-            InputPin.IncomingConnections.RemoveAll(l => l.OutputNodePin == outputNode.OutputPin);
+            IncomingNodes.RemoveAll(p => p == outputNode);
 
             UpdateValue();
         }
 
         public void RemoveIncomingNode(int index)
         {
-            InputPin.IncomingNodes.RemoveAt(index);
-            InputPin.IncomingConnections.RemoveAt(index);
+            IncomingNodes.RemoveAt(index);
 
             UpdateValue();
         }

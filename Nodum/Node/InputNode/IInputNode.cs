@@ -2,6 +2,6 @@
 {
     public interface IInputNode : IValueNode
     {
-        Connection[] GetIncomingConnections();
+        int AmountOfInputs { get; }
     }
 }

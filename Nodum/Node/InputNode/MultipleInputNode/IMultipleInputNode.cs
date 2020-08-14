@@ -2,7 +2,7 @@
 {
     public interface IMultipleInputNode : IInputNode
     {
-        InputNodePin[] InputPins { get; }
+        IOutputNode[] IncomingNodes { get; }
         void AddIncomingNode(IOutputNode nodePin, int index);
         void RemoveIncomingNode(IOutputNode nodePin);
         void RemoveIncomingNode(int index);

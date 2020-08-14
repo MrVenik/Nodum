@@ -1,8 +1,10 @@
-﻿namespace Nodum.Node
+﻿using System.Collections.Generic;
+
+namespace Nodum.Node
 {
     public interface ICommutateInputNode : IInputNode
     {
-        CommutateInputNodePin InputPin { get; }
+        List<IOutputNode> IncomingNodes { get; }
 
         void AddIncomingNode(IOutputNode nodePin);
         void AddIncomingNode(IOutputNode nodePin, int index);

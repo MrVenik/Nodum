@@ -5,8 +5,8 @@ namespace NodumConsoleApp
 {
     public class InputDoubleNode : SingleInputValueNode<double>
     {
-        public InputDoubleNode(string name, INodeHolder node, bool nodePinShowed = true, bool outputNodePinShowed = true, double value = default)
-            : base(name, node, nodePinShowed, outputNodePinShowed, value)
+        public InputDoubleNode(string name, double value = default)
+            : base(name, value)
         {
         }
     }
@@ -26,8 +26,8 @@ namespace NodumConsoleApp
             return default;
         }
 
-        public DoubleAddFuncNode(string name, INodeHolder node, bool nodePinShowed = true)
-            : base(name, node, 2, Add, nodePinShowed)
+        public DoubleAddFuncNode(string name)
+            : base(name, 2, Add)
         {
         }
     }
@@ -36,17 +36,13 @@ namespace NodumConsoleApp
     {
         static void Main(string[] args)
         {
-            InputDoubleNode input1 = new InputDoubleNode("Input1", null)
-            {
-                Value = 2
-            };
-            InputDoubleNode input2 = new InputDoubleNode("Input2", null)
-            {
-                Value = 2
-            };
-            DoubleAddFuncNode addFuncNode = new DoubleAddFuncNode("Result", null);
+            InputDoubleNode input1 = new InputDoubleNode("Input1", 2);
+            InputDoubleNode input2 = new InputDoubleNode("Input2", 2);
+
+            DoubleAddFuncNode addFuncNode = new DoubleAddFuncNode("Result");
             addFuncNode.AddIncomingNode(input1, 0);
             addFuncNode.AddIncomingNode(input2, 1);
+
             Console.WriteLine($"{input1.Name} = {input1.Value}");
             Console.WriteLine($"{input2.Name} = {input2.Value}");
             Console.WriteLine($"{addFuncNode.Name} = {addFuncNode.Value}");

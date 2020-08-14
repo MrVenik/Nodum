@@ -6,8 +6,8 @@ namespace Nodum.Node
     public class CommutateInputFuncNode<T> : CommutateInputValueNode<T>
     {
         private Func<List<IOutputNode>, T> _func;
-        public CommutateInputFuncNode(string name, INodeHolder node, Func<List<IOutputNode>, T> func, bool nodePinShowed = true)
-            : base(name, node, nodePinShowed)
+        public CommutateInputFuncNode(string name, Func<List<IOutputNode>, T> func)
+            : base(name)
         {
             _func = func;
         }
@@ -16,7 +16,7 @@ namespace Nodum.Node
         {
             if (_func != null)
             {
-                Value = _func.Invoke(InputPin.IncomingNodes);
+                Value = _func.Invoke(IncomingNodes);
             }
             else
             {

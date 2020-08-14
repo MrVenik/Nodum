@@ -5,47 +5,29 @@ namespace Nodum.Node
 {
     public class MultipleInputValueNode<T> : ValueNode<T>, IMultipleInputNode
     {
-        public InputNodePin[] InputPins { get; private set; }
+        public int AmountOfInputs { get => IncomingNodes.Length; }
+        public IOutputNode[] IncomingNodes { get; private set; }
 
-        public MultipleInputValueNode(string name, INodeHolder node, int amountOfInputs, bool nodeShowed = true, bool outputNodePinShowed = true, T value = default)
-            : base(name, node, nodeShowed, outputNodePinShowed, value)
+        public MultipleInputValueNode(string name, int amountOfInputs, T value = default)
+            : base(name, value)
         {
-            InputPins = new InputNodePin[amountOfInputs];
-            for (int i = 0; i < InputPins.Length; i++)
-            {
-                InputPins[i] = new InputNodePin
-                {
-                    Node = this,
-                    Position = new Position(),
-                    ElementId = $"{Name}_Input_{i}_{Guid}",
-                    Showed = true
-                };
-            }
-
-            foreach (var pin in InputPins)
-            {
-                if (Holder != null)
-                {
-                    Holder.Position.OnPositionChanged += () => pin.Position.UpdatePosition?.Invoke();
-                }
-            }
+            IncomingNodes = new IOutputNode[amountOfInputs];
         }
 
         public void AddIncomingNode(IOutputNode outputNode, int index)
         {
-            if (index < InputPins.Length && outputNode != this && CanConnectTo(outputNode))
+            if (index < IncomingNodes.Length && outputNode != this && CanConnectTo(outputNode))
             {
-                InputPins[index].IncomingNode?.RemoveOutgoingNode(this);
-                InputPins[index].IncomingNode = outputNode;
-                InputPins[index].IncomingNode.AddOutgoingNode(this);
-                InputPins[index].IncomingConnection = new Connection(InputPins[index].IncomingNode.OutputPin, InputPins[index]);
+                IncomingNodes[index]?.RemoveOutgoingNode(this);
+                IncomingNodes[index] = outputNode;
+                IncomingNodes[index].AddOutgoingNode(this);
                 UpdateValue();
             }
         }
 
         public void RemoveAllIncomingNodes()
         {
-            for (int i = 0; i < InputPins.Length; i++)
+            for (int i = 0; i < IncomingNodes.Length; i++)
             {
                 RemoveIncomingNode(i);
             }
@@ -54,22 +36,20 @@ namespace Nodum.Node
 
         public void RemoveIncomingNode(int index)
         {
-            if (index >= 0 && index < InputPins.Length)
+            if (index >= 0 && index < IncomingNodes.Length)
             {
-                InputPins[index].IncomingNode = null;
-                InputPins[index].IncomingConnection = null;
+                IncomingNodes[index] = null;
                 UpdateValue();
             }
         }
 
         public void RemoveIncomingNode(IOutputNode outputNode)
         {
-            foreach (var pin in InputPins.Where(p => p.IncomingNode == outputNode))
+            for (int i = 0; i < IncomingNodes.Length; i++)
             {
-                if (pin != null)
+                if (IncomingNodes[i] == outputNode)
                 {
-                    pin.IncomingNode = null;
-                    pin.IncomingConnection = null;
+                    IncomingNodes[i] = null;
                 }
             }
 
@@ -81,16 +61,6 @@ namespace Nodum.Node
             base.Close();
 
             RemoveAllIncomingNodes();
-        }
-
-        public Connection[] GetIncomingConnections()
-        {
-            List<Connection> lines = new List<Connection>();
-            for (int i = 0; i < InputPins.Length; i++)
-            {
-                lines.Add(InputPins[i].IncomingConnection);
-            }
-            return lines.ToArray();
         }
     }
 }

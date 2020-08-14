@@ -5,12 +5,8 @@ namespace Nodum.Node
 {
     public class ValueNode<T> : IValueNode<T>
     {
-        public Position Position { get; set; } = new Position();
         public string Name { get; set; }
         public Guid Guid { get; private set; }
-        public INodeHolder Holder { get; private set; }
-
-        public NodePin OutputPin { get; private set; }
 
         private T _value;
         public T Value
@@ -35,28 +31,12 @@ namespace Nodum.Node
         public Type ValueType { get => typeof(T); }
 
 
-        public ValueNode(string name, INodeHolder node, bool showed = true, bool outputPinShowed = true, T value = default)
+        public ValueNode(string name, T value = default)
         {
             Guid = Guid.NewGuid();
 
             Name = name;
-            Holder = node;
             Value = value;
-            Showed = showed;
-
-            OutputPin = new NodePin
-            {
-                Node = this,
-                Position = new Position(),
-                ElementId = $"{Name}_Output_{Guid}",
-                Showed = outputPinShowed
-            };
-
-
-            if (Holder != null)
-            {
-                Holder.Position.OnPositionChanged += () => OutputPin.Position.UpdatePosition?.Invoke();
-            }
         }
 
         public virtual void UpdateValue()
@@ -68,8 +48,6 @@ namespace Nodum.Node
         {
             return true;
         }
-
-        public bool Showed { get; set; }
 
         private List<IInputNode> _outgoingNodes = new List<IInputNode>();
 

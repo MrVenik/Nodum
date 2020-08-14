@@ -6,8 +6,8 @@ namespace Nodum.Node
     public class MultipleInputFuncNode<T> : MultipleInputValueNode<T>
     {
         private Func<IValueNode[], T> _func;
-        public MultipleInputFuncNode(string name, INodeHolder node, int amountOfInputs, Func<IValueNode[], T> func, bool nodeShowed = true)
-            : base(name, node, amountOfInputs, nodeShowed)
+        public MultipleInputFuncNode(string name, int amountOfInputs, Func<IValueNode[], T> func)
+            : base(name, amountOfInputs)
         {
             _func = func;
         }
@@ -18,9 +18,9 @@ namespace Nodum.Node
             {
                 List<IValueNode> inputs = new List<IValueNode>();
 
-                for (int i = 0; i < InputPins.Length; i++)
+                for (int i = 0; i < IncomingNodes.Length; i++)
                 {
-                    if (InputPins[i].IncomingNode != null && InputPins[i].IncomingNode is IValueNode valueNode)
+                    if (IncomingNodes[i] != null && IncomingNodes[i] is IValueNode valueNode)
                     {
                         inputs.Add(valueNode);
                     }

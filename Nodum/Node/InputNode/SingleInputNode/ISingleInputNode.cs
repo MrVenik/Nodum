@@ -2,7 +2,7 @@
 {
     public interface ISingleInputNode : IInputNode
     {
-        InputNodePin InputPin { get; }
+        IOutputNode IncomingNode { get; }
 
         void AddIncomingNode(IOutputNode nodePin);
         void RemoveIncomingNode();
