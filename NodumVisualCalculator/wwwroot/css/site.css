@@ -1,3 +1,7 @@
+* {
+    font-family: 'Ubuntu', sans-serif;
+}
+
 body {
     background-color: #424242;
 }
@@ -46,6 +50,49 @@ img {
     margin-left: 10px;
 }
 
+.main-node {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.main-node-header {
+    position: fixed;
+    width: 100%;
+    padding: 10px;
+    background-color: #212121;
+    color: #fff;
+}
+
+.main-node-header-left-buttons {
+    margin-left: 25px;
+    display: inline-block;
+    float: left;
+}
+
+.main-node-header-right-buttons {
+    margin-right: 25px;
+    display: inline-block;
+    float: right;
+}
+
+.main-node-header-button {
+    height: 32px;
+    width: 32px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.main-node-header-text {
+    margin-left: 10px;
+    margin-right: 10px;
+    display: inline-block;
+    color: #fff;
+    font-size: 32px;
+}
+
 .node-header-text {
     color: #fff;
     text-align: left;
@@ -89,13 +136,19 @@ img {
     color: #fff;
 }
 
-.node-window-header-buttons {
+.node-window-header-left-buttons {
+    display: inline-block;
+    float: left;
+}
+
+.node-window-header-right-buttons {
     display: inline-block;
     float: right;
 }
 
 .node-window-header-button {
     margin-left: 10px;
+    margin-right: 10px;
 }
 
 .input-container {
