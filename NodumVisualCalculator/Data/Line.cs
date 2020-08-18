@@ -5,6 +5,18 @@
         public Position From { get; set; }
         public Position To { get; set; }
 
+        public Line()
+        {
+            From = new Position();
+            To = new Position();
+        }
+
+        public Line(Position from, Position to)
+        {
+            From = from;
+            To = to;
+        }
+
         public string Curve
         {
             get

@@ -50,7 +50,40 @@ namespace NodumVisualCalculator.Data
         public NodePin OutputNodePin { get; private set; }
         public List<NodePin> InputNodePins { get; private set; }
 
-        public List<Line> Lines { get; private set; } = new List<Line>();
+        public List<NodePinConnection> IncomingConnections { get; private set; } = new List<NodePinConnection>();
+        public List<NodePinConnection> OutgoingConnections { get; private set; } = new List<NodePinConnection>();
+
+        public void ConnectToNode(VisualNode outputVisualNode, int inputIndex)
+        {
+            if (Node is ISingleInputNode singleInputNode)
+            {
+                singleInputNode.AddIncomingNode(outputVisualNode.Node as IOutputNode);
+            }
+            else if (Node is ICommutateInputNode commutateInputNode)
+            {
+                commutateInputNode.AddIncomingNode(outputVisualNode.Node as IOutputNode);
+            }
+            else if (Node is IMultipleInputNode multipleInputNode)
+            {
+                multipleInputNode.AddIncomingNode(outputVisualNode.Node as IOutputNode, inputIndex);
+            }
+
+            NodePinConnection connection = new NodePinConnection(outputVisualNode.OutputNodePin, GetInputNodePin(inputIndex));
+            IncomingConnections.Add(connection);
+            outputVisualNode.OutgoingConnections.Add(connection);
+        }
+
+        public NodePin GetInputNodePin(int index = 0)
+        {
+            if (InputNodePins.Count > 0)
+            {
+                if (index >= 0 && index < InputNodePins.Count)
+                {
+                    return InputNodePins[index];
+                }
+            }
+            throw new ArgumentOutOfRangeException();
+        }
 
         public INode Node { get; private set; }
         public VisualNodeHolder Holder { get; private set; }
@@ -69,7 +102,27 @@ namespace NodumVisualCalculator.Data
         public bool MenuShowed { get; set; }
         public void Close()
         {
+            CloseIncomingConnections();
+            CloseOutgoingConnections();
             Node.Close();
+        }
+
+        private void CloseIncomingConnections()
+        {
+            for (int i = 0; i < IncomingConnections.Count; i++)
+            {
+                NodePinConnection item = IncomingConnections[i];
+                item.CloseConnection();
+            }
+        }
+
+        private void CloseOutgoingConnections()
+        {
+            for (int i = 0; i < OutgoingConnections.Count; i++)
+            {
+                NodePinConnection item = OutgoingConnections[i];
+                item.CloseConnection();
+            }
         }
     }
 }
