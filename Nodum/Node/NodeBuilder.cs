@@ -10,15 +10,30 @@ namespace Nodum.Node
         private static Dictionary<Type, List<FieldInfo>> _nodeFields;
         private static bool Initialized { get { return _nodeFields != null; } }
 
-        public static void Build(Node node)
+        public static NodePin BuildNodePin(FieldInfo fieldInfo)
+        {
+            Type type = typeof(NodePin<>);
+            Type genericType = type.MakeGenericType(fieldInfo.FieldType);
+
+            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { fieldInfo });
+
+            return nodePin;
+        }
+
+        public static NodePin BuildNodePin(string name, Type valueType, bool isInput = false, bool isOutput = false, bool isInvokeUpdate = false)
+        {
+            Type type = typeof(NodePin<>);
+            Type genericType = type.MakeGenericType(valueType);
+
+            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { name, isInput, isOutput, isInvokeUpdate });
+
+            return nodePin;
+        }
+
+        public static void BuildNode(Node node)
         {
             if (!Initialized) BuildCache();
 
-            BuildNode(node);
-        }
-
-        private static void BuildNode(Node node)
-        {
             Type nodeType = node.GetType();
 
             if (_nodeFields.TryGetValue(nodeType, out List<FieldInfo> typeNodeFields))
@@ -27,10 +42,7 @@ namespace Nodum.Node
                 {
                     FieldInfo fieldInfo = typeNodeFields[i];
 
-                    Type type = typeof(NodePin<>);
-                    Type genericType = type.MakeGenericType(fieldInfo.FieldType);
-
-                    NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { fieldInfo, fieldInfo.GetValue(node) });
+                    NodePin nodePin = BuildNodePin(fieldInfo);
 
                     node.AddNodePin(nodePin);
                 }
