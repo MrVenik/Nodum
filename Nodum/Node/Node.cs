@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Nodum.Node
 {
@@ -32,22 +33,50 @@ namespace Nodum.Node
             public override bool IsInvokeUpdate { get; set; } = false;
         }
 
-        public List<NodePin> AllNodePins { get; } = new List<NodePin>();
+        public Dictionary<string, NodePin> NodePins { get; } = new Dictionary<string, NodePin>();
+        public List<NodePin> AllNodePins => NodePins.Values.ToList();
 
         public string Name { get; set; }
 
         protected Node()
         {
-            NodeBuilder.Build(this);
+            NodeBuilder.BuildNode(this);
             Update();
         }
 
         public void AddNodePin(NodePin nodePin)
         {
-            AllNodePins.Add(nodePin);
-            if (nodePin.IsInvokeUpdate)
+            if (!NodePins.ContainsKey(nodePin.Name))
             {
-                nodePin.OnValueChanged += Update;
+                NodePins.Add(nodePin.Name, nodePin);
+                if (nodePin.IsInvokeUpdate)
+                {
+                    nodePin.OnValueChanged += Update;
+                }
+            }
+        }
+
+        public void RemoveNodePin(NodePin nodePin)
+        {
+            if (NodePins.ContainsKey(nodePin.Name))
+            {
+                NodePins[nodePin.Name].Close();
+                NodePins.Remove(nodePin.Name);
+            }
+        }
+
+        public void SetNodePin(NodePin nodePin)
+        {
+            if (NodePins.ContainsKey(nodePin.Name))
+            {
+                RemoveNodePin(nodePin);
+
+                NodePins.Add(nodePin.Name, nodePin);
+
+                if (nodePin.IsInvokeUpdate)
+                {
+                    nodePin.OnValueChanged += Update;
+                }
             }
         }
 
