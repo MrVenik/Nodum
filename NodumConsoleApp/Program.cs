@@ -3,49 +3,87 @@ using Nodum.Node;
 
 namespace NodumConsoleApp
 {
-    public class InputDoubleNode : SingleInputValueNode<double>
+    public class MathNode : Node
     {
-        public InputDoubleNode(string name, double value = default)
-            : base(name, value)
+        public enum MathType
         {
+            Add,
+            Subtract,
+            Multiply,
+            Divide
+        }
+
+        [NodePin(IsInvokeUpdate = true)] public MathType Type;
+        [Input] public int InputA;
+        [Input] public int InputB;
+        [Output] public int Result;
+
+        public MathNode()
+            : base()
+        {
+        }
+
+        public override void UpdateValue()
+        {
+            Result = 0;
+            switch (Type)
+            {
+                case MathType.Add:
+                    Result = InputA + InputB;
+                    break;
+                case MathType.Subtract:
+                    Result = InputA - InputB;
+                    break;
+                case MathType.Multiply:
+                    Result = InputA * InputB;
+                    break;
+                case MathType.Divide:
+                    if (InputB != 0)
+                    {
+                        Result = InputA / InputB;
+                    }
+                    break;
+            }
         }
     }
 
-
-    public class DoubleAddFuncNode : MultipleInputFuncNode<double>
+    public class IntNode : Node
     {
-        private static double Add(IValueNode[] inputs)
-        {
-            if (inputs != null && inputs.Length == 2)
-            {
-                if (inputs[0] is ValueNode<double> input1 && inputs[1] is ValueNode<double> input2)
-                {
-                    return input1.Value + input2.Value;
-                }
-            }
-            return default;
-        }
-
-        public DoubleAddFuncNode(string name)
-            : base(name, 2, Add)
-        {
-        }
+        [InputOutput] public int Number;
     }
 
     class Program
     {
         static void Main(string[] args)
         {
-            InputDoubleNode input1 = new InputDoubleNode("Input1", 2);
-            InputDoubleNode input2 = new InputDoubleNode("Input2", 2);
+            MathNode math = new MathNode();
+            IntNode intNode = new IntNode();
+            IntNode intNode1 = new IntNode();
 
-            DoubleAddFuncNode addFuncNode = new DoubleAddFuncNode("Result");
-            addFuncNode.AddIncomingNode(input1, 0);
-            addFuncNode.AddIncomingNode(input2, 1);
+            Debug(math);
+            Debug(intNode);
+            Debug(intNode1);
 
-            Console.WriteLine($"{input1.Name} = {input1.Value}");
-            Console.WriteLine($"{input2.Name} = {input2.Value}");
-            Console.WriteLine($"{addFuncNode.Name} = {addFuncNode.Value}");
+            intNode.AllNodePins[0].Value = 20;
+            math.AllNodePins[1].AddIncomingNodePin(intNode.AllNodePins[0]);
+            math.AllNodePins[2].AddIncomingNodePin(intNode.AllNodePins[0]);
+            intNode1.AllNodePins[0].AddIncomingNodePin(math.AllNodePins[3]);
+
+            Debug(math);
+            Debug(intNode);
+            Debug(intNode1);
+        }
+
+        private static void Debug(Node node)
+        {
+            foreach (var pin in node.AllNodePins)
+            {
+                Console.WriteLine($"{pin.GetType()}");
+                Console.WriteLine($"{pin.Name}");
+                Console.WriteLine($"{pin.Value}");
+                Console.WriteLine($"{pin.ValueType}");
+                Console.WriteLine();
+            }
         }
     }
 }

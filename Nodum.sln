@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodumConsoleApp", "NodumCon
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodumVisualCalculator", "NodumVisualCalculator\NodumVisualCalculator.csproj", "{5BE86001-390E-4887-A4BA-6321E14356B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorDraggableWindow", "BlazorDraggableWindow\BlazorDraggableWindow.csproj", "{57D8342F-207A-4028-BAB2-EBDC3DB4B2BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorDraggableWindow", "BlazorDraggableWindow\BlazorDraggableWindow.csproj", "{57D8342F-207A-4028-BAB2-EBDC3DB4B2BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
