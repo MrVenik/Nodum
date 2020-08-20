@@ -47,6 +47,30 @@ namespace Nodum.Node
         {
             if (!Initialized) BuildCache();
 
+            BuildFieldNodePins(node);
+
+            BuildProperyNodePins(node);
+        }
+
+        private static void BuildProperyNodePins(Node node)
+        {
+            Type nodeType = node.GetType();
+
+            if (_nodeProperties.TryGetValue(nodeType, out List<PropertyInfo> typeNodeProperties))
+            {
+                for (int i = 0; i < typeNodeProperties.Count; i++)
+                {
+                    PropertyInfo propertyInfo = typeNodeProperties[i];
+
+                    NodePin nodePin = BuildNodePin(propertyInfo);
+
+                    node.AddNodePin(nodePin);
+                }
+            }
+        }
+
+        private static void BuildFieldNodePins(Node node)
+        {
             Type nodeType = node.GetType();
 
             if (_nodeFields.TryGetValue(nodeType, out List<FieldInfo> typeNodeFields))
@@ -56,18 +80,6 @@ namespace Nodum.Node
                     FieldInfo fieldInfo = typeNodeFields[i];
 
                     NodePin nodePin = BuildNodePin(fieldInfo);
-
-                    node.AddNodePin(nodePin);
-                }
-            }
-
-            if (_nodeProperties.TryGetValue(nodeType, out List<PropertyInfo> typeNodeProperties))
-            {
-                for (int i = 0; i < typeNodeProperties.Count; i++)
-                {
-                    PropertyInfo propertyInfo = typeNodeProperties[i];
-
-                    NodePin nodePin = BuildNodePin(propertyInfo);
 
                     node.AddNodePin(nodePin);
                 }
