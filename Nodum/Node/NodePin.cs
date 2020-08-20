@@ -118,15 +118,20 @@ namespace Nodum.Node
     {
         public override Type ValueType { get => typeof(T); }
 
-        public NodePin(FieldInfo fieldInfo, T value = default) : base(fieldInfo)
+        public NodePin(FieldInfo fieldInfo) : base(fieldInfo)
+        {
+            Value = default;
+        }
+
+        public NodePin(FieldInfo fieldInfo, T value) : base(fieldInfo)
         {
             Value = value;
         }
 
-        public NodePin(string name, bool isInput = false, bool isOutput = false, bool isInvokeUpdate = false, T value = default) 
+        public NodePin(string name, bool isInput = false, bool isOutput = false, bool isInvokeUpdate = false)
             : base(name, isInput, isOutput, isInvokeUpdate)
         {
-            Value = value;
+            Value = default;
         }
 
         public new T Value
