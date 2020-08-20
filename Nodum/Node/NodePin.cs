@@ -30,6 +30,8 @@ namespace Nodum.Node
 
         protected NodePin(string name, bool isInput = false, bool isOutput = false, bool isInvokeUpdate = false)
         {
+            Guid = Guid.NewGuid();
+
             Name = name;
             IsInput = isInput;
             IsOutput = isOutput;
