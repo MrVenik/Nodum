@@ -1,25 +1,16 @@
 ﻿@if (VisualNode != null)
 {
-    if (VisualNode is VisualNode visualNode)
+    foreach (var pin in VisualNode.VisualNodePins)
     {
-        <ValueNodeComponent VisualNode="@visualNode" OnNodePinSelect="@((a, n) => OnNodePinSelect(a, n))" OnNodePinConnect="@((a, n, i) => OnNodePinConnect(a, n, i))" />
-    }
-    else if (VisualNode is VisualNodeHolder visualNodeHolder)
-    {
-        <NodeHolderComponent VisualNodeHolder="@visualNodeHolder" OnNodePinSelect="@((a, n) => OnNodePinSelect(a, n))" OnNodePinConnect="@((a, n, i) => OnNodePinConnect(a, n, i))"/>
+        <NodePinComponent @key="pin" VisualNodePin="@pin" OnNodePinSelect="@((a, n) => OnNodePinSelect(a, n))" OnNodePinConnect="@((a, n) => OnNodePinConnect(a, n))" />
     }
 }
 
 @code {
     [Parameter]
-    public IVisualNode VisualNode { get; set; }
+    public VisualNode VisualNode { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, VisualNode> OnNodePinSelect { get; set; }
+    public Action<MouseEventArgs, VisualNodePin> OnNodePinSelect { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, VisualNode, int> OnNodePinConnect { get; set; }
-
-    protected override void OnInitialized()
-    {
-
-    }
+    public Action<MouseEventArgs, VisualNodePin> OnNodePinConnect { get; set; }
 }

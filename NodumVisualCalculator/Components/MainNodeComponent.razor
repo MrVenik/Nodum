@@ -7,7 +7,7 @@
                     <span class="iconify iconify-main" data-icon="mdi:menu" data-inline="false"></span>
                 </div>
                 <div class="dropdown-content" style="@(_mainDropDownShowed ? "display: block;" : "display: none;")">
-                    <div class="dropdown-content-element" @onclick="CreateNewNodeHolder">
+                    <div class="dropdown-content-element" @onclick="CreateNewNode">
                         Add New Empty Node
                     </div>
                     <div class="dropdown-content-element" @onclick="CreateNewAddNode">
@@ -17,6 +17,9 @@
                         Add New Number Node
                     </div>
                 </div>
+            </div>
+            <div class="main-node-header-element" @onclick="() => _currentMainNode = _currentMainNode.Holder ?? MainNode">
+                <span class="iconify iconify-main" data-icon="mdi:menu" data-inline="false"></span>
             </div>
             <div class="main-node-header-element main-node-header-text">@_currentMainNode.Name</div>
             @if (CloseButtonShowed)
@@ -51,7 +54,7 @@
         </svg>
 
         <DraggableZone Height="100%" Width="100%">
-            @foreach (var visualNode in _currentMainNode.VisualNodes)
+            @foreach (var visualNode in _currentMainNode.InternalVisualNodes)
             {
                 <DraggableWindow @key="visualNode" X="@visualNode.Position.X" Y="@visualNode.Position.Y" AllowDrag="true" OnDragingWindow="@((e, w) => OnNodeDragging(e, w, visualNode))">
                     <WindowHeader>
@@ -61,8 +64,17 @@
                                     <span class="iconify iconify-small" data-icon="mdi:menu" data-inline="false"></span>
                                 </div>
                                 <div class="dropdown-content" style="@(visualNode.MenuShowed ? "display: block;" : "display: none;")">
-                                    <div class="dropdown-content-element">
-                                        Edit Node
+                                    @if (visualNode.Editable)
+                                    {
+                                        <div class="dropdown-content-element" @onclick="(() => EditNode(visualNode))">
+                                            Edit Node
+                                        </div>
+                                    }
+                                    <div class="dropdown-content-element" @onclick="(() => AddInputNodePin(visualNode))">
+                                        Add Input
+                                    </div>
+                                    <div class="dropdown-content-element" @onclick="(() => AddOutputNodePin(visualNode))">
+                                        Add Output
                                     </div>
                                 </div>
                             </div>
@@ -74,7 +86,7 @@
                     </WindowHeader>
                     <WindowContent>
                         <div class="node-window">
-                            <NodeComponent VisualNode="@visualNode" OnNodePinSelect="@((a, n) => OnNodeSelect(a, n))" OnNodePinConnect="@((a, n, i) => OnNodeConnect(a, n, i))" />
+                            <NodeComponent VisualNode="@visualNode" OnNodePinSelect="@((a, n) => OnNodePinSelect(a, n))" OnNodePinConnect="@((a, n) => OnNodePinConnect(a, n))" />
                         </div>
                     </WindowContent>
                 </DraggableWindow>
@@ -87,7 +99,7 @@
     private bool _mainDropDownShowed = false;
 
     [Parameter]
-    public VisualNodeHolder MainNode { get; set; }
+    public VisualNode MainNode { get; set; }
     [Parameter]
     public bool CloseButtonShowed { get; set; }
     [Parameter]
@@ -95,9 +107,9 @@
 
     private bool _isEditor = false;
 
-    private VisualNodeHolder _currentMainNode;
+    private VisualNode _currentMainNode;
 
-    private VisualNode _selectedNode;
+    private VisualNodePin _selectedNodePin;
 
     private List<NodePinConnection> _allConnections = new List<NodePinConnection>();
 
@@ -109,16 +121,22 @@
         _currentMainNode = MainNode;
     }
 
-    private void OnNodeSelect(MouseEventArgs args, VisualNode visualNode)
+    private void OnNodePinSelect(MouseEventArgs args, VisualNodePin visualNodePin)
     {
         _mainLine.From = new Position() { X = args.ClientX, Y = args.ClientY };
 
         _isMainLineDrawing = true;
 
-        if (visualNode.Node is IOutputNode)
-        {
-            _selectedNode = visualNode;
-        }
+        _selectedNodePin = visualNodePin;
+    }
+
+    private void OnNodePinConnect(MouseEventArgs args, VisualNodePin visualNodePin)
+    {
+        StopDrawingMainLine(args);
+
+        visualNodePin.ConnectToNodePin(_selectedNodePin);
+
+        UpdateLines();
     }
 
     private void DrawMainLine(MouseEventArgs args)
@@ -138,61 +156,64 @@
         }
     }
 
-    private void OnNodeConnect(MouseEventArgs args, VisualNode inputNode, int index)
-    {
-        StopDrawingMainLine(args);
-
-        inputNode.ConnectToNode(_selectedNode, index);
-
-        UpdateLines();
-    }
-
     private void UpdateLines()
     {
         _currentMainNode.Position.OnPositionChanged?.Invoke();
         _allConnections.Clear();
-        foreach (var vn in _currentMainNode.VisualNodes)
+        foreach (var visualNode in _currentMainNode.InternalVisualNodes)
         {
-            if (vn is VisualNode visualNode)
-            {
-                _allConnections.AddRange(visualNode.IncomingConnections);
-            }
+            _allConnections.AddRange(visualNode.IncomingConnections);
         }
 
         StateHasChanged();
     }
 
-    private void CreateNewNodeHolder()
+    private void CreateNewNode()
     {
-        _currentMainNode.AddNode(new VisualNodeHolder("New Node Holder", _currentMainNode));
-        _mainDropDownShowed = false;
-    }
-
-    private void CreateNewNumberNode()
-    {
-        _currentMainNode.AddNode(new VisualNode(new InputDoubleNode("Number"), _currentMainNode));
+        _currentMainNode.AddNode(new VisualNode(_currentMainNode));
         _mainDropDownShowed = false;
     }
 
     private void CreateNewAddNode()
     {
-        _currentMainNode.AddNode(new VisualNode(new DoubleAddFuncNode("Add"), _currentMainNode));
+        _currentMainNode.AddNode(new VisualNode(new MathNode(), _currentMainNode));
         _mainDropDownShowed = false;
     }
 
-    private void CloseWindow(IVisualNode window)
+    private void CreateNewNumberNode()
+    {
+        _currentMainNode.AddNode(new VisualNode(new IntNode(), _currentMainNode));
+        _mainDropDownShowed = false;
+    }
+
+    private void CloseWindow(VisualNode window)
     {
         _currentMainNode.RemoveNode(window);
 
         UpdateLines();
     }
 
-    private void OnNodeStartDragging(MouseEventArgs args, DraggableWindow nodeWindow, INode node)
+    private void AddInputNodePin(VisualNode node)
+    {
+        node.AddInputNodePin("Input", typeof(int));
+    }
+
+    private void AddOutputNodePin(VisualNode node)
+    {
+        node.AddOutputNodePin("Output", typeof(int));
+    }
+
+    private void EditNode(VisualNode nodeHolder)
+    {
+        _currentMainNode = nodeHolder;
+    }
+
+    private void OnNodeStartDragging(MouseEventArgs args, DraggableWindow nodeWindow, VisualNode node)
     {
 
     }
 
-    private void OnNodeDragging(MouseEventArgs args, DraggableWindow nodeWindow, IVisualNode node)
+    private void OnNodeDragging(MouseEventArgs args, DraggableWindow nodeWindow, VisualNode node)
     {
         node.Position.X = nodeWindow.Offset.Left;
         node.Position.Y = nodeWindow.Offset.Top;

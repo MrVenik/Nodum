@@ -1,0 +1,68 @@
+﻿@inject IJSRuntime JSRuntime
+
+@if (VisualNodePin != null && VisualNodePin.NodePin != null)
+{
+    if (VisualNodePin.Showed)
+    {
+        <div class="node">
+            <div class="node-element">
+                @if ((VisualNodePin.NodePin.IsInput && !VisualNodePin.IsInternal) || (VisualNodePin.IsInternal && VisualNodePin.NodePin.IsOutput))
+                {
+                    <div class="node-element-content" @onclick="@(args => OnNodePinConnect(args, VisualNodePin))">
+                        <span id="@VisualNodePin.InputElementId" class="iconify iconify-inputpin" data-icon="mdi:circle" data-inline="false"></span>
+                    </div>
+                }
+                <div class="node-element-content input-container">
+                    <label>@VisualNodePin.NodePin.Name</label>
+                    @if (VisualNodePin.NodePin is NodePin<double> doubleNodePin)
+                    {
+                        <input type="number" @bind-value="doubleNodePin.Value" />
+                    }
+                    else if (VisualNodePin.NodePin is NodePin<int> intNodePin)
+                    {
+                        <input type="number" @bind-value="intNodePin.Value" />
+                    }
+                    else if (VisualNodePin.NodePin is NodePin<float> floatNodePin)
+                    {
+                        <input type="number" @bind-value="floatNodePin.Value" />
+                    }
+                    else if (VisualNodePin.NodePin is NodePin<string> stringNodePin)
+                    {
+                        <input type="text" @bind-value="stringNodePin.Value" />
+                    }
+                </div>
+
+                @if ((VisualNodePin.NodePin.IsOutput && !VisualNodePin.IsInternal) || (VisualNodePin.IsInternal && VisualNodePin.NodePin.IsInput))
+                {
+                    <div class="node-element-content" @onclick="@(args => OnNodePinSelect(args, VisualNodePin))">
+                        <span id="@VisualNodePin.OutputElementId" class="iconify iconify-outputpin" data-icon="mdi:circle" data-inline="false"></span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public VisualNodePin VisualNodePin { get; set; }
+    [Parameter]
+    public Action<MouseEventArgs, VisualNodePin> OnNodePinSelect { get; set; }
+    [Parameter]
+    public Action<MouseEventArgs, VisualNodePin> OnNodePinConnect { get; set; }
+
+    protected override void OnInitialized()
+    {
+        VisualNodePin.InputPosition.UpdatePosition = () => UpdatePinPosition(VisualNodePin.InputPosition, VisualNodePin.InputElementId);
+        VisualNodePin.OutputPosition.UpdatePosition = () => UpdatePinPosition(VisualNodePin.OutputPosition, VisualNodePin.OutputElementId);
+    }
+
+    private async void UpdatePinPosition(Position pos, string elementId)
+    {
+        double elementX = await JSRuntime.InvokeAsync<double>("getElementOffsetLeft", elementId) + 12;
+        double elementY = await JSRuntime.InvokeAsync<double>("getElementOffsetTop", elementId) + 12;
+
+        pos.X = elementX;
+        pos.Y = elementY;
+    }
+}

@@ -6,87 +6,103 @@ using System.Threading.Tasks;
 
 namespace NodumVisualCalculator.Data
 {
-    public class VisualNode : IVisualNode
+    public class MathNode : Node
     {
-        public VisualNode(INode node, VisualNodeHolder holder = null)
+        [Input] public int InputA;
+        [Input] public int InputB;
+        [Output] public int Result;
+
+        public MathNode()
+            : base()
+        {
+        }
+
+        public override void UpdateValue()
+        {
+            Result = InputA + InputB;
+        }
+    }
+
+    public class IntNode : Node
+    {
+        [InputOutput] public int Number;
+    }
+
+    public class EmptyNode : Node
+    {
+
+    }
+
+    public class VisualNode
+    {
+        public List<VisualNodePin> VisualNodePins { get; private set; } = new List<VisualNodePin>();
+
+        public List<VisualNode> InternalVisualNodes { get; private set; } = new List<VisualNode>();
+
+        public VisualNode(VisualNode holder = null)
+        {
+            Holder = holder;
+            Node = new EmptyNode();
+            Editable = true;
+        }
+
+        public VisualNode(NodePin nodePin, VisualNode holder)
+        {
+            Holder = holder;
+            Node = new EmptyNode();
+
+            Editable = false;
+
+            VisualNodePin visualNodePin = new VisualNodePin()
+            {
+                NodePin = nodePin,
+                VisualNode = this,
+                InputPosition = new Position(),
+                OutputPosition = new Position(),
+                ElementId = $"{nodePin.Name}_{nodePin.Guid}",
+                Showed = true,
+                IsInternal = true
+            };
+            if (Holder != null)
+            {
+                Holder.Position.OnPositionChanged += () => visualNodePin.InputPosition.UpdatePosition?.Invoke();
+                Holder.Position.OnPositionChanged += () => visualNodePin.OutputPosition.UpdatePosition?.Invoke();
+            }
+            VisualNodePins.Add(visualNodePin);
+        }
+
+        public VisualNode(Node node, VisualNode holder)
         {
             Node = node;
             Holder = holder;
 
-            if (Node is IOutputNode)
+            Editable = false;
+
+            foreach (var pin in node.AllNodePins)
             {
-                OutputNodePin = new NodePin()
+                VisualNodePin visualNodePin = new VisualNodePin()
                 {
+                    NodePin = pin,
                     VisualNode = this,
-                    Position = new Position(),
-                    ElementId = $"{Name}_{Guid}_Output",
+                    InputPosition = new Position(),
+                    OutputPosition = new Position(),
+                    ElementId = $"{pin.Name}_{pin.Guid}",
                     Showed = true
                 };
                 if (Holder != null)
                 {
-                    Holder.Position.OnPositionChanged += () => OutputNodePin.Position.UpdatePosition?.Invoke();
+                    Holder.Position.OnPositionChanged += () => visualNodePin.InputPosition.UpdatePosition?.Invoke();
+                    Holder.Position.OnPositionChanged += () => visualNodePin.OutputPosition.UpdatePosition?.Invoke();
                 }
-            }
-            if (Node is IInputNode inputNode)
-            {
-                InputNodePins = new List<NodePin>();
-                for (int i = 0; i < inputNode.AmountOfInputs; i++)
-                {
-                    NodePin pin = new NodePin()
-                    {
-                        VisualNode = this,
-                        Position = new Position(),
-                        ElementId = $"{Name}_{Guid}_Input_{i}",
-                        Showed = true
-                    };
-                    if (Holder != null)
-                    {
-                        Holder.Position.OnPositionChanged += () => pin.Position.UpdatePosition?.Invoke();
-                    }
-                    InputNodePins.Add(pin);
-                }
-            }
+                VisualNodePins.Add(visualNodePin);
+            }          
         }
-        public NodePin OutputNodePin { get; private set; }
-        public List<NodePin> InputNodePins { get; private set; }
 
         public List<NodePinConnection> IncomingConnections { get; private set; } = new List<NodePinConnection>();
         public List<NodePinConnection> OutgoingConnections { get; private set; } = new List<NodePinConnection>();
 
-        public void ConnectToNode(VisualNode outputVisualNode, int inputIndex)
-        {
-            if (Node is ISingleInputNode singleInputNode)
-            {
-                singleInputNode.AddIncomingNode(outputVisualNode.Node as IOutputNode);
-            }
-            else if (Node is ICommutateInputNode commutateInputNode)
-            {
-                commutateInputNode.AddIncomingNode(outputVisualNode.Node as IOutputNode);
-            }
-            else if (Node is IMultipleInputNode multipleInputNode)
-            {
-                multipleInputNode.AddIncomingNode(outputVisualNode.Node as IOutputNode, inputIndex);
-            }
-
-            NodePinConnection connection = new NodePinConnection(outputVisualNode.OutputNodePin, GetInputNodePin(inputIndex));
-            IncomingConnections.Add(connection);
-            outputVisualNode.OutgoingConnections.Add(connection);
-        }
-
-        public NodePin GetInputNodePin(int index = 0)
-        {
-            if (InputNodePins.Count > 0)
-            {
-                if (index >= 0 && index < InputNodePins.Count)
-                {
-                    return InputNodePins[index];
-                }
-            }
-            throw new ArgumentOutOfRangeException();
-        }
-
-        public INode Node { get; private set; }
-        public VisualNodeHolder Holder { get; private set; }
+        public Node Node { get; private set; }
+        public VisualNode Holder { get; private set; }
         public string Name
         {
             get => Node.Name;
@@ -95,15 +111,115 @@ namespace NodumVisualCalculator.Data
                 Node.Name = value;
             }
         }
-        public Guid Guid { get => Node.Guid; }
+        //public Guid Guid { get => Node.Guid; }
         public Position Position { get; set; } = new Position();
+        public bool Editable { get; set; }
         public bool Showed { get; set; }
         public bool Focused { get; set; }
         public bool MenuShowed { get; set; }
+
+
+        public void AddInputNodePin(string name, Type pinType)
+        {
+            Type type = typeof(NodePin<>);
+            Type genericType = type.MakeGenericType(pinType);
+
+            bool isInput = true;
+            bool isOutput = false;
+            bool isInvokeUpdate = true;
+
+
+            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { name, isInput, isOutput, isInvokeUpdate, default });
+
+            VisualNodePin visualNodePin = new VisualNodePin()
+            {
+                NodePin = nodePin,
+                VisualNode = this,
+                InputPosition = new Position(),
+                OutputPosition = new Position(),
+                ElementId = $"{nodePin.Name}_{nodePin.Guid}",
+                Showed = true
+            };
+            if (Holder != null)
+            {
+                Holder.Position.OnPositionChanged += () => visualNodePin.InputPosition.UpdatePosition?.Invoke();
+                Holder.Position.OnPositionChanged += () => visualNodePin.OutputPosition.UpdatePosition?.Invoke();
+            }
+
+            InternalVisualNodes.Add(new VisualNode(nodePin, this));
+            VisualNodePins.Add(visualNodePin);
+            Node.AddNodePin(nodePin);
+        }
+
+        public void AddOutputNodePin(string name, Type pinType)
+        {
+            Type type = typeof(NodePin<>);
+            Type genericType = type.MakeGenericType(pinType);
+
+            bool isInput = false;
+            bool isOutput = true;
+            bool isInvokeUpdate = false;
+
+
+            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { name, isInput, isOutput, isInvokeUpdate, default });
+
+            VisualNodePin visualNodePin = new VisualNodePin()
+            {
+                NodePin = nodePin,
+                VisualNode = this,
+                InputPosition = new Position(),
+                OutputPosition = new Position(),
+                ElementId = $"{nodePin.Name}_{nodePin.Guid}",
+                Showed = true
+            };
+            if (Holder != null)
+            {
+                Holder.Position.OnPositionChanged += () => visualNodePin.InputPosition.UpdatePosition?.Invoke();
+                Holder.Position.OnPositionChanged += () => visualNodePin.OutputPosition.UpdatePosition?.Invoke();
+            }
+
+            InternalVisualNodes.Add(new VisualNode(nodePin, this));
+
+            VisualNodePins.Add(visualNodePin);
+            Node.AddNodePin(nodePin);
+        }
+
+        public void AddNode(VisualNode visualNode)
+        {
+            InternalVisualNodes.Add(visualNode);
+        }
+
+        public void AddNodes(params VisualNode[] visualNodes)
+        {
+            foreach (var node in visualNodes)
+            {
+                AddNode(node);
+            }
+        }
+
+        public void RemoveAllNodes()
+        {
+            foreach (var node in InternalVisualNodes)
+            {
+                node.Close();
+            }
+            InternalVisualNodes.Clear();
+        }
+
+        public void RemoveNode(VisualNode visualNode)
+        {
+            visualNode.Close();
+
+            InternalVisualNodes.Remove(visualNode);
+        }
+
         public void Close()
         {
             CloseIncomingConnections();
             CloseOutgoingConnections();
+
+            RemoveAllNodes();
+
             Node.Close();
         }
 
