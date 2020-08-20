@@ -8,14 +8,27 @@ namespace Nodum.Node
     public static class NodeBuilder
     {
         private static Dictionary<Type, List<FieldInfo>> _nodeFields;
-        private static bool Initialized { get { return _nodeFields != null; } }
+        private static Dictionary<Type, List<PropertyInfo>> _nodeProperties;
+        private static bool FieldsInitialized => _nodeFields != null;
+        private static bool PropertiesInitialized => _nodeProperties != null;
+        private static bool Initialized => FieldsInitialized && PropertiesInitialized;
 
         public static NodePin BuildNodePin(FieldInfo fieldInfo)
         {
-            Type type = typeof(NodePin<>);
+            Type type = typeof(FieldNodePin<>);
             Type genericType = type.MakeGenericType(fieldInfo.FieldType);
 
             NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { fieldInfo });
+
+            return nodePin;
+        }
+
+        public static NodePin BuildNodePin(PropertyInfo propertyInfo)
+        {
+            Type type = typeof(PropertyNodePin<>);
+            Type genericType = type.MakeGenericType(propertyInfo.PropertyType);
+
+            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { propertyInfo });
 
             return nodePin;
         }
@@ -47,11 +60,24 @@ namespace Nodum.Node
                     node.AddNodePin(nodePin);
                 }
             }
+
+            if (_nodeProperties.TryGetValue(nodeType, out List<PropertyInfo> typeNodeProperties))
+            {
+                for (int i = 0; i < typeNodeProperties.Count; i++)
+                {
+                    PropertyInfo propertyInfo = typeNodeProperties[i];
+
+                    NodePin nodePin = BuildNodePin(propertyInfo);
+
+                    node.AddNodePin(nodePin);
+                }
+            }
         }
 
         private static void BuildCache()
         {
             _nodeFields = new Dictionary<Type, List<FieldInfo>>();
+            _nodeProperties = new Dictionary<Type, List<PropertyInfo>>();
 
             Type baseType = typeof(Node);
             List<Type> nodeTypes = new List<Type>();
@@ -83,40 +109,48 @@ namespace Nodum.Node
             }
         }
 
-        public static List<FieldInfo> GetNodeFields(Type nodeType)
-        {
-            List<FieldInfo> fieldInfo = new List<FieldInfo>(nodeType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
-
-            Type tempType = nodeType;
-
-            FieldInfo[] parentFields = nodeType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-            for (int i = 0; i < parentFields.Length; i++)
-            {
-                FieldInfo parentField = parentFields[i];
-                if (fieldInfo.TrueForAll(x => x.Name != parentField.Name))
-                {
-                    fieldInfo.Add(parentField);
-                }
-            }
-
-            return fieldInfo;
-        }
-
         private static void CachePorts(Type nodeType)
         {
-            List<FieldInfo> fieldInfo = GetNodeFields(nodeType);
+            CacheNodeFields(nodeType);
 
-            for (int i = 0; i < fieldInfo.Count; i++)
+            CacheNodeProperties(nodeType);
+        }
+
+        private static void CacheNodeProperties(Type nodeType)
+        {
+            PropertyInfo[] propertyInfos = nodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var property in propertyInfos)
             {
-                object[] attribs = fieldInfo[i].GetCustomAttributes(true);
+                if (property.CanWrite && property.CanRead)
+                {
+                    object[] attribs = property.GetCustomAttributes(true);
+                    if (attribs.FirstOrDefault(x => x is Node.NodePinAttribute) is Node.NodePinAttribute nodePinAttribete)
+                    {
+                        if (!_nodeProperties.ContainsKey(nodeType))
+                        {
+                            _nodeProperties.Add(nodeType, new List<PropertyInfo>());
+                        }
+                        _nodeProperties[nodeType].Add(property);
+                    }
+                }
+            }
+        }
 
+        private static void CacheNodeFields(Type nodeType)
+        {
+            FieldInfo[] fieldInfos = nodeType.GetFields(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var field in fieldInfos)
+            {
+                object[] attribs = field.GetCustomAttributes(true);
                 if (attribs.FirstOrDefault(x => x is Node.NodePinAttribute) is Node.NodePinAttribute nodePinAttribete)
                 {
                     if (!_nodeFields.ContainsKey(nodeType))
                     {
                         _nodeFields.Add(nodeType, new List<FieldInfo>());
                     }
-                    _nodeFields[nodeType].Add(fieldInfo[i]);
+                    _nodeFields[nodeType].Add(field);
                 }
             }
         }

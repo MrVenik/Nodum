@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Nodum.Node
 {
+
     public abstract class NodePin
     {
         public bool IsInput { get; private set; }
@@ -14,18 +14,13 @@ namespace Nodum.Node
         public Guid Guid { get; private set; }
         public string Name { get; set; }
 
-        public FieldInfo FieldInfo { get; private set; }
-
-        protected NodePin(FieldInfo fieldInfo)
+        protected NodePin(string name, object[] attributes)
         {
             Guid = Guid.NewGuid();
 
-            FieldInfo = fieldInfo;
+            Name = name;
 
-            Name = FieldInfo.Name;
-
-            object[] attribs = FieldInfo.GetCustomAttributes(true);
-            if (attribs.FirstOrDefault(x => x is Node.NodePinAttribute) is Node.NodePinAttribute nodePinAttribete)
+            if (attributes.FirstOrDefault(x => x is Node.NodePinAttribute) is Node.NodePinAttribute nodePinAttribete)
             {
                 IsInput = nodePinAttribete.IsInput;
                 IsOutput = nodePinAttribete.IsOutput;
@@ -56,6 +51,9 @@ namespace Nodum.Node
         public abstract Type ValueType { get; }
         protected Func<NodePin, bool> CanConnectTo { get; set; }
         public abstract void UpdateValue();
+
+        public abstract void SetNodeValue(Node node);
+        public abstract void GetNodeValue(Node node);
 
         public NodePin IncomingNodePin { get; private set; }
         private List<NodePin> _outgoingNodePins = new List<NodePin>();
@@ -118,14 +116,9 @@ namespace Nodum.Node
     {
         public override Type ValueType { get => typeof(T); }
 
-        public NodePin(FieldInfo fieldInfo) : base(fieldInfo)
+        public NodePin(string name, object[] attributes) : base(name, attributes)
         {
             Value = default;
-        }
-
-        public NodePin(FieldInfo fieldInfo, T value) : base(fieldInfo)
-        {
-            Value = value;
         }
 
         public NodePin(string name, bool isInput = false, bool isOutput = false, bool isInvokeUpdate = false)
@@ -160,6 +153,14 @@ namespace Nodum.Node
             {
 
             }
+        }
+
+        public override void SetNodeValue(Node node)
+        {
+        }
+
+        public override void GetNodeValue(Node node)
+        {
         }
     }
 }

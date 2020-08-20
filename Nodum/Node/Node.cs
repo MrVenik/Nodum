@@ -89,9 +89,9 @@ namespace Nodum.Node
         {
             foreach (var pin in AllNodePins)
             {
-                if (pin.IsInput && pin.FieldInfo != null)
+                if (pin.IsInput)
                 {
-                    pin.FieldInfo.SetValue(this, pin.Value);
+                    pin.SetNodeValue(this);
                 }
             }
 
@@ -99,9 +99,9 @@ namespace Nodum.Node
 
             foreach (var pin in AllNodePins)
             {
-                if (pin.IsOutput && pin.FieldInfo != null)
+                if (pin.IsOutput)
                 {
-                    pin.Value = pin.FieldInfo.GetValue(this);
+                    pin.GetNodeValue(this);
                 }
             }
         }
