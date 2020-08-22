@@ -72,7 +72,7 @@ namespace NodumVisualCalculator.Data
         public VisualNode(VisualNode holder = null)
         {
             Holder = holder;
-            Node = new EmptyNode();
+            Node = new EmptyNode() { Name = "Empty Node" };
             Editable = true;
         }
 
@@ -135,47 +135,53 @@ namespace NodumVisualCalculator.Data
         public bool MenuShowed { get; set; }
 
 
-        public void AddInputNodePin(string name, Type pinType)
+        public void AddInputNodePin(Type pinType, string name = null)
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                name = $"Input_{Node.AllInputNodePins.Count}";
+            }
+
             bool isInput = true;
             bool isOutput = false;
             bool isInvokeUpdate = true;
 
             NodePin nodePin = NodeBuilder.BuildNodePin(name, pinType, isInput, isOutput, isInvokeUpdate);
 
-            VisualNodePin visualNodePin = new VisualNodePin()
-            {
-                NodePin = nodePin,
-                VisualNode = this,
-                ElementId = $"{nodePin.Name}_{nodePin.Guid}",
-                Showed = true
-            };
-
-            InternalVisualNodes.Add(new VisualNode(nodePin, this));
-            VisualNodePins.Add(visualNodePin);
-            Node.AddNodePin(nodePin);
+            AddVisualNodePin(nodePin);
         }
 
-        public void AddOutputNodePin(string name, Type pinType)
+        public void AddOutputNodePin(Type pinType, string name = null)
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                name = $"Output_{Node.AllOutputNodePins.Count}";
+            }
+
             bool isInput = false;
             bool isOutput = true;
             bool isInvokeUpdate = false;
 
             NodePin nodePin = NodeBuilder.BuildNodePin(name, pinType, isInput, isOutput, isInvokeUpdate);
+            AddVisualNodePin(nodePin);
+        }
 
-            VisualNodePin visualNodePin = new VisualNodePin()
+        private void AddVisualNodePin(NodePin nodePin)
+        {
+            if (Node.TryAddNodePin(nodePin))
             {
-                NodePin = nodePin,
-                VisualNode = this,
-                ElementId = $"{nodePin.Name}_{nodePin.Guid}",
-                Showed = true
-            };
+                VisualNodePin visualNodePin = new VisualNodePin()
+                {
+                    NodePin = nodePin,
+                    VisualNode = this,
+                    ElementId = $"{nodePin.Name}_{nodePin.Guid}",
+                    Showed = true
+                };
 
-            InternalVisualNodes.Add(new VisualNode(nodePin, this));
+                InternalVisualNodes.Add(new VisualNode(nodePin, this));
 
-            VisualNodePins.Add(visualNodePin);
-            Node.AddNodePin(nodePin);
+                VisualNodePins.Add(visualNodePin);
+            }
         }
 
         public void AddNode(VisualNode visualNode)

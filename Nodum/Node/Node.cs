@@ -42,6 +42,8 @@ namespace Nodum.Node
         }
 
         public Dictionary<string, NodePin> NodePins { get; } = new Dictionary<string, NodePin>();
+        public List<NodePin> AllInputNodePins => NodePins.Values.Where(p => p.IsInput).ToList();
+        public List<NodePin> AllOutputNodePins => NodePins.Values.Where(p => p.IsOutput).ToList();
         public List<NodePin> AllNodePins => NodePins.Values.ToList();
 
         public string Name { get; set; }
@@ -52,7 +54,7 @@ namespace Nodum.Node
             Update();
         }
 
-        public void AddNodePin(NodePin nodePin)
+        public bool TryAddNodePin(NodePin nodePin)
         {
             if (!NodePins.ContainsKey(nodePin.Name))
             {
@@ -61,7 +63,9 @@ namespace Nodum.Node
                 {
                     nodePin.OnValueChanged += Update;
                 }
+                return true;
             }
+            else return false;
         }
 
         public void RemoveNodePin(NodePin nodePin)

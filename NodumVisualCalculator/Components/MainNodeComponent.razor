@@ -69,10 +69,10 @@
                                         <div class="dropdown-content-element" @onclick="(() => EditNode(visualNode))">
                                             Edit Node
                                         </div>
-                                        <div class="dropdown-content-element" @onclick="@(() => visualNode.AddInputNodePin("Input", typeof(double)))">
+                                        <div class="dropdown-content-element" @onclick="@(() => visualNode.AddInputNodePin(typeof(double)))">
                                             Add Input
                                         </div>
-                                        <div class="dropdown-content-element" @onclick="@(() => visualNode.AddOutputNodePin("Output", typeof(double)))">
+                                        <div class="dropdown-content-element" @onclick="@(() => visualNode.AddOutputNodePin(typeof(double)))">
                                             Add Output
                                         </div>
                                     </div>

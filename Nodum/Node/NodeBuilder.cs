@@ -64,7 +64,7 @@ namespace Nodum.Node
 
                     NodePin nodePin = BuildNodePin(propertyInfo);
 
-                    node.AddNodePin(nodePin);
+                    node.TryAddNodePin(nodePin);
                 }
             }
         }
@@ -81,7 +81,7 @@ namespace Nodum.Node
 
                     NodePin nodePin = BuildNodePin(fieldInfo);
 
-                    node.AddNodePin(nodePin);
+                    node.TryAddNodePin(nodePin);
                 }
             }
         }
