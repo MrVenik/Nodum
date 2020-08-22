@@ -8,18 +8,40 @@ namespace NodumVisualCalculator.Data
 {
     public class MathNode : Node
     {
-        [Input] public int InputA;
-        [Input] public int InputB;
-        [Output] public int Result;
-
-        public MathNode()
-            : base()
+        public enum MathType
         {
+            Add,
+            Subtract,
+            Multiply,
+            Divide
         }
+
+        [Input] public MathType Type;
+        [Input] public int InputA { get; set; }
+        [Input] public int InputB { get; set; }
+        [Output] public int Result { get; set; }
 
         public override void UpdateValue()
         {
-            Result = InputA + InputB;
+            Result = 0;
+            switch (Type)
+            {
+                case MathType.Add:
+                    Result = InputA + InputB;
+                    break;
+                case MathType.Subtract:
+                    Result = InputA - InputB;
+                    break;
+                case MathType.Multiply:
+                    Result = InputA * InputB;
+                    break;
+                case MathType.Divide:
+                    if (InputB != 0)
+                    {
+                        Result = InputA / InputB;
+                    }
+                    break;
+            }
         }
     }
 

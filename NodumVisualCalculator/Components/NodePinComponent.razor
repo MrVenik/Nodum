@@ -28,6 +28,15 @@
                     {
                         <input type="text" @bind-value="stringNodePin.Value" />
                     }
+                    else if (VisualNodePin.NodePin.Value is Enum)
+                    {
+                        <select @onchange="(e) => VisualNodePin.NodePin.Value = Enum.Parse(VisualNodePin.NodePin.ValueType, e.Value as string)">
+                            @foreach (var enumValue in Enum.GetValues(VisualNodePin.NodePin.ValueType))
+                            {
+                                <option>@enumValue.ToString()</option>
+                            }
+                        </select>
+                    }
                 </div>
 
                 @if ((VisualNodePin.NodePin.IsOutput && !VisualNodePin.IsInternal) || (VisualNodePin.IsInternal && VisualNodePin.NodePin.IsInput))
