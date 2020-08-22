@@ -10,6 +10,8 @@ namespace Nodum.Node
         public bool IsInput { get; private set; }
         public bool IsOutput { get; private set; }
         public bool IsInvokeUpdate { get; private set; }
+        public bool CanSetValue { get; private set; }
+        public bool CanGetValue { get; private set; }
 
         public Guid Guid { get; private set; }
         public string Name { get; set; }
@@ -20,11 +22,13 @@ namespace Nodum.Node
 
             Name = name;
 
-            if (attributes.FirstOrDefault(x => x is Node.NodePinAttribute) is Node.NodePinAttribute nodePinAttribete)
+            if (attributes.FirstOrDefault(x => x is Node.NodePinAttribute) is Node.NodePinAttribute nodePinAttribute)
             {
-                IsInput = nodePinAttribete.IsInput;
-                IsOutput = nodePinAttribete.IsOutput;
-                IsInvokeUpdate = nodePinAttribete.IsInvokeUpdate;
+                IsInput = nodePinAttribute.IsInput;
+                IsOutput = nodePinAttribute.IsOutput;
+                IsInvokeUpdate = nodePinAttribute.IsInvokeUpdate;
+                CanSetValue = nodePinAttribute.CanSetValue;
+                CanGetValue = nodePinAttribute.CanGetValue;
             }
         }
 
@@ -36,6 +40,8 @@ namespace Nodum.Node
             IsInput = isInput;
             IsOutput = isOutput;
             IsInvokeUpdate = isInvokeUpdate;
+            CanSetValue = false;
+            CanGetValue = false;
         }
 
         protected object _value;

@@ -16,7 +16,7 @@ namespace NodumVisualCalculator.Data
             Divide
         }
 
-        [Input] public MathType Type;
+        [NodePin(IsInvokeUpdate = true, CanSetValue = true)] public MathType Type;
         [Input] public int InputA { get; set; }
         [Input] public int InputB { get; set; }
         [Output] public int Result { get; set; }

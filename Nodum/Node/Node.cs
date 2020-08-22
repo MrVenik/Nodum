@@ -11,12 +11,16 @@ namespace Nodum.Node
             public virtual bool IsInput { get; set; } = false;
             public virtual bool IsOutput { get; set; } = false;
             public virtual bool IsInvokeUpdate { get; set; } = false;
+            public virtual bool CanSetValue { get; set; } = false;
+            public virtual bool CanGetValue { get; set; } = false;
         }
         public class InputAttribute : NodePinAttribute
         {
             public override bool IsInput { get; set; } = true;
             public override bool IsOutput { get; set; } = false;
             public override bool IsInvokeUpdate { get; set; } = true;
+            public override bool CanSetValue { get; set; } = true;
+            public override bool CanGetValue { get; set; } = false;
         }
 
         public class OutputAttribute : NodePinAttribute
@@ -24,6 +28,8 @@ namespace Nodum.Node
             public override bool IsInput { get; set; } = false;
             public override bool IsOutput { get; set; } = true;
             public override bool IsInvokeUpdate { get; set; } = false;
+            public override bool CanSetValue { get; set; } = false;
+            public override bool CanGetValue { get; set; } = true;
         }
 
         public class InputOutputAttribute : NodePinAttribute
@@ -31,6 +37,8 @@ namespace Nodum.Node
             public override bool IsInput { get; set; } = true;
             public override bool IsOutput { get; set; } = true;
             public override bool IsInvokeUpdate { get; set; } = false;
+            public override bool CanSetValue { get; set; } = true;
+            public override bool CanGetValue { get; set; } = true;
         }
 
         public Dictionary<string, NodePin> NodePins { get; } = new Dictionary<string, NodePin>();
@@ -89,7 +97,7 @@ namespace Nodum.Node
         {
             foreach (var pin in AllNodePins)
             {
-                if (pin.IsInput)
+                if (pin.CanSetValue)
                 {
                     pin.SetNodeValue(this);
                 }
@@ -99,7 +107,7 @@ namespace Nodum.Node
 
             foreach (var pin in AllNodePins)
             {
-                if (pin.IsOutput)
+                if (pin.CanGetValue)
                 {
                     pin.GetNodeValue(this);
                 }
