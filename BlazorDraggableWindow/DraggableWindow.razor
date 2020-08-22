@@ -16,38 +16,40 @@
     [Parameter]
     public double Y { get; set; }
 
+    public double PositionX { get; set; }
+    public double PositionY { get; set; }
+
     [Parameter]
-    public Action<MouseEventArgs, DraggableWindow> OnStartDragingWindow { get; set; }
+    public Action<DraggableWindow> OnStartDragingWindow { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, DraggableWindow> OnDragingWindow { get; set; }
+    public Action<DraggableWindow> OnDragingWindow { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, DraggableWindow> OnStopDragingWindow { get; set; }
+    public Action<DraggableWindow> OnStopDragingWindow { get; set; }
     [Parameter]
     public Action<DraggableWindow> OnDispose { get; set; }
 
     [Parameter]
     public bool AllowDrag { get; set; }
 
-    [Parameter(CaptureUnmatchedValues = true)]
-    public Dictionary<string, object> AllOtherAttributes { get; set; }
+    public Guid Guid { get; private set; }
 
-    public int ZIndex { get; set; }
-
-    public ElementOffset Offset { get; set; } = new ElementOffset();
+    public string WindowId => $"draggablewindow-{Guid}";
 
     protected override void OnInitialized()
     {
         if (DraggableZone == null) throw new InvalidOperationException("");
 
-        Offset.Top = Y;
-        Offset.Left = X;
+        Guid = Guid.NewGuid();
 
-        DraggableZone.DraggableWindows.Add(this);
+        if (!DraggableZone.DraggableWindows.ContainsKey(WindowId))
+        {
+            DraggableZone.DraggableWindows.Add(WindowId, this);
+        }
     }
 
     public void Dispose()
     {
-        DraggableZone.DraggableWindows.Remove(this);
+        DraggableZone.DraggableWindows.Remove(WindowId);
         OnDispose?.Invoke(this);
     }
 }

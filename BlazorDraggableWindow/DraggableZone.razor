@@ -1,16 +1,16 @@
-﻿<div class="draggablezone" style="height: @(Height); width:@(Width);" @onmousemove="_onMouseMove" @onmouseup="_onMouseUp">
+﻿<div id="draggablezone" class="draggablezone" style="height: @(Height); width:@(Width);">
     <CascadingValue Value="this">
         @ChildContent
     </CascadingValue>
 
     @if (DraggableWindows.Count > 0)
     {
-        @foreach (var window in DraggableWindows)
+        @foreach (var window in DraggableWindows.Values)
         {
             if (window.AllowDrag)
             {
-                <div @key="window" class="draggablewindow" style="top: @(window.Offset.Top)px; left: @(window.Offset.Left)px; z-index: @(window.ZIndex);" @attributes="window.AllOtherAttributes">
-                    <div class="draggablewindowheader" @onmousedown:preventDefault @onmousedown="(args) => StartDragWindow(args, window)">
+                <div @key="window" id="@window.WindowId" class="draggablewindow" style="top: @($"{window.Y}px"); left: @($"{window.X}px");">
+                    <div class="draggablewindowheader" onmousedown="draggableWindowHandler.StartDragging(event)">
                         <CascadingValue Value="window">
                             @window.WindowHeader
                         </CascadingValue>
@@ -22,7 +22,7 @@
             }
             else
             {
-                <div @key="window" class="draggablewindow" style="top: @(window.Offset.Top)px; left: @(window.Offset.Left)px; z-index: @(window.ZIndex);" @attributes="window.AllOtherAttributes">
+                <div @key="window" id="@window.WindowId" class="draggablewindow" style="top: @($"{window.Y}px"); left: @($"{window.X}px");">
                     <div class="draggablewindowheader" @onmousedown:preventDefault>
                         <CascadingValue Value="window">
                             @window.WindowHeader
@@ -38,7 +38,6 @@
 </div>
 
 @code {
-
     [Parameter]
     public RenderFragment ChildContent { get; set; }
     [Parameter]
@@ -48,52 +47,46 @@
     [Parameter]
     public string Name { get; set; }
 
-    private Action<MouseEventArgs> _onMouseMove;
-    private Action<MouseEventArgs> _onMouseUp;
+    private static DraggableWindow _selectedWindow;
 
-    public List<DraggableWindow> DraggableWindows { get; private set; } = new List<DraggableWindow>();
+    public static Dictionary<string, DraggableWindow> DraggableWindows { get; } = new Dictionary<string, DraggableWindow>();
 
-    private ElementOffset _startOffset = new ElementOffset();
-    private ElementOffset _offset = new ElementOffset();
-
-    private bool _isDragging = false;
-
-    private void StartDragWindow(MouseEventArgs args, DraggableWindow window)
+    [Microsoft.JSInterop.JSInvokable]
+    public static void StartDragWindow(string windowId, double x, double y)
     {
-        window.ZIndex = 1;
-
-        _startOffset.Left = args.ClientX;
-        _startOffset.Top = args.ClientY;
-
-        _isDragging = true;
-
-        _onMouseMove = (e) => DragWindow(e, window);
-        _onMouseUp = (e) => StopDragWindow(e, window);
-
-        window.OnDragingWindow?.Invoke(args, window);
-    }
-
-    private void DragWindow(MouseEventArgs args, DraggableWindow window)
-    {
-        if (_isDragging)
+        if (DraggableWindows.TryGetValue(windowId, out DraggableWindow window))
         {
-            window.Offset.Left += args.ClientX - _startOffset.Left;
-            window.Offset.Top += args.ClientY - _startOffset.Top;
+            _selectedWindow = window;
 
-            _startOffset.Left = args.ClientX;
-            _startOffset.Top = args.ClientY;
+            _selectedWindow.PositionX = x;
+            _selectedWindow.PositionY = y;
 
-            window.OnDragingWindow?.Invoke(args, window);
+            _selectedWindow.OnStartDragingWindow?.Invoke(_selectedWindow);
         }
     }
 
-    private void StopDragWindow(MouseEventArgs args, DraggableWindow window)
+    [Microsoft.JSInterop.JSInvokable]
+    public static void DragWindow(double x, double y)
     {
-        window.ZIndex = 0;
-        _isDragging = false;
-        _onMouseMove = null;
-        _onMouseUp = null;
+        if (_selectedWindow != null)
+        {
+            _selectedWindow.PositionX = x;
+            _selectedWindow.PositionY = y;
 
-        window.OnStopDragingWindow?.Invoke(args, window);
+            _selectedWindow?.OnDragingWindow?.Invoke(_selectedWindow);
+        }
+    }
+
+    [Microsoft.JSInterop.JSInvokable]
+    public static void StopDragWindow(double x, double y)
+    {
+        if (_selectedWindow != null)
+        {
+            _selectedWindow.PositionX = x;
+            _selectedWindow.PositionY = y;
+
+            _selectedWindow.OnStopDragingWindow?.Invoke(_selectedWindow);
+            _selectedWindow = null;
+        }
     }
 }
