@@ -6,8 +6,6 @@ namespace NodumVisualCalculator.Data
     {
         public NodePin NodePin { get; set; }
         public VisualNode VisualNode { get; set; }
-        public Position InputPosition { get; set; }
-        public Position OutputPosition { get; set; }
         public NodePinConnection Connection { get; set; }
         public string ElementId { get; set; }
         public string InputElementId => $"{ElementId}_Input";

@@ -11,14 +11,10 @@ namespace NodumVisualCalculator.Data
         {
             FromPin = fromPin;
             ToPin = toPin;
-
-            Line = new Line(FromPin.OutputPosition, ToPin.InputPosition);
         }
 
         public VisualNodePin FromPin { get; set; }
         public VisualNodePin ToPin { get; set; }
-
-        public Line Line { get; private set; }
 
         public void CloseConnection()
         {

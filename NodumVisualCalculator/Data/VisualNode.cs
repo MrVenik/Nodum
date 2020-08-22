@@ -57,8 +57,6 @@ namespace NodumVisualCalculator.Data
             {
                 NodePin = nodePin,
                 VisualNode = this,
-                InputPosition = new Position(),
-                OutputPosition = new Position(),
                 ElementId = $"{nodePin.Name}_{nodePin.Guid}",
                 Showed = true,
                 IsInternal = true
@@ -79,8 +77,6 @@ namespace NodumVisualCalculator.Data
                 {
                     NodePin = pin,
                     VisualNode = this,
-                    InputPosition = new Position(),
-                    OutputPosition = new Position(),
                     ElementId = $"{pin.Name}_{pin.Guid}",
                     Showed = true
                 };
@@ -125,8 +121,6 @@ namespace NodumVisualCalculator.Data
             {
                 NodePin = nodePin,
                 VisualNode = this,
-                InputPosition = new Position(),
-                OutputPosition = new Position(),
                 ElementId = $"{nodePin.Name}_{nodePin.Guid}",
                 Showed = true
             };
@@ -152,8 +146,6 @@ namespace NodumVisualCalculator.Data
             {
                 NodePin = nodePin,
                 VisualNode = this,
-                InputPosition = new Position(),
-                OutputPosition = new Position(),
                 ElementId = $"{nodePin.Name}_{nodePin.Guid}",
                 Showed = true
             };
