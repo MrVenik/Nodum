@@ -18,8 +18,8 @@
                     </div>
                 </div>
             </div>
-            <div class="main-node-header-element" @onclick="() => _currentMainNode = _currentMainNode.Holder ?? MainNode">
-                <span class="iconify iconify-main" data-icon="mdi:menu" data-inline="false"></span>
+            <div class="main-node-header-element" style="display: @(_currentMainNode == MainNode ? "none" : "block")" @onclick="() => _currentMainNode = _currentMainNode.Holder ?? MainNode">
+                <span class="iconify iconify-main" data-icon="mdi:arrow-left" data-inline="false"></span>
             </div>
             <div class="main-node-header-element main-node-header-text">@_currentMainNode.Name</div>
             @if (CloseButtonShowed)
@@ -204,6 +204,7 @@
 
     private void EditNode(VisualNode nodeHolder)
     {
+        nodeHolder.MenuShowed = false;
         _currentMainNode = nodeHolder;
     }
 
