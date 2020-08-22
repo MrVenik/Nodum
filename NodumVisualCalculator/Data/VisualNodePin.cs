@@ -8,6 +8,7 @@ namespace NodumVisualCalculator.Data
         public VisualNode VisualNode { get; set; }
         public Position InputPosition { get; set; }
         public Position OutputPosition { get; set; }
+        public NodePinConnection Connection { get; set; }
         public string ElementId { get; set; }
         public string InputElementId => $"{ElementId}_Input";
         public string OutputElementId => $"{ElementId}_Output";
@@ -17,10 +18,10 @@ namespace NodumVisualCalculator.Data
         public void ConnectToNodePin(VisualNodePin outputVisualNodePin)
         {
             NodePin.AddIncomingNodePin(outputVisualNodePin.NodePin);
-
-            NodePinConnection connection = new NodePinConnection(outputVisualNodePin, this);
-            VisualNode.IncomingConnections.Add(connection);
-            outputVisualNodePin.VisualNode.OutgoingConnections.Add(connection);
+            Connection?.CloseConnection();
+            Connection = new NodePinConnection(outputVisualNodePin, this);
+            VisualNode.IncomingConnections.Add(Connection);
+            outputVisualNodePin.VisualNode.OutgoingConnections.Add(Connection);
         }
     }
 }
