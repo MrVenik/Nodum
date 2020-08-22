@@ -13,7 +13,9 @@ namespace NodumVisualCalculator.Data
             Add,
             Subtract,
             Multiply,
-            Divide
+            Divide,
+            Remainder
+
         }
 
         [NodePin(IsInvokeUpdate = true, CanSetValue = true)] public MathType Type;
@@ -39,6 +41,12 @@ namespace NodumVisualCalculator.Data
                     if (InputB != 0)
                     {
                         Result = InputA / InputB;
+                    }
+                    break;
+                case MathType.Remainder:
+                    if (InputB != 0)
+                    {
+                        Result = InputA % InputB;
                     }
                     break;
             }
