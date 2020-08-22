@@ -5,12 +5,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\NodeLineHandler.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Shared\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BlazorDraggableWindow\BlazorDraggableWindow.csproj" />
     <ProjectReference Include="..\Nodum\Nodum.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\NodeLineHandler.ts" />
   </ItemGroup>
 
 </Project>

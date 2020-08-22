@@ -63,11 +63,6 @@ namespace NodumVisualCalculator.Data
                 Showed = true,
                 IsInternal = true
             };
-            if (Holder != null)
-            {
-                Holder.Position.OnPositionChanged += () => visualNodePin.InputPosition.UpdatePosition?.Invoke();
-                Holder.Position.OnPositionChanged += () => visualNodePin.OutputPosition.UpdatePosition?.Invoke();
-            }
             VisualNodePins.Add(visualNodePin);
         }
 
@@ -89,11 +84,6 @@ namespace NodumVisualCalculator.Data
                     ElementId = $"{pin.Name}_{pin.Guid}",
                     Showed = true
                 };
-                if (Holder != null)
-                {
-                    Holder.Position.OnPositionChanged += () => visualNodePin.InputPosition.UpdatePosition?.Invoke();
-                    Holder.Position.OnPositionChanged += () => visualNodePin.OutputPosition.UpdatePosition?.Invoke();
-                }
                 VisualNodePins.Add(visualNodePin);
             }          
         }
@@ -140,11 +130,6 @@ namespace NodumVisualCalculator.Data
                 ElementId = $"{nodePin.Name}_{nodePin.Guid}",
                 Showed = true
             };
-            if (Holder != null)
-            {
-                Holder.Position.OnPositionChanged += () => visualNodePin.InputPosition.UpdatePosition?.Invoke();
-                Holder.Position.OnPositionChanged += () => visualNodePin.OutputPosition.UpdatePosition?.Invoke();
-            }
 
             InternalVisualNodes.Add(new VisualNode(nodePin, this));
             VisualNodePins.Add(visualNodePin);
@@ -172,11 +157,6 @@ namespace NodumVisualCalculator.Data
                 ElementId = $"{nodePin.Name}_{nodePin.Guid}",
                 Showed = true
             };
-            if (Holder != null)
-            {
-                Holder.Position.OnPositionChanged += () => visualNodePin.InputPosition.UpdatePosition?.Invoke();
-                Holder.Position.OnPositionChanged += () => visualNodePin.OutputPosition.UpdatePosition?.Invoke();
-            }
 
             InternalVisualNodes.Add(new VisualNode(nodePin, this));
 

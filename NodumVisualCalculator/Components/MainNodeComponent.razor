@@ -39,11 +39,11 @@
                         <stop offset="100%" style="stop-color: red; stop-opacity: 1" />
                     </linearGradient>
                 </defs>
-                <path fill="none" stroke="url(#grad1)" stroke-width="8" d="@connection.Line.Curve" />
+                <path id="@($"{connection.FromPin.OutputElementId}+{connection.ToPin.InputElementId}")" class="node-line" fill="none" stroke="url(#grad1)" stroke-width="8" d="@connection.Line.Curve" />
             </svg>
         }
 
-        <svg x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: 0;">
+        <svg id="main-node-line" x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: 0;">
             <defs>
                 <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" style="stop-color: green; stop-opacity: 1" />
@@ -56,7 +56,7 @@
         <DraggableZone Height="100%" Width="100%">
             @foreach (var visualNode in _currentMainNode.InternalVisualNodes)
             {
-                <DraggableWindow @key="visualNode" X="@visualNode.Position.X" Y="@visualNode.Position.Y" AllowDrag="true" OnDragingWindow="@((e, w) => OnNodeDragging(e, w, visualNode))">
+                <DraggableWindow @key="visualNode" X="@visualNode.Position.X" Y="@visualNode.Position.Y" AllowDrag="true" OnDragingWindow="@((w) => OnNodeDragging(w, visualNode))">
                     <WindowHeader>
                         <div class="node-window-header">
                             <div class="dropdown">
@@ -158,7 +158,6 @@
 
     private void UpdateLines()
     {
-        _currentMainNode.Position.OnPositionChanged?.Invoke();
         _allConnections.Clear();
         foreach (var visualNode in _currentMainNode.InternalVisualNodes)
         {
@@ -208,15 +207,10 @@
         _currentMainNode = nodeHolder;
     }
 
-    private void OnNodeStartDragging(MouseEventArgs args, DraggableWindow nodeWindow, VisualNode node)
+    private void OnNodeDragging(DraggableWindow nodeWindow, VisualNode node)
     {
-
-    }
-
-    private void OnNodeDragging(MouseEventArgs args, DraggableWindow nodeWindow, VisualNode node)
-    {
-        node.Position.X = nodeWindow.Offset.Left;
-        node.Position.Y = nodeWindow.Offset.Top;
+        node.Position.X = nodeWindow.PositionX;
+        node.Position.Y = nodeWindow.PositionY;
 
         UpdateLines();
     }

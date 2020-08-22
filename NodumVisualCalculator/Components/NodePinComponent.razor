@@ -1,6 +1,4 @@
-﻿@inject IJSRuntime JSRuntime
-
-@if (VisualNodePin != null && VisualNodePin.NodePin != null)
+﻿@if (VisualNodePin != null && VisualNodePin.NodePin != null)
 {
     if (VisualNodePin.Showed)
     {
@@ -50,19 +48,4 @@
     public Action<MouseEventArgs, VisualNodePin> OnNodePinSelect { get; set; }
     [Parameter]
     public Action<MouseEventArgs, VisualNodePin> OnNodePinConnect { get; set; }
-
-    protected override void OnInitialized()
-    {
-        VisualNodePin.InputPosition.UpdatePosition = () => UpdatePinPosition(VisualNodePin.InputPosition, VisualNodePin.InputElementId);
-        VisualNodePin.OutputPosition.UpdatePosition = () => UpdatePinPosition(VisualNodePin.OutputPosition, VisualNodePin.OutputElementId);
-    }
-
-    private async void UpdatePinPosition(Position pos, string elementId)
-    {
-        double elementX = await JSRuntime.InvokeAsync<double>("getElementOffsetLeft", elementId) + 12;
-        double elementY = await JSRuntime.InvokeAsync<double>("getElementOffsetTop", elementId) + 12;
-
-        pos.X = elementX;
-        pos.Y = elementY;
-    }
 }
