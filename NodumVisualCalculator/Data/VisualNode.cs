@@ -18,7 +18,7 @@ namespace NodumVisualCalculator.Data
 
         }
 
-        [NodePin(IsInvokeUpdate = true, CanSetValue = true)] public MathType Type;
+        [NodePin(IsInvokeUpdate = true, CanSetValue = true)] public MathType Operation;
         [Input] public double InputA { get; set; }
         [Input] public double InputB { get; set; }
         [Output] public double Result { get; set; }
@@ -26,7 +26,7 @@ namespace NodumVisualCalculator.Data
         public override void UpdateValue()
         {
             Result = 0;
-            switch (Type)
+            switch (Operation)
             {
                 case MathType.Add:
                     Result = InputA + InputB;
