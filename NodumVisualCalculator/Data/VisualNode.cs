@@ -19,9 +19,9 @@ namespace NodumVisualCalculator.Data
         }
 
         [NodePin(IsInvokeUpdate = true, CanSetValue = true)] public MathType Type;
-        [Input] public int InputA { get; set; }
-        [Input] public int InputB { get; set; }
-        [Output] public int Result { get; set; }
+        [Input] public double InputA { get; set; }
+        [Input] public double InputB { get; set; }
+        [Output] public double Result { get; set; }
 
         public override void UpdateValue()
         {
@@ -53,9 +53,9 @@ namespace NodumVisualCalculator.Data
         }
     }
 
-    public class IntNode : Node
+    public class NumberNode : Node
     {
-        [InputOutput] public int Number;
+        [InputOutput] public double Number;
     }
 
     public class EmptyNode : Node
@@ -137,15 +137,11 @@ namespace NodumVisualCalculator.Data
 
         public void AddInputNodePin(string name, Type pinType)
         {
-            Type type = typeof(NodePin<>);
-            Type genericType = type.MakeGenericType(pinType);
-
             bool isInput = true;
             bool isOutput = false;
             bool isInvokeUpdate = true;
 
-
-            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { name, isInput, isOutput, isInvokeUpdate, default });
+            NodePin nodePin = NodeBuilder.BuildNodePin(name, pinType, isInput, isOutput, isInvokeUpdate);
 
             VisualNodePin visualNodePin = new VisualNodePin()
             {
@@ -162,15 +158,11 @@ namespace NodumVisualCalculator.Data
 
         public void AddOutputNodePin(string name, Type pinType)
         {
-            Type type = typeof(NodePin<>);
-            Type genericType = type.MakeGenericType(pinType);
-
             bool isInput = false;
             bool isOutput = true;
             bool isInvokeUpdate = false;
 
-
-            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { name, isInput, isOutput, isInvokeUpdate, default });
+            NodePin nodePin = NodeBuilder.BuildNodePin(name, pinType, isInput, isOutput, isInvokeUpdate);
 
             VisualNodePin visualNodePin = new VisualNodePin()
             {

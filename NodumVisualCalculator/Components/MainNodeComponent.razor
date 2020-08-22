@@ -8,17 +8,17 @@
                 </div>
                 <div class="dropdown-content" style="@(_mainDropDownShowed ? "display: block;" : "display: none;")">
                     <div class="dropdown-content-element" @onclick="CreateNewNode">
-                        Add New Empty Node
+                        Add Empty Node
                     </div>
-                    <div class="dropdown-content-element" @onclick="CreateNewAddNode">
-                        Add New Add Node
+                    <div class="dropdown-content-element" @onclick="@(() => CreateNewNode(new MathNode() { Name = "Math Node"}))">
+                        Add Math Node
                     </div>
-                    <div class="dropdown-content-element" @onclick="CreateNewNumberNode">
-                        Add New Number Node
+                    <div class="dropdown-content-element" @onclick="@(() => CreateNewNode(new NumberNode() { Name = "Number Node"}))">
+                        Add Number Node
                     </div>
                 </div>
             </div>
-            <div class="main-node-header-element" style="display: @(_currentMainNode == MainNode ? "none" : "block")" @onclick="() => _currentMainNode = _currentMainNode.Holder ?? MainNode">
+            <div class="main-node-header-element" style="display: @(_currentMainNode == MainNode ? "none" : "block")" @onclick="() => { _currentMainNode = _currentMainNode.Holder ?? MainNode; UpdateLines(); }">
                 <span class="iconify iconify-main" data-icon="mdi:arrow-left" data-inline="false"></span>
             </div>
             <div class="main-node-header-element main-node-header-text">@_currentMainNode.Name</div>
@@ -59,25 +59,25 @@
                 <DraggableWindow @key="visualNode" X="@visualNode.Position.X" Y="@visualNode.Position.Y" AllowDrag="true" OnDragingWindow="@((w) => OnNodeDragging(w, visualNode))">
                     <WindowHeader>
                         <div class="node-window-header">
-                            <div class="dropdown">
-                                <div class="node-window-header-element" @onclick="() => visualNode.MenuShowed = !visualNode.MenuShowed">
-                                    <span class="iconify iconify-small" data-icon="mdi:menu" data-inline="false"></span>
-                                </div>
-                                <div class="dropdown-content" style="@(visualNode.MenuShowed ? "display: block;" : "display: none;")">
-                                    @if (visualNode.Editable)
-                                    {
+                            @if (visualNode.Editable)
+                            {
+                                <div class="dropdown">
+                                    <div class="node-window-header-element" @onclick="() => visualNode.MenuShowed = !visualNode.MenuShowed">
+                                        <span class="iconify iconify-small" data-icon="mdi:menu" data-inline="false"></span>
+                                    </div>
+                                    <div class="dropdown-content" style="@(visualNode.MenuShowed ? "display: block;" : "display: none;")">
                                         <div class="dropdown-content-element" @onclick="(() => EditNode(visualNode))">
                                             Edit Node
                                         </div>
-                                    }
-                                    <div class="dropdown-content-element" @onclick="(() => AddInputNodePin(visualNode))">
-                                        Add Input
-                                    </div>
-                                    <div class="dropdown-content-element" @onclick="(() => AddOutputNodePin(visualNode))">
-                                        Add Output
+                                        <div class="dropdown-content-element" @onclick="@(() => visualNode.AddInputNodePin("Input", typeof(double)))">
+                                            Add Input
+                                        </div>
+                                        <div class="dropdown-content-element" @onclick="@(() => visualNode.AddOutputNodePin("Output", typeof(double)))">
+                                            Add Output
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            }
                             <div class="node-window-header-element node-window-header-text">@visualNode.Name (@visualNode.Position.X, @visualNode.Position.Y)</div>
                             <div class="node-window-header-element" @onclick="@(() => CloseWindow(visualNode))">
                                 <span class="iconify iconify-small" data-icon="mdi:close" data-inline="false"></span>
@@ -173,15 +173,9 @@
         _mainDropDownShowed = false;
     }
 
-    private void CreateNewAddNode()
+    private void CreateNewNode(Node node)
     {
-        _currentMainNode.AddNode(new VisualNode(new MathNode(), _currentMainNode));
-        _mainDropDownShowed = false;
-    }
-
-    private void CreateNewNumberNode()
-    {
-        _currentMainNode.AddNode(new VisualNode(new IntNode(), _currentMainNode));
+        _currentMainNode.AddNode(new VisualNode(node, _currentMainNode));
         _mainDropDownShowed = false;
     }
 
@@ -192,20 +186,12 @@
         UpdateLines();
     }
 
-    private void AddInputNodePin(VisualNode node)
-    {
-        node.AddInputNodePin("Input", typeof(int));
-    }
-
-    private void AddOutputNodePin(VisualNode node)
-    {
-        node.AddOutputNodePin("Output", typeof(int));
-    }
-
     private void EditNode(VisualNode nodeHolder)
     {
         nodeHolder.MenuShowed = false;
+        _isEditor = true;
         _currentMainNode = nodeHolder;
+        UpdateLines();
     }
 
     private void OnNodeDragging(DraggableWindow nodeWindow, VisualNode node)

@@ -33,7 +33,7 @@
                         <select @onchange="(e) => VisualNodePin.NodePin.Value = Enum.Parse(VisualNodePin.NodePin.ValueType, e.Value as string)">
                             @foreach (var enumValue in Enum.GetValues(VisualNodePin.NodePin.ValueType))
                             {
-                                <option>@enumValue.ToString()</option>
+                                <option >@enumValue.ToString()</option>
                             }
                         </select>
                     }
