@@ -99,19 +99,44 @@ namespace NodumVisualCalculator.Data
             Node = node;
             Holder = holder;
 
+            Node.OnUpdatePins += () => ReAddNodePins(false);
+
             Editable = false;
 
-            foreach (var pin in node.AllNodePins)
+            ReAddNodePins(true);
+        }
+
+        private void ReAddNodePins(bool firstLoad)
+        {
+            foreach (var pin in Node.AllNodePins)
             {
-                VisualNodePin visualNodePin = new VisualNodePin()
+                if (!VisualNodePins.Any(vn => vn.NodePin == pin))
                 {
-                    NodePin = pin,
-                    VisualNode = this,
-                    ElementId = $"{pin.Name}_{pin.Guid}",
-                    Showed = true
-                };
-                VisualNodePins.Add(visualNodePin);
-            }          
+                    VisualNodePin visualNodePin = new VisualNodePin()
+                    {
+                        NodePin = pin,
+                        VisualNode = this,
+                        ElementId = $"{pin.Name}_{pin.Guid}",
+                        Showed = true
+                    };
+                    VisualNodePins.Add(visualNodePin);
+                }
+            }
+            if (!firstLoad)
+            {
+                List<VisualNodePin> toRemove = new List<VisualNodePin>();
+                foreach (var visualPin in VisualNodePins)
+                {
+                    if (!Node.AllNodePins.Contains(visualPin.NodePin))
+                    {
+                        toRemove.Add(visualPin);
+                    }
+                }
+                foreach (var visualPin in toRemove)
+                {
+                    VisualNodePins.Remove(visualPin);
+                }
+            }
         }
 
         public List<NodePinConnection> IncomingConnections { get; private set; } = new List<NodePinConnection>();
