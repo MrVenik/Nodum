@@ -16,8 +16,9 @@ namespace NodumVisualCalculator.Data
             Subtract,
             Multiply,
             Divide,
-            Remainder
-
+            Remainder,
+            Pow,
+            Root,
         }
 
         [NodePin(IsInvokeUpdate = true, CanSetValue = true)] public MathType Operation;
@@ -50,6 +51,12 @@ namespace NodumVisualCalculator.Data
                     {
                         Result = InputA % InputB;
                     }
+                    break;
+                case MathType.Pow:
+                    Result = Math.Pow(InputA, InputB);
+                    break;
+                case MathType.Root:
+                    Result = Math.Pow(InputA, 1.0 / InputB);
                     break;
             }
         }
