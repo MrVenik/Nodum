@@ -30,10 +30,17 @@
                     }
                     else if (VisualNodePin.NodePin.Value is Enum)
                     {
-                        <select @onchange="(e) => VisualNodePin.NodePin.Value = Enum.Parse(VisualNodePin.NodePin.ValueType, e.Value as string)">
+                        <select @onchange="(e) => VisualNodePin.NodePin.Value = Enum.Parse(VisualNodePin.NodePin.ValueType, e.Value.ToString())">
                             @foreach (var enumValue in Enum.GetValues(VisualNodePin.NodePin.ValueType))
                             {
-                                <option >@enumValue.ToString()</option>
+                                if ((int)VisualNodePin.NodePin.Value == (int)enumValue)
+                                {
+                                    <option selected value="@((int)enumValue)">@enumValue.ToString()</option>
+                                }
+                                else
+                                {
+                                    <option value="@((int)enumValue)">@enumValue.ToString()</option>
+                                }
                             }
                         </select>
                     }
