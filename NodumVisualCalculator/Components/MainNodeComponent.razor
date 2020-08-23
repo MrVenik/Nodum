@@ -16,6 +16,9 @@
                     <div class="dropdown-content-element" @onclick="@(() => CreateNewNode(new NumberNode() { Name = "Number Node"}))">
                         Add Number Node
                     </div>
+                    <div class="dropdown-content-element" @onclick="@(() => CreateNewNode(new RegexMathNode() { Name = "Regex Math Node"}))">
+                        Add Regex Math Node
+                    </div>
                 </div>
             </div>
             <div class="main-node-header-element" style="display: @(_currentMainNode == MainNode ? "none" : "block")" @onclick="() => { _currentMainNode = _currentMainNode.Holder ?? MainNode; UpdateLines(); }">

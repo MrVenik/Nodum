@@ -1,7 +1,9 @@
 ﻿using Nodum.Node;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace NodumVisualCalculator.Data
@@ -50,6 +52,72 @@ namespace NodumVisualCalculator.Data
                     }
                     break;
             }
+        }
+    }
+
+    public class RegexMathNode : Node
+    {
+        [NodePin(IsInvokeUpdatePins = true, CanSetValue = true)] public string RegexOperation { get; set; }
+        [Output] public double Result { get; set; }
+
+        private string _oldRegexOperation;
+        private readonly MatchEvaluator _evaluator;
+
+        public RegexMathNode()
+        {
+            _evaluator = new MatchEvaluator(MatchReplacer);
+        }
+
+        public override void UpdatePins()
+        {
+            if (!string.IsNullOrEmpty(RegexOperation) && RegexOperation != _oldRegexOperation)
+            {
+                Match[] matches = Regex.Matches(RegexOperation, @"\b[^\d]\w+").ToArray();
+
+                if (!string.IsNullOrEmpty(_oldRegexOperation))
+                {
+                    Match[] oldMatches = Regex.Matches(_oldRegexOperation, @"\b[^\d]\w+").ToArray();
+                    foreach (Match match in oldMatches)
+                    {
+                        if (!matches.Any(m => m.Value == match.Value))
+                        {
+                            RemoveNodePin(match.Value);
+                        }
+                    }
+                }
+
+                foreach (Match match in matches)
+                {
+                    if (!NodePins.ContainsKey(match.Value))
+                    {
+                        NodePin inputNodePin = NodeBuilder.BuildNodePin(match.Value, typeof(double), true, false, true);
+
+                        TryAddNodePin(inputNodePin);
+                    }
+                }
+
+                _oldRegexOperation = RegexOperation;
+                OnUpdatePins?.Invoke();
+            }
+        }
+
+        public override void UpdateValue()
+        {
+            if (!string.IsNullOrEmpty(RegexOperation))
+            {
+                string math = Regex.Replace(RegexOperation, @"\b[^\d]\w+", _evaluator).Trim();
+
+                Result = Convert.ToDouble(new DataTable().Compute(math, ""));
+            }
+        }
+
+        private string MatchReplacer(Match match)
+        {
+            if (NodePins.TryGetValue(match.Value, out NodePin input))
+            {
+                return input.Value.ToString();
+            }
+            return string.Empty;
         }
     }
 
