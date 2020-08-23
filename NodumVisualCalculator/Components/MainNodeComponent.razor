@@ -1,6 +1,7 @@
 ﻿@inject IJSRuntime JSRuntime
 
 <NodeCreatorComponent @ref="_nodeCreator" />
+<NodeEditorComponent @ref="_nodeEditor" />
 
 @if (_currentMainNode != null)
 {
@@ -13,6 +14,9 @@
                     </div>
                 </DropdownTrigger>
                 <DropdownContent>
+                    <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeEditor.Open(_currentMainNode))">
+                        Edit Node
+                    </DropdownElement>
                     <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode))">
                         Add Empty Node
                     </DropdownElement>
@@ -122,6 +126,7 @@
     private VisualNodePin _selectedNodePin;
 
     private NodeCreatorComponent _nodeCreator;
+    private NodeEditorComponent _nodeEditor;
 
     private List<NodePinConnection> _allConnections = new List<NodePinConnection>();
 
