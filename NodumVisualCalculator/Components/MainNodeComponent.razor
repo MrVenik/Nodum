@@ -1,27 +1,32 @@
-﻿@if (_currentMainNode != null)
+﻿@inject IJSRuntime JSRuntime
+
+@if (_currentMainNode != null)
 {
     <div class="main-node" @onmousemove="DrawMainLine" @ondblclick="StopDrawingMainLine">
         <div class="main-node-header">
-            <div class="dropdown">
-                <div class="main-node-header-element" @onclick="() => _mainDropDownShowed = !_mainDropDownShowed">
-                    <span class="iconify iconify-main" data-icon="mdi:menu" data-inline="false"></span>
-                </div>
-                <div class="dropdown-content" style="@(_mainDropDownShowed ? "display: block;" : "display: none;")">
-                    <div class="dropdown-content-element" @onclick="CreateNewNode">
+            <Dropdown>
+                <DropdownTrigger>
+                    <div class="main-node-header-element">
+                        <span class="iconify iconify-main" data-icon="mdi:menu" data-inline="false"></span>
+                    </div>
+                </DropdownTrigger>
+                <DropdownContent>
+                    <DropdownElement HideOnClick="true" OnClick="@((e) => CreateNewNode())">
                         Add Empty Node
-                    </div>
-                    <div class="dropdown-content-element" @onclick="@(() => CreateNewNode(new MathNode() { Name = "Math Node"}))">
+                    </DropdownElement>
+                    <DropdownElement HideOnClick="true" OnClick="@((e) => CreateNewNode(new MathNode() { Name = "Math Node"}))">
                         Add Math Node
-                    </div>
-                    <div class="dropdown-content-element" @onclick="@(() => CreateNewNode(new NumberNode() { Name = "Number Node"}))">
+                    </DropdownElement>
+                    <DropdownElement HideOnClick="true" OnClick="@((e) => CreateNewNode(new NumberNode() { Name = "Number Node"}))">
                         Add Number Node
-                    </div>
-                    <div class="dropdown-content-element" @onclick="@(() => CreateNewNode(new RegexMathNode() { Name = "Regex Math Node"}))">
+                    </DropdownElement>
+                    <DropdownElement HideOnClick="true" OnClick="@((e) => CreateNewNode(new RegexMathNode() { Name = "Regex Math Node"}))">
                         Add Regex Math Node
-                    </div>
-                </div>
-            </div>
-            <div class="main-node-header-element" style="display: @(_currentMainNode == MainNode ? "none" : "block")" @onclick="() => { _currentMainNode = _currentMainNode.Holder ?? MainNode; UpdateLines(); }">
+                    </DropdownElement>
+                </DropdownContent>
+            </Dropdown>
+
+            <div class="main-node-header-element" style="display: @(_currentMainNode == MainNode ? "none" : "block")" @onclick="() => { _currentMainNode = _currentMainNode.Holder ?? MainNode; UpdateConnections(); }">
                 <span class="iconify iconify-main" data-icon="mdi:arrow-left" data-inline="false"></span>
             </div>
             <div class="main-node-header-element main-node-header-text">@_currentMainNode.Name</div>
@@ -64,22 +69,24 @@
                         <div class="node-window-header">
                             @if (visualNode.Editable)
                             {
-                                <div class="dropdown">
-                                    <div class="node-window-header-element" @onclick="() => visualNode.MenuShowed = !visualNode.MenuShowed">
-                                        <span class="iconify iconify-small" data-icon="mdi:menu" data-inline="false"></span>
-                                    </div>
-                                    <div class="dropdown-content" style="@(visualNode.MenuShowed ? "display: block;" : "display: none;")">
-                                        <div class="dropdown-content-element" @onclick="(() => EditNode(visualNode))">
+                                <Dropdown>
+                                    <DropdownTrigger>
+                                        <div class="node-window-header-element">
+                                            <span class="iconify iconify-small" data-icon="mdi:menu" data-inline="false"></span>
+                                        </div>
+                                    </DropdownTrigger>
+                                    <DropdownContent>
+                                        <DropdownElement HideOnClick="true" OnClick="@((e) => EditNode(visualNode))">
                                             Edit Node
-                                        </div>
-                                        <div class="dropdown-content-element" @onclick="@(() => visualNode.AddInputNodePin(typeof(double)))">
+                                        </DropdownElement>
+                                        <DropdownElement HideOnClick="true" OnClick="@((e) => visualNode.AddInputNodePin(typeof(double)))">
                                             Add Input
-                                        </div>
-                                        <div class="dropdown-content-element" @onclick="@(() => visualNode.AddOutputNodePin(typeof(double)))">
+                                        </DropdownElement>
+                                        <DropdownElement HideOnClick="true" OnClick="@((e) => visualNode.AddOutputNodePin(typeof(double)))">
                                             Add Output
-                                        </div>
-                                    </div>
-                                </div>
+                                        </DropdownElement>
+                                    </DropdownContent>
+                                </Dropdown>
                             }
                             <div class="node-window-header-element node-window-header-text">@visualNode.Name (@visualNode.Position.X, @visualNode.Position.Y)</div>
                             <div class="node-window-header-element" @onclick="@(() => CloseWindow(visualNode))">
@@ -124,6 +131,12 @@
         _currentMainNode = MainNode;
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        //TODO: Create normal method to update lines when something changes
+        //await UpdateLines();
+    }
+
     private void OnNodePinSelect(MouseEventArgs args, VisualNodePin visualNodePin)
     {
         _mainLine.From = new Position() { X = args.ClientX, Y = args.ClientY };
@@ -133,13 +146,15 @@
         _selectedNodePin = visualNodePin;
     }
 
-    private void OnNodePinConnect(MouseEventArgs args, VisualNodePin visualNodePin)
+    private async void OnNodePinConnect(MouseEventArgs args, VisualNodePin visualNodePin)
     {
         StopDrawingMainLine(args);
 
         visualNodePin.ConnectToNodePin(_selectedNodePin);
 
-        UpdateLines();
+        UpdateConnections();
+
+        await UpdateLines();
     }
 
     private void DrawMainLine(MouseEventArgs args)
@@ -159,7 +174,12 @@
         }
     }
 
-    private void UpdateLines()
+    private async Task UpdateLines()
+    {
+        await JSRuntime.InvokeVoidAsync("nodeLineHandler.UpdateLines");
+    }
+
+    private void UpdateConnections()
     {
         _allConnections.Clear();
         foreach (var visualNode in _currentMainNode.InternalVisualNodes)
@@ -186,15 +206,16 @@
     {
         _currentMainNode.RemoveNode(window);
 
-        UpdateLines();
+        UpdateConnections();
     }
 
-    private void EditNode(VisualNode nodeHolder)
+    private async void EditNode(VisualNode nodeHolder)
     {
         nodeHolder.MenuShowed = false;
         _isEditor = true;
         _currentMainNode = nodeHolder;
-        UpdateLines();
+        UpdateConnections();
+        await UpdateLines();
     }
 
     private void OnNodeDragging(DraggableWindow nodeWindow, VisualNode node)
@@ -202,6 +223,6 @@
         node.Position.X = nodeWindow.PositionX;
         node.Position.Y = nodeWindow.PositionY;
 
-        UpdateLines();
+        UpdateConnections();
     }
 }
