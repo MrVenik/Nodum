@@ -1,5 +1,7 @@
 ﻿@inject IJSRuntime JSRuntime
 
+<NodeCreatorComponent @ref="_nodeCreator" />
+
 @if (_currentMainNode != null)
 {
     <div class="main-node" @onmousemove="DrawMainLine" @ondblclick="StopDrawingMainLine">
@@ -11,7 +13,7 @@
                     </div>
                 </DropdownTrigger>
                 <DropdownContent>
-                    <DropdownElement HideOnClick="true" OnClick="@((e) => CreateNewNode())">
+                    <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode))">
                         Add Empty Node
                     </DropdownElement>
                     <DropdownElement HideOnClick="true" OnClick="@((e) => CreateNewNode(new MathNode() { Name = "Math Node"}))">
@@ -106,8 +108,6 @@
 }
 
 @code {
-    private bool _mainDropDownShowed = false;
-
     [Parameter]
     public VisualNode MainNode { get; set; }
     [Parameter]
@@ -120,6 +120,8 @@
     private VisualNode _currentMainNode;
 
     private VisualNodePin _selectedNodePin;
+
+    private NodeCreatorComponent _nodeCreator;
 
     private List<NodePinConnection> _allConnections = new List<NodePinConnection>();
 
@@ -190,16 +192,9 @@
         StateHasChanged();
     }
 
-    private void CreateNewNode()
-    {
-        _currentMainNode.AddNode(new VisualNode(_currentMainNode));
-        _mainDropDownShowed = false;
-    }
-
     private void CreateNewNode(Node node)
     {
         _currentMainNode.AddNode(new VisualNode(node, _currentMainNode));
-        _mainDropDownShowed = false;
     }
 
     private void CloseWindow(VisualNode window)

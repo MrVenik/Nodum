@@ -144,10 +144,10 @@ namespace NodumVisualCalculator.Data
 
         public List<VisualNode> InternalVisualNodes { get; private set; } = new List<VisualNode>();
 
-        public VisualNode(VisualNode holder = null)
+        public VisualNode(string name, VisualNode holder = null)
         {
             Holder = holder;
-            Node = new EmptyNode() { Name = "Empty Node" };
+            Node = new EmptyNode() { Name = name };
             Editable = true;
         }
 

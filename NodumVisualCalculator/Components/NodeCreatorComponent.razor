@@ -1,0 +1,47 @@
+﻿<ModalWindow @ref="_modalWindow">
+    <div class="modal-window">
+        <div class="modal-header">
+            <div class="modal-header-element modal-header-text">Create New Node</div>
+            <div class="modal-header-element" @onclick="() => _modalWindow.Close()">
+                <span class="iconify iconify-main" data-icon="mdi:close" data-inline="false"></span>
+            </div>
+        </div>
+        <div class="modal-window-element">
+            <div class="modal-window-element-content input-container">
+                <div class="node-header-text">Name: </div>
+                <input type="text" @bind-value="_nodeName" />
+            </div>
+        </div>
+        <div class="modal-window-element">
+            <div class="modal-window-element-content">
+                <button @onclick="@(() => CreateNewNode())">Create</button>
+            </div>
+        </div>
+    </div>
+</ModalWindow>
+
+@code {
+    private VisualNode _currentVisualNode;
+
+    private ModalWindow _modalWindow;
+
+    private string _nodeName;
+
+    public void Open(VisualNode visualNode)
+    {
+        _currentVisualNode = visualNode;
+        _modalWindow.Open();
+    }
+
+    private void CreateNewNode()
+    {
+        if (_currentVisualNode != null)
+        {
+            _currentVisualNode.AddNode(new VisualNode(_nodeName, _currentVisualNode));
+        }
+
+        _nodeName = string.Empty;
+        _modalWindow.Close();
+        _currentVisualNode = null;
+    }
+}

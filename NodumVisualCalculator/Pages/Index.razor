@@ -3,7 +3,7 @@
 <MainNodeComponent MainNode="@_mainNode" />
 
 @code {
-    private VisualNode _mainNode = new VisualNode() { Name = "Main Node" };
+    private VisualNode _mainNode = new VisualNode("Main Mode");
 
     protected override void OnInitialized()
     {

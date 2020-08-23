@@ -237,3 +237,53 @@ body {
     justify-content: center;
     align-items: center;
 }
+
+.modal-window {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #424242;
+    border: 1px solid #424242;
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+}
+
+.modal-header {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #212121;
+}
+
+.modal-header-element {
+    margin-left: 25px;
+    margin-right: 25px;
+}
+
+.modal-header-text {
+    font-size: 24px;
+    color: #fff;
+}
+
+.modal-window-element {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.modal-window-element-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Modal Content/Box */
