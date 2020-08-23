@@ -11,6 +11,7 @@ namespace Nodum.Node
             public virtual bool IsInput { get; set; } = false;
             public virtual bool IsOutput { get; set; } = false;
             public virtual bool IsInvokeUpdate { get; set; } = false;
+            public virtual bool IsInvokeUpdatePins { get; set; } = false;
             public virtual bool CanSetValue { get; set; } = false;
             public virtual bool CanGetValue { get; set; } = false;
         }
@@ -19,6 +20,7 @@ namespace Nodum.Node
             public override bool IsInput { get; set; } = true;
             public override bool IsOutput { get; set; } = false;
             public override bool IsInvokeUpdate { get; set; } = true;
+            public override bool IsInvokeUpdatePins { get; set; } = false;
             public override bool CanSetValue { get; set; } = true;
             public override bool CanGetValue { get; set; } = false;
         }
@@ -28,6 +30,7 @@ namespace Nodum.Node
             public override bool IsInput { get; set; } = false;
             public override bool IsOutput { get; set; } = true;
             public override bool IsInvokeUpdate { get; set; } = false;
+            public override bool IsInvokeUpdatePins { get; set; } = false;
             public override bool CanSetValue { get; set; } = false;
             public override bool CanGetValue { get; set; } = true;
         }
@@ -37,6 +40,7 @@ namespace Nodum.Node
             public override bool IsInput { get; set; } = true;
             public override bool IsOutput { get; set; } = true;
             public override bool IsInvokeUpdate { get; set; } = false;
+            public override bool IsInvokeUpdatePins { get; set; } = false;
             public override bool CanSetValue { get; set; } = true;
             public override bool CanGetValue { get; set; } = true;
         }
@@ -45,6 +49,8 @@ namespace Nodum.Node
         public List<NodePin> AllInputNodePins => NodePins.Values.Where(p => p.IsInput).ToList();
         public List<NodePin> AllOutputNodePins => NodePins.Values.Where(p => p.IsOutput).ToList();
         public List<NodePin> AllNodePins => NodePins.Values.ToList();
+
+        public Action OnUpdatePins { get; set; }
 
         public string Name { get; set; }
 
@@ -63,6 +69,10 @@ namespace Nodum.Node
                 {
                     nodePin.OnValueChanged += Update;
                 }
+                if (nodePin.IsInvokeUpdatePins)
+                {
+                    nodePin.OnValueChanged += UpdateAllPins;
+                }
                 return true;
             }
             else return false;
@@ -74,6 +84,15 @@ namespace Nodum.Node
             {
                 NodePins[nodePin.Name].Close();
                 NodePins.Remove(nodePin.Name);
+            }
+        }
+
+        public void RemoveNodePin(string nodePinName)
+        {
+            if (NodePins.ContainsKey(nodePinName))
+            {
+                NodePins[nodePinName].Close();
+                NodePins.Remove(nodePinName);
             }
         }
 
@@ -90,6 +109,35 @@ namespace Nodum.Node
                     nodePin.OnValueChanged += Update;
                 }
             }
+        }
+
+        public virtual void UpdatePins()
+        {
+
+        }
+
+        public void UpdateAllPins()
+        {
+            foreach (var pin in AllNodePins)
+            {
+                if (pin.CanSetValue)
+                {
+                    pin.SetNodeValue(this);
+                }
+            }
+
+            UpdatePins();
+            UpdateValue();
+
+            foreach (var pin in AllNodePins)
+            {
+                if (pin.CanGetValue)
+                {
+                    pin.GetNodeValue(this);
+                }
+            }
+
+            OnUpdatePins?.Invoke();
         }
 
         public virtual void UpdateValue()

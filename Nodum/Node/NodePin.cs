@@ -10,6 +10,7 @@ namespace Nodum.Node
         public bool IsInput { get; private set; }
         public bool IsOutput { get; private set; }
         public bool IsInvokeUpdate { get; private set; }
+        public bool IsInvokeUpdatePins { get; private set; }
         public bool CanSetValue { get; private set; }
         public bool CanGetValue { get; private set; }
 
@@ -27,6 +28,7 @@ namespace Nodum.Node
                 IsInput = nodePinAttribute.IsInput;
                 IsOutput = nodePinAttribute.IsOutput;
                 IsInvokeUpdate = nodePinAttribute.IsInvokeUpdate;
+                IsInvokeUpdatePins = nodePinAttribute.IsInvokeUpdatePins;
                 CanSetValue = nodePinAttribute.CanSetValue;
                 CanGetValue = nodePinAttribute.CanGetValue;
             }
@@ -40,6 +42,7 @@ namespace Nodum.Node
             IsInput = isInput;
             IsOutput = isOutput;
             IsInvokeUpdate = isInvokeUpdate;
+            IsInvokeUpdatePins = false;
             CanSetValue = false;
             CanGetValue = false;
         }
