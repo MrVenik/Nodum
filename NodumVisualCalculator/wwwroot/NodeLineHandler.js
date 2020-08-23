@@ -16,12 +16,14 @@ var NodeLineHandler = /** @class */ (function () {
             if (lineElementPinIds.length == 2) {
                 var fromElement = document.getElementById(lineElementPinIds[0]);
                 var toElement = document.getElementById(lineElementPinIds[1]);
-                var fromX = fromElement.getBoundingClientRect().left + pageXOffset + 12;
-                var fromY = fromElement.getBoundingClientRect().top + pageYOffset + 12;
-                var toX = toElement.getBoundingClientRect().left + pageXOffset + 12;
-                var toY = toElement.getBoundingClientRect().top + pageYOffset + 12;
-                var path = NodeLineHandler.GetPath(fromX, fromY, toX, toY);
-                lineElement.setAttribute("d", path);
+                if (fromElement && toElement) {
+                    var fromX = fromElement.getBoundingClientRect().left + pageXOffset + 12;
+                    var fromY = fromElement.getBoundingClientRect().top + pageYOffset + 12;
+                    var toX = toElement.getBoundingClientRect().left + pageXOffset + 12;
+                    var toY = toElement.getBoundingClientRect().top + pageYOffset + 12;
+                    var path = NodeLineHandler.GetPath(fromX, fromY, toX, toY);
+                    lineElement.setAttribute("d", path);
+                }
             }
         }
     };
