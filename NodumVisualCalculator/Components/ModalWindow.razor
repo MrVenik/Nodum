@@ -1,0 +1,24 @@
+﻿<div class="modal-background" style="@(_modalWindowShowed ? "display: block;" : "display: none;")">
+    <div class="modal-content">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private bool _modalWindowShowed = false;
+
+    public void Open()
+    {
+        _modalWindowShowed = true;
+        StateHasChanged();
+    }
+
+    public void Close()
+    {
+        _modalWindowShowed = false;
+        StateHasChanged();
+    }
+}
