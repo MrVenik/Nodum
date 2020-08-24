@@ -239,7 +239,7 @@ namespace NodumVisualCalculator.Data
         {
             if (string.IsNullOrEmpty(name))
             {
-                name = $"Input_{Node.AllInputNodePins.Count}";
+                name = $"Input_{Node.AllInputNodePins.Count()}";
             }
 
             bool isInput = true;
@@ -255,7 +255,7 @@ namespace NodumVisualCalculator.Data
         {
             if (string.IsNullOrEmpty(name))
             {
-                name = $"Output_{Node.AllOutputNodePins.Count}";
+                name = $"Output_{Node.AllOutputNodePins.Count()}";
             }
 
             bool isInput = false;

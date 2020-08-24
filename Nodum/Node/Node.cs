@@ -18,20 +18,13 @@ namespace Nodum.Node
         public class InputAttribute : NodePinAttribute
         {
             public override bool IsInput { get; set; } = true;
-            public override bool IsOutput { get; set; } = false;
             public override bool IsInvokeUpdate { get; set; } = true;
-            public override bool IsInvokeUpdatePins { get; set; } = false;
             public override bool CanSetValue { get; set; } = true;
-            public override bool CanGetValue { get; set; } = false;
         }
 
         public class OutputAttribute : NodePinAttribute
         {
-            public override bool IsInput { get; set; } = false;
             public override bool IsOutput { get; set; } = true;
-            public override bool IsInvokeUpdate { get; set; } = false;
-            public override bool IsInvokeUpdatePins { get; set; } = false;
-            public override bool CanSetValue { get; set; } = false;
             public override bool CanGetValue { get; set; } = true;
         }
 
@@ -39,15 +32,13 @@ namespace Nodum.Node
         {
             public override bool IsInput { get; set; } = true;
             public override bool IsOutput { get; set; } = true;
-            public override bool IsInvokeUpdate { get; set; } = false;
-            public override bool IsInvokeUpdatePins { get; set; } = false;
             public override bool CanSetValue { get; set; } = true;
             public override bool CanGetValue { get; set; } = true;
         }
 
         public Dictionary<string, NodePin> NodePins { get; } = new Dictionary<string, NodePin>();
-        public List<NodePin> AllInputNodePins => NodePins.Values.Where(p => p.IsInput).ToList();
-        public List<NodePin> AllOutputNodePins => NodePins.Values.Where(p => p.IsOutput).ToList();
+        public IEnumerable<NodePin> AllInputNodePins => NodePins.Values.Where(p => p.IsInput);
+        public IEnumerable<NodePin> AllOutputNodePins => NodePins.Values.Where(p => p.IsOutput);
         public List<NodePin> AllNodePins => NodePins.Values.ToList();
 
         public Action OnUpdatePins { get; set; }
