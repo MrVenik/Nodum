@@ -1,4 +1,4 @@
-﻿using Nodum.Node;
+﻿using Nodum.Core;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -21,7 +21,15 @@ namespace NodumVisualCalculator.Data
             Root,
         }
 
+        public override bool IsBaseNode => true;
+
         [NodePin(IsInvokeUpdate = true, CanSetValue = true)] public MathType Operation;
+
+        public MathNode(string name = "Math Node", Node holder = null)
+            : base(name, holder)
+        {
+        }
+
         [Input] public double InputA { get; set; }
         [Input] public double InputB { get; set; }
         [Output] public double Result { get; set; }
@@ -64,13 +72,15 @@ namespace NodumVisualCalculator.Data
 
     public class RegexMathNode : Node
     {
+        public override bool IsBaseNode => true;
+
         [NodePin(IsInvokeUpdatePins = true, CanSetValue = true)] public string RegexOperation { get; set; }
         [Output] public double Result { get; set; }
 
         private string _oldRegexOperation;
         private readonly MatchEvaluator _evaluator;
 
-        public RegexMathNode()
+        public RegexMathNode(string name = "Regex Math Node", Node holder = null) : base(name, holder)
         {
             _evaluator = new MatchEvaluator(MatchReplacer);
         }
@@ -97,9 +107,9 @@ namespace NodumVisualCalculator.Data
                 {
                     if (!NodePins.ContainsKey(match.Value))
                     {
-                        NodePin inputNodePin = NodeBuilder.BuildNodePin(match.Value, typeof(double), true, false, true);
+                        NodePin inputNodePin = NodeBuilder.BuildNodePin(match.Value, this, typeof(double), true, false, true);
 
-                        TryAddNodePin(inputNodePin);
+                        ProtectedTryAddNodePin(inputNodePin);
                     }
                 }
 
@@ -130,12 +140,22 @@ namespace NodumVisualCalculator.Data
 
     public class NumberNode : Node
     {
+        public override bool IsBaseNode => true;
+
         [InputOutput] public double Number;
+
+        public NumberNode(string name = "Number Node", Node holder = null) : base(name, holder)
+        {
+        }
     }
 
     public class EmptyNode : Node
     {
+        public override bool IsBaseNode => false;
 
+        public EmptyNode(string name = "Empty Node", Node holder = null) : base(name, holder)
+        {
+        }
     }
 
     public class VisualNode
@@ -246,7 +266,7 @@ namespace NodumVisualCalculator.Data
             bool isOutput = false;
             bool isInvokeUpdate = true;
 
-            NodePin nodePin = NodeBuilder.BuildNodePin(name, pinType, isInput, isOutput, isInvokeUpdate);
+            NodePin nodePin = NodeBuilder.BuildNodePin(name, Node, pinType, isInput, isOutput, isInvokeUpdate);
 
             AddVisualNodePin(nodePin);
         }
@@ -262,7 +282,7 @@ namespace NodumVisualCalculator.Data
             bool isOutput = true;
             bool isInvokeUpdate = false;
 
-            NodePin nodePin = NodeBuilder.BuildNodePin(name, pinType, isInput, isOutput, isInvokeUpdate);
+            NodePin nodePin = NodeBuilder.BuildNodePin(name, Node, pinType, isInput, isOutput, isInvokeUpdate);
             AddVisualNodePin(nodePin);
         }
 

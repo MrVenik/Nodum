@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Nodum.Node
+namespace Nodum.Core
 {
     public static class NodeBuilder
     {
@@ -13,27 +13,27 @@ namespace Nodum.Node
         private static bool PropertiesInitialized => _nodeProperties != null;
         private static bool Initialized => FieldsInitialized && PropertiesInitialized;
 
-        public static NodePin BuildNodePin(FieldInfo fieldInfo)
+        public static NodePin BuildNodePin(FieldInfo fieldInfo, Node node)
         {
             Type type = typeof(FieldNodePin<>);
             Type genericType = type.MakeGenericType(fieldInfo.FieldType);
 
-            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { fieldInfo });
+            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { fieldInfo, node });
 
             return nodePin;
         }
 
-        public static NodePin BuildNodePin(PropertyInfo propertyInfo)
+        public static NodePin BuildNodePin(PropertyInfo propertyInfo, Node node)
         {
             Type type = typeof(PropertyNodePin<>);
             Type genericType = type.MakeGenericType(propertyInfo.PropertyType);
 
-            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { propertyInfo });
+            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { propertyInfo, node });
 
             return nodePin;
         }
 
-        public static NodePin BuildNodePin(string name, Type valueType, bool isInput = false, bool isOutput = false, bool isInvokeUpdate = false)
+        public static NodePin BuildNodePin(string name, Node node, Type valueType, bool isInput = false, bool isOutput = false, bool isInvokeUpdate = false)
         {
             Type type = typeof(NodePin<>);
             Type genericType = type.MakeGenericType(valueType);
@@ -62,7 +62,7 @@ namespace Nodum.Node
                 {
                     PropertyInfo propertyInfo = typeNodeProperties[i];
 
-                    NodePin nodePin = BuildNodePin(propertyInfo);
+                    NodePin nodePin = BuildNodePin(propertyInfo, node);
 
                     node.TryAddNodePin(nodePin);
                 }
@@ -79,7 +79,7 @@ namespace Nodum.Node
                 {
                     FieldInfo fieldInfo = typeNodeFields[i];
 
-                    NodePin nodePin = BuildNodePin(fieldInfo);
+                    NodePin nodePin = BuildNodePin(fieldInfo, node);
 
                     node.TryAddNodePin(nodePin);
                 }

@@ -1,4 +1,4 @@
-﻿using Nodum.Node;
+﻿using Nodum.Core;
 
 namespace NodumVisualCalculator.Data
 {

@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
-namespace Nodum.Node
+namespace Nodum.Core
 {
-
+    [Serializable]
     public abstract class NodePin
     {
         public bool IsInput { get; private set; }
         public bool IsOutput { get; private set; }
+        public bool IsInternalInput { get; private set; }
+        public bool IsInternalOutput { get; private set; }
         public bool IsInvokeUpdate { get; private set; }
         public bool IsInvokeUpdatePins { get; private set; }
         public bool CanSetValue { get; private set; }
@@ -16,35 +19,49 @@ namespace Nodum.Node
 
         public Guid Guid { get; private set; }
         public string Name { get; set; }
+        public Node Node { get; private set; }
 
-        protected NodePin(string name, object[] attributes)
+        protected NodePin(string name, Node node, object[] attributes)
         {
-            Guid = Guid.NewGuid();
-
-            Name = name;
-
-            if (attributes.FirstOrDefault(x => x is Node.NodePinAttribute) is Node.NodePinAttribute nodePinAttribute)
+            if (node != null)
             {
-                IsInput = nodePinAttribute.IsInput;
-                IsOutput = nodePinAttribute.IsOutput;
-                IsInvokeUpdate = nodePinAttribute.IsInvokeUpdate;
-                IsInvokeUpdatePins = nodePinAttribute.IsInvokeUpdatePins;
-                CanSetValue = nodePinAttribute.CanSetValue;
-                CanGetValue = nodePinAttribute.CanGetValue;
+                Guid = Guid.NewGuid();
+                Node = node;
+                Name = name;
+
+                if (attributes.FirstOrDefault(x => x is Node.NodePinAttribute) is Node.NodePinAttribute nodePinAttribute)
+                {
+                    IsInput = nodePinAttribute.IsInput;
+                    IsOutput = nodePinAttribute.IsOutput;
+                    IsInternalInput = nodePinAttribute.IsInternalInput;
+                    IsInternalOutput = nodePinAttribute.IsInternalOutput;
+                    IsInvokeUpdate = nodePinAttribute.IsInvokeUpdate;
+                    IsInvokeUpdatePins = nodePinAttribute.IsInvokeUpdatePins;
+                    CanSetValue = nodePinAttribute.CanSetValue;
+                    CanGetValue = nodePinAttribute.CanGetValue;
+                }
             }
+            else throw new Exception("Node is null");
         }
 
-        protected NodePin(string name, bool isInput = false, bool isOutput = false, bool isInvokeUpdate = false)
+        protected NodePin(string name, Node node, bool isInput, bool isOutput, bool isInternalInput, bool isInternalOutput, bool isInvokeUpdate, bool isInvokeUpdatePins, bool canSetValue, bool canGetValue)
         {
-            Guid = Guid.NewGuid();
+            if (node != null)
+            {
+                Guid = Guid.NewGuid();
+                Name = name;
+                Node = node;
 
-            Name = name;
-            IsInput = isInput;
-            IsOutput = isOutput;
-            IsInvokeUpdate = isInvokeUpdate;
-            IsInvokeUpdatePins = false;
-            CanSetValue = false;
-            CanGetValue = false;
+                IsInput = isInput;
+                IsOutput = isOutput;
+                IsInternalInput = isInternalInput;
+                IsInternalOutput = isInternalOutput;
+                IsInvokeUpdate = isInvokeUpdate;
+                IsInvokeUpdatePins = isInvokeUpdatePins;
+                CanSetValue = canSetValue;
+                CanGetValue = canGetValue;
+            }
+            else throw new Exception("Node is null");
         }
 
         protected object _value;
@@ -52,15 +69,22 @@ namespace Nodum.Node
         {
             get => _value;
             set
-            {           
+            {
                 _value = value;
                 OnValueChanged?.Invoke();
             }
         }
-        public Action OnValueChanged { get; set; }
-
         public abstract Type ValueType { get; }
-        protected Func<NodePin, bool> CanConnectTo { get; set; }
+
+
+        [NonSerialized]
+        private Action _onValueChanged;
+        public Action OnValueChanged { get => _onValueChanged; set => _onValueChanged = value; }
+
+
+        [NonSerialized]
+        private Func<NodePin, bool> _canConnectTo;
+        protected Func<NodePin, bool> CanConnectTo { get => _canConnectTo; set => _canConnectTo = value; }
         public abstract void UpdateValue();
 
         public abstract void SetNodeValue(Node node);
@@ -116,6 +140,23 @@ namespace Nodum.Node
             }
         }
 
+        [OnDeserialized]
+        public void OnDeserialized(StreamingContext context)
+        {
+            if (Node != null)
+            {
+                Node.BindUpdates(this);
+            }
+        }
+
+        public void ReConnect()
+        {
+            if (IncomingNodePin != null)
+            {
+                AddIncomingNodePin(IncomingNodePin);
+            }
+        }
+
         public void Close()
         {
             RemoveIncomingNodePin(IncomingNodePin);
@@ -123,17 +164,18 @@ namespace Nodum.Node
         }
     }
 
+    [Serializable]
     public class NodePin<T> : NodePin
     {
         public override Type ValueType { get => typeof(T); }
 
-        public NodePin(string name, object[] attributes) : base(name, attributes)
+        public NodePin(string name, Node node, object[] attributes) : base(name, node, attributes)
         {
             Value = default;
         }
 
-        public NodePin(string name, bool isInput = false, bool isOutput = false, bool isInvokeUpdate = false)
-            : base(name, isInput, isOutput, isInvokeUpdate)
+        protected NodePin(string name, Node node, bool isInput, bool isOutput, bool isInternalInput, bool isInternalOutput, bool isInvokeUpdate, bool isInvokeUpdatePins, bool canSetValue, bool canGetValue)
+            : base(name, node, isInput, isOutput, isInternalInput, isInternalOutput, isInvokeUpdate, isInvokeUpdatePins, canSetValue, canGetValue)
         {
             Value = default;
         }
