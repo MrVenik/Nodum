@@ -54,7 +54,7 @@ namespace Nodum.Core
             BuildProperyNodePins(node);
         }
 
-        public static Node CopyNode(Node node)
+        public static Node CloneNode(Node node)
         {
             if (node != null)
             {
@@ -131,6 +131,7 @@ namespace Nodum.Core
             for (int i = 0; i < nodeTypes.Count; i++)
             {
                 CachePorts(nodeTypes[i]);
+                Console.WriteLine(nodeTypes[i]);
             }
         }
 

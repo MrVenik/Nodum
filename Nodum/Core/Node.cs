@@ -8,6 +8,11 @@ namespace Nodum.Core
     [Serializable]
     public abstract class Node
     {
+        public Node Clone()
+        {
+            return NodeBuilder.CloneNode(this);
+        }
+
         public class NodePinAttribute : Attribute
         {
             public virtual bool IsInput { get; set; } = false;
