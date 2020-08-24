@@ -21,7 +21,7 @@ namespace Nodum.Core
         public string Name { get; set; }
         public Node Node { get; private set; }
 
-        protected NodePin(string name, Node node, object[] attributes)
+        public NodePin(string name, Node node, object[] attributes)
         {
             if (node != null)
             {
@@ -44,7 +44,7 @@ namespace Nodum.Core
             else throw new Exception("Node is null");
         }
 
-        protected NodePin(string name, Node node, bool isInput, bool isOutput, bool isInternalInput, bool isInternalOutput, bool isInvokeUpdate, bool isInvokeUpdatePins, bool canSetValue, bool canGetValue)
+        public NodePin(string name, Node node, NodePinOptions options)
         {
             if (node != null)
             {
@@ -52,14 +52,14 @@ namespace Nodum.Core
                 Name = name;
                 Node = node;
 
-                IsInput = isInput;
-                IsOutput = isOutput;
-                IsInternalInput = isInternalInput;
-                IsInternalOutput = isInternalOutput;
-                IsInvokeUpdate = isInvokeUpdate;
-                IsInvokeUpdatePins = isInvokeUpdatePins;
-                CanSetValue = canSetValue;
-                CanGetValue = canGetValue;
+                IsInput = options.IsInput;
+                IsOutput = options.IsOutput;
+                IsInternalInput = options.IsInternalInput;
+                IsInternalOutput = options.IsInternalOutput;
+                IsInvokeUpdate = options.IsInvokeUpdate;
+                IsInvokeUpdatePins = options.IsInvokeUpdatePins;
+                CanSetValue = options.CanSetValue;
+                CanGetValue = options.CanGetValue;
             }
             else throw new Exception("Node is null");
         }
@@ -74,7 +74,7 @@ namespace Nodum.Core
                 OnValueChanged?.Invoke();
             }
         }
-        public abstract Type ValueType { get; }
+        public virtual Type ValueType => Value?.GetType();
 
 
         [NonSerialized]
@@ -85,10 +85,10 @@ namespace Nodum.Core
         [NonSerialized]
         private Func<NodePin, bool> _canConnectTo;
         protected Func<NodePin, bool> CanConnectTo { get => _canConnectTo; set => _canConnectTo = value; }
-        public abstract void UpdateValue();
+        public virtual void UpdateValue() { }
 
-        public abstract void SetNodeValue(Node node);
-        public abstract void GetNodeValue(Node node);
+        public virtual void SetNodeValue(Node node) { }
+        public virtual void GetNodeValue(Node node) { }
 
         public NodePin IncomingNodePin { get; private set; }
         private List<NodePin> _outgoingNodePins = new List<NodePin>();
@@ -147,6 +147,7 @@ namespace Nodum.Core
             {
                 Node.BindUpdates(this);
             }
+            Guid = Guid.NewGuid();
         }
 
         public void ReConnect()
@@ -167,15 +168,12 @@ namespace Nodum.Core
     [Serializable]
     public class NodePin<T> : NodePin
     {
-        public override Type ValueType { get => typeof(T); }
-
         public NodePin(string name, Node node, object[] attributes) : base(name, node, attributes)
         {
             Value = default;
         }
 
-        protected NodePin(string name, Node node, bool isInput, bool isOutput, bool isInternalInput, bool isInternalOutput, bool isInvokeUpdate, bool isInvokeUpdatePins, bool canSetValue, bool canGetValue)
-            : base(name, node, isInput, isOutput, isInternalInput, isInternalOutput, isInvokeUpdate, isInvokeUpdatePins, canSetValue, canGetValue)
+        public NodePin(string name, Node node, NodePinOptions options) : base(name, node, options)
         {
             Value = default;
         }

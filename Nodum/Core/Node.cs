@@ -41,7 +41,7 @@ namespace Nodum.Core
         public string Name { get; set; }
 
         public Node Holder { get; private set; }
-        public abstract bool IsBaseNode { get; }
+        public virtual bool IsBaseNode { get; }
 
         [NonSerialized]
         private Action _onUpdatePins;

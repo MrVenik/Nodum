@@ -33,12 +33,14 @@ namespace Nodum.Core
             return nodePin;
         }
 
-        public static NodePin BuildNodePin(string name, Node node, Type valueType, bool isInput = false, bool isOutput = false, bool isInvokeUpdate = false)
+        public static NodePin BuildNodePin(string name, Node node, Type valueType, NodePinOptions options)
         {
             Type type = typeof(NodePin<>);
             Type genericType = type.MakeGenericType(valueType);
 
-            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { name, isInput, isOutput, isInvokeUpdate });
+            object[] parameters = new object[] { name, node, options };
+
+            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, parameters);
 
             return nodePin;
         }
@@ -50,6 +52,17 @@ namespace Nodum.Core
             BuildFieldNodePins(node);
 
             BuildProperyNodePins(node);
+        }
+
+        public static Node CopyNode(Node node)
+        {
+            if (node != null)
+            {
+                BinaryNodeSerializer serializer = new BinaryNodeSerializer();
+                byte[] bytes = serializer.SerializeToByteArray(node);
+                return serializer.DeserializeFromByteArray(bytes);
+            }
+            throw new Exception("Node is null");
         }
 
         private static void BuildProperyNodePins(Node node)

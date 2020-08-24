@@ -46,7 +46,7 @@ namespace Nodum.Calc
                 {
                     if (!NodePins.ContainsKey(match))
                     {
-                        NodePin inputNodePin = NodeBuilder.BuildNodePin(match, this, typeof(double), true, false, true);
+                        NodePin inputNodePin = NodeBuilder.BuildNodePin(match, this, typeof(double), new NodePinOptions() { IsInput = true, IsInvokeUpdate = true });
 
                         ProtectedTryAddNodePin(inputNodePin);
                     }
