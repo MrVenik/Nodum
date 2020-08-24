@@ -2,6 +2,7 @@
 
 <NodeCreatorComponent @ref="_nodeCreator" />
 <NodeEditorComponent @ref="_nodeEditor" />
+<NodePinCreatorComponent @ref="_nodePinCreator" />
 
 @if (_currentMainNode != null)
 {
@@ -20,19 +21,25 @@
                     <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode))">
                         Add Empty Node
                     </DropdownElement>
-                    <DropdownElement HideOnClick="true" OnClick="@((e) => CreateNewNode(new MathNode() { Name = "Math Node"}))">
+                    <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode, new MathNode() { Name = "Math Node"}))">
                         Add Math Node
                     </DropdownElement>
-                    <DropdownElement HideOnClick="true" OnClick="@((e) => CreateNewNode(new NumberNode() { Name = "Number Node"}))">
+                    <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode, new NumberNode() { Name = "Number Node"}))">
                         Add Number Node
                     </DropdownElement>
-                    <DropdownElement HideOnClick="true" OnClick="@((e) => CreateNewNode(new RegexMathNode() { Name = "Regex Math Node"}))">
+                    <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode, new RegexMathNode() { Name = "Regex Math Node"}))">
                         Add Regex Math Node
                     </DropdownElement>
+                    @if (_isEditor)
+                    {
+                        <DropdownElement HideOnClick="true" OnClick="@((e) => _nodePinCreator.Open(_currentMainNode))">
+                            Add New NodePin
+                        </DropdownElement>
+                    }
                 </DropdownContent>
             </Dropdown>
 
-            <div class="main-node-header-element" style="display: @(_currentMainNode == MainNode ? "none" : "block")" @onclick="() => { _currentMainNode = _currentMainNode.Holder ?? MainNode; UpdateConnections(); }">
+            <div class="main-node-header-element" style="display: @(_currentMainNode == MainNode ? "none" : "block")" @onclick="() => EditNode(_currentMainNode.Holder)">
                 <span class="iconify iconify-main" data-icon="mdi:arrow-left" data-inline="false"></span>
             </div>
             <div class="main-node-header-element main-node-header-text">@_currentMainNode.Name</div>
@@ -85,12 +92,6 @@
                                         <DropdownElement HideOnClick="true" OnClick="@((e) => EditNode(visualNode))">
                                             Edit Node
                                         </DropdownElement>
-                                        <DropdownElement HideOnClick="true" OnClick="@((e) => visualNode.AddInputNodePin(typeof(double)))">
-                                            Add Input
-                                        </DropdownElement>
-                                        <DropdownElement HideOnClick="true" OnClick="@((e) => visualNode.AddOutputNodePin(typeof(double)))">
-                                            Add Output
-                                        </DropdownElement>
                                     </DropdownContent>
                                 </Dropdown>
                             }
@@ -127,6 +128,7 @@
 
     private NodeCreatorComponent _nodeCreator;
     private NodeEditorComponent _nodeEditor;
+    private NodePinCreatorComponent _nodePinCreator;
 
     private List<NodePinConnection> _allConnections = new List<NodePinConnection>();
 
@@ -211,9 +213,17 @@
 
     private async void EditNode(VisualNode nodeHolder)
     {
-        nodeHolder.MenuShowed = false;
-        _isEditor = true;
-        _currentMainNode = nodeHolder;
+        if (nodeHolder != null)
+        {
+            _isEditor = true;
+            _currentMainNode = nodeHolder;
+        }
+        else
+        {
+            _isEditor = false;
+            _currentMainNode = MainNode;
+        }
+
         UpdateConnections();
         await UpdateLines();
     }

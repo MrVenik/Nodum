@@ -154,7 +154,7 @@ namespace NodumVisualCalculator.Data
         public VisualNode(NodePin nodePin, VisualNode holder)
         {
             Holder = holder;
-            Node = new EmptyNode();
+            Node = new EmptyNode() { Name = nodePin.Name };
 
             Editable = false;
 
@@ -266,7 +266,7 @@ namespace NodumVisualCalculator.Data
             AddVisualNodePin(nodePin);
         }
 
-        private void AddVisualNodePin(NodePin nodePin)
+        public void AddVisualNodePin(NodePin nodePin)
         {
             if (Node.TryAddNodePin(nodePin))
             {

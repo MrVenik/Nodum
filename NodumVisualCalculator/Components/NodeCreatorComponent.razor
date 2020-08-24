@@ -22,6 +22,7 @@
 
 @code {
     private VisualNode _currentVisualNode;
+    private Node _nodeToAdd;
 
     private ModalWindow _modalWindow;
 
@@ -33,14 +34,32 @@
         _modalWindow.Open();
     }
 
+    public void Open(VisualNode visualNode, Node node)
+    {
+        _currentVisualNode = visualNode;
+        _nodeToAdd = node;
+        _nodeName = node.Name;
+        _modalWindow.Open();
+    }
+
     private void CreateNewNode()
     {
         if (_currentVisualNode != null)
         {
-            _currentVisualNode.AddNode(new VisualNode(_nodeName, _currentVisualNode));
+            if (_nodeToAdd != null)
+            {
+                _nodeToAdd.Name = _nodeName;
+                _currentVisualNode.AddNode(new VisualNode(_nodeToAdd, _currentVisualNode));
+            }
+            else
+            {
+                _currentVisualNode.AddNode(new VisualNode(_nodeName, _currentVisualNode));
+            }
         }
 
+
         _nodeName = string.Empty;
+        _nodeToAdd = null;
         _modalWindow.Close();
         _currentVisualNode = null;
     }

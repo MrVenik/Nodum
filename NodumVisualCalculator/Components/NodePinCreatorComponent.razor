@@ -1,0 +1,81 @@
+﻿<ModalWindow @ref="_modalWindow">
+    <div class="modal-window">
+        <div class="modal-header">
+            <div class="modal-header-element modal-header-text">Create New NodePin</div>
+            <div class="modal-header-element" @onclick="() => _modalWindow.Close()">
+                <span class="iconify iconify-main" data-icon="mdi:close" data-inline="false"></span>
+            </div>
+        </div>
+        <div class="modal-window-element">
+            <div class="modal-window-element-content input-container">
+                <div class="node-header-text">Name: </div>
+                <input type="text" @bind-value="_nodePinName" />
+            </div>
+        </div>
+        <div class="modal-window-element">
+            <div class="modal-window-element-content input-container">
+                <div class="node-header-text">IsInput: </div>
+                @if (_isInput)
+                {
+                    <input checked type="checkbox" @bind-value="_isInput" />
+                }
+                else
+                {
+                    <input type="checkbox" @bind-value="_isInput" />
+                }
+
+            </div>
+        </div>
+        <div class="modal-window-element">
+            <div class="modal-window-element-content input-container">
+                <div class="node-header-text">IsOutput: </div>
+                @if (_isOutput)
+                {
+                    <input checked type="checkbox" @bind-value="_isOutput" />
+                }
+                else
+                {
+                    <input type="checkbox" @bind-value="_isOutput" />
+                }
+            </div>
+        </div>
+        <div class="modal-window-element">
+            <div class="modal-window-element-content">
+                <button @onclick="@(() => CreateNewNodePin())">Create</button>
+            </div>
+        </div>
+    </div>
+</ModalWindow>
+
+@code {
+    private VisualNode _currentVisualNode;
+
+    private ModalWindow _modalWindow;
+
+    private string _nodePinName;
+    private Type _nodePinType;
+    private bool _isInput;
+    private bool _isOutput;
+
+    public void Open(VisualNode visualNode)
+    {
+        _currentVisualNode = visualNode;
+        _modalWindow.Open();
+    }
+
+    private void CreateNewNodePin()
+    {
+        if (_currentVisualNode != null)
+        {
+            bool isInvokeUpdate = _isInput && !_isOutput;
+            NodePin nodePin = NodeBuilder.BuildNodePin(_nodePinName, typeof(double), _isInput, _isOutput, isInvokeUpdate);
+            _currentVisualNode.AddVisualNodePin(nodePin);
+        }
+
+        _nodePinName = string.Empty;
+        _isInput = false;
+        _isOutput = false;
+        _modalWindow.Close();
+        _currentVisualNode = null;
+    }
+}
