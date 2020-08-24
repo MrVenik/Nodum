@@ -5,8 +5,10 @@ using System.Text;
 
 namespace Nodum.Calc
 {
+    [Serializable]
     public class MathNode : Node
     {
+        [Serializable]
         public enum MathType
         {
             Add,
@@ -18,15 +20,15 @@ namespace Nodum.Calc
             Root,
         }
 
-        public override bool IsBaseNode => true;
-
-        [NodePin(IsInvokeUpdate = true, CanSetValue = true)] public MathType Operation;
+        public override bool IsBaseNode { get; }
 
         public MathNode(string name = "Math Node", Node holder = null)
             : base(name, holder)
         {
+            IsBaseNode = true;
         }
 
+        [NodePin(IsInvokeUpdate = true, CanSetValue = true)] public MathType Operation;
         [Input] public double InputA { get; set; }
         [Input] public double InputB { get; set; }
         [Output] public double Result { get; set; }

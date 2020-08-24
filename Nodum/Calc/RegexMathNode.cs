@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace Nodum.Calc
 {
+    [Serializable]
     public class RegexMathNode : Node
     {
-        public override bool IsBaseNode => true;
-
+        public override bool IsBaseNode { get; }
         [NodePin(IsInvokeUpdatePins = true, CanSetValue = true)] public string RegexOperation { get; set; }
         [Output] public double Result { get; set; }
 
@@ -20,6 +20,7 @@ namespace Nodum.Calc
 
         public RegexMathNode(string name = "Regex Math Node", Node holder = null) : base(name, holder)
         {
+            IsBaseNode = true;
             _evaluator = new MatchEvaluator(MatchReplacer);
         }
 
