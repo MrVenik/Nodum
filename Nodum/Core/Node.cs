@@ -99,7 +99,7 @@ namespace Nodum.Core
 
         public void AddInternalNode(Node node)
         {
-            if (!IsEditable)
+            if (IsEditable)
             {
                 node.Holder = this;
                 InternalNodes.Add(node);
@@ -109,7 +109,7 @@ namespace Nodum.Core
 
         public void RemoveInternalNode(Node node)
         {
-            if (!IsEditable)
+            if (IsEditable)
             {
                 InternalNodes.Remove(node);
             }
@@ -227,7 +227,7 @@ namespace Nodum.Core
 
         public bool TryAddNodePin(NodePin nodePin)
         {
-            if (!IsEditable)
+            if (IsEditable)
             {
                 return ProtectedTryAddNodePin(nodePin);
             }
@@ -236,7 +236,7 @@ namespace Nodum.Core
 
         public void RemoveNodePin(NodePin nodePin)
         {
-            if (!IsEditable)
+            if (IsEditable)
             {
                 ProtectedRemoveNodePin(nodePin);
             }
@@ -245,7 +245,7 @@ namespace Nodum.Core
 
         public void RemoveNodePin(string nodePinName)
         {
-            if (!IsEditable)
+            if (IsEditable)
             {
                 ProtectedRemoveNodePin(nodePinName);
             }
@@ -254,7 +254,7 @@ namespace Nodum.Core
 
         public void SetNodePin(NodePin nodePin)
         {
-            if (!IsEditable)
+            if (IsEditable)
             {
                 ProtectedSetNodePin(nodePin);
             }
