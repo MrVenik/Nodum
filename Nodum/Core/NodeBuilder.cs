@@ -11,38 +11,6 @@ namespace Nodum.Core
         private static Dictionary<Type, NodeMembersInfo> _nodeInfoList;
         public static Dictionary<string, List<Node>> AllBaseNodes { get; } = new Dictionary<string, List<Node>>();
 
-        public static NodePin BuildNodePin(FieldInfo fieldInfo, Node node)
-        {
-            Type type = typeof(FieldNodePin<>);
-            Type genericType = type.MakeGenericType(fieldInfo.FieldType);
-
-            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { fieldInfo, node });
-
-            return nodePin;
-        }
-
-        public static NodePin BuildNodePin(PropertyInfo propertyInfo, Node node)
-        {
-            Type type = typeof(PropertyNodePin<>);
-            Type genericType = type.MakeGenericType(propertyInfo.PropertyType);
-
-            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, new object[] { propertyInfo, node });
-
-            return nodePin;
-        }
-
-        public static NodePin BuildNodePin(string name, Node node, Type valueType, NodePinOptions options)
-        {
-            Type type = typeof(NodePin<>);
-            Type genericType = type.MakeGenericType(valueType);
-
-            object[] parameters = new object[] { name, node, options };
-
-            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, parameters);
-
-            return nodePin;
-        }
-
         public static NodeMembersInfo GetNodeMembers(Type type)
         {
             if (_nodeInfoList.ContainsKey(type))

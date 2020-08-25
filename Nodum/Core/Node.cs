@@ -88,7 +88,7 @@ namespace Nodum.Core
         {
             foreach (var field in fields)
             {
-                NodePin nodePin = NodeBuilder.BuildNodePin(field, this);
+                NodePin nodePin = NodePinBuilder.BuildNodePin(field, this);
                 ProtectedTryAddNodePin(nodePin);
             }
         }
@@ -97,7 +97,7 @@ namespace Nodum.Core
         {
             foreach (var property in properties)
             {
-                NodePin nodePin = NodeBuilder.BuildNodePin(property, this);
+                NodePin nodePin = NodePinBuilder.BuildNodePin(property, this);
                 ProtectedTryAddNodePin(nodePin);
             }
         }
