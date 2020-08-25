@@ -6,6 +6,7 @@ using System.Text;
 namespace Nodum.Calc
 {
     [Serializable]
+    [BaseNode(Group = "Calc")]
     public class MathNode : Node
     {
         [Serializable]

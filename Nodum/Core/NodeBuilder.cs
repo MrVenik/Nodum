@@ -8,7 +8,7 @@ namespace Nodum.Core
     public static class NodeBuilder
     {
         private static Dictionary<Type, NodeMembersInfo> _nodeInfoList;
-        public static List<Node> AllBaseNodes { get; } = new List<Node>();
+        public static Dictionary<string, List<Node>> AllBaseNodes { get; } = new Dictionary<string, List<Node>>();
 
         public static NodePin BuildNodePin(FieldInfo fieldInfo, Node node)
         {
@@ -81,8 +81,22 @@ namespace Nodum.Core
                 foreach (Type type in nodeTypes)
                 {
                     CacheNodeMembers(type);
+                    object[] attributes = type.GetCustomAttributes(true);
+
+                    string group = "ungrouped";
+
+                    if (attributes.FirstOrDefault(x => x is Node.BaseNodeAttribute) is Node.BaseNodeAttribute baseNodeAttribute)
+                    {
+                        group = baseNodeAttribute.Group;
+                    }
+
+                    if (!AllBaseNodes.ContainsKey(group))
+                    {
+                        AllBaseNodes.Add(group, new List<Node>());
+                    }
+
                     Node node = (Node)Activator.CreateInstance(type, type.Name);
-                    AllBaseNodes.Add(node);
+                    AllBaseNodes[group].Add(node);
                 }
             }
         }

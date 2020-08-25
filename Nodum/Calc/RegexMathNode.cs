@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace Nodum.Calc
 {
     [Serializable]
+    [BaseNode(Group = "Calc")]
     public class RegexMathNode : Node
     {
         public override bool IsEditable => false;

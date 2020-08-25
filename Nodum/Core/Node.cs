@@ -9,6 +9,11 @@ namespace Nodum.Core
     [Serializable]
     public abstract class Node
     {
+        [AttributeUsage(AttributeTargets.Class)]
+        public class BaseNodeAttribute : Attribute
+        {
+            public string Group { get; set; }
+        }
         public class NodePinAttribute : Attribute
         {
             public virtual bool IsInput { get; set; } = false;
