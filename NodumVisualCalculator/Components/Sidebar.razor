@@ -1,0 +1,44 @@
+﻿<CascadingValue Value="this">
+    @ChildContent
+</CascadingValue>
+
+<div class="sidebar" style="@(_sidebarShowed ? "display: flex;" : "display: none;")">
+    @foreach (var tab in Tabs)
+    {
+        <div class="sidebar-tab">
+            <div class="sidebar-tab-header">
+                @tab.SidebarTabHeader
+            </div>
+            @foreach (var element in tab.Elements)
+            {
+                <div class="sidebar-tab-element" @onclick="@((e) => element.OnClick?.Invoke(e))">
+                    @element.ChildContent
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private bool _sidebarShowed = false;
+
+    public List<SidebarTab> Tabs { get; } = new List<SidebarTab>();
+
+    public void OpenOrClose()
+    {
+        _sidebarShowed = !_sidebarShowed;
+    }
+
+    public void Open()
+    {
+        _sidebarShowed = true;
+    }
+
+    public void Close()
+    {
+        _sidebarShowed = false;
+    }
+}

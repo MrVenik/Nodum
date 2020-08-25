@@ -65,7 +65,7 @@ body {
 
 .main-node-header {
     position: relative;
-    z-index: 1;
+    z-index: 3;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -200,7 +200,7 @@ body {
     background-color: #424242;
     min-width: 250px;
     box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
-    z-index: 2;
+    z-index: 3;
 }
 
 /* Links inside the dropdown */
@@ -286,4 +286,45 @@ body {
     align-items: center;
 }
 
-/* Modal Content/Box */
+.sidebar {
+    height: 100%;
+    width: 250px;
+    z-index: 2;
+    position: relative;
+    overflow-x: hidden;
+    transition: 0.5s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #424242;
+    border: 1px solid #424242;
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+}
+
+.sidebar-tab {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: 1px solid #424242;
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+}
+
+.sidebar-tab-header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #212121;
+    color: #fff;
+}
+
+.sidebar-tab-element {
+    color: #fff;
+    padding: 10px;
+    cursor: pointer;
+}
+    .sidebar-tab-element:hover {
+        background-color: #363636;
+    }

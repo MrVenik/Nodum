@@ -1,0 +1,22 @@
+﻿<CascadingValue Value="this">
+    @SidebarTabElements
+</CascadingValue>
+
+@code {
+    [CascadingParameter]
+    public Sidebar Sidebar { get; set; }
+    [Parameter]
+    public RenderFragment SidebarTabHeader { get; set; }
+    [Parameter]
+    public RenderFragment SidebarTabElements { get; set; }
+
+    public List<SidebarTabElement> Elements { get; } = new List<SidebarTabElement>();
+
+    protected override void OnInitialized()
+    {
+        if (Sidebar != null)
+        {
+            Sidebar.Tabs.Add(this);
+        }
+    }
+}
