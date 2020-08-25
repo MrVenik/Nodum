@@ -48,7 +48,7 @@
         <div class="main-node-body">
 
             <Sidebar @ref="_mainSidebar">
-                @foreach (var group in NodeBuilder.AllBaseNodes)
+                @foreach (var group in NodeCacher.AllBaseNodes)
                 {
                     <SidebarTab>
                         <SidebarTabHeader>

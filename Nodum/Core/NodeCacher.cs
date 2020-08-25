@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Nodum.Core
 {
-    public static class NodeBuilder
+    public static class NodeCacher
     {
         private static Dictionary<Type, NodeMembersInfo> _nodeInfoList;
         public static Dictionary<string, List<Node>> AllBaseNodes { get; } = new Dictionary<string, List<Node>>();
@@ -54,7 +54,7 @@ namespace Nodum.Core
 
                     string group = "ungrouped";
 
-                    if (attributes.FirstOrDefault(x => x is Node.NodeAttribute) is Node.NodeAttribute baseNodeAttribute)
+                    if (attributes.FirstOrDefault(x => x is NodeAttribute) is NodeAttribute baseNodeAttribute)
                     {
                         group = baseNodeAttribute.Group;
                     }
@@ -68,17 +68,6 @@ namespace Nodum.Core
                     AllBaseNodes[group].Add(node);
                 }
             }
-        }
-
-        public static Node CloneNode(Node node)
-        {
-            if (node != null)
-            {
-                BinaryNodeSerializer serializer = new BinaryNodeSerializer();
-                byte[] bytes = serializer.SerializeToByteArray(node);
-                return serializer.DeserializeFromByteArray(bytes);
-            }
-            throw new Exception("Node is null");
         }
 
         private static void CacheNodeMembers(Type nodeType)

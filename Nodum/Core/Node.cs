@@ -56,7 +56,7 @@ namespace Nodum.Core
 
         static Node()
         {
-            NodeBuilder.CacheBaseNodes();
+            NodeCacher.CacheBaseNodes();
         }
 
         protected Node(string name)
@@ -71,7 +71,7 @@ namespace Nodum.Core
         private void BuildNode()
         {
             Type nodeType = GetType();
-            NodeMembersInfo members = NodeBuilder.GetNodeMembers(nodeType);
+            NodeMembersInfo members = NodeCacher.GetNodeMembers(nodeType);
             if (members != null)
             {
                 BuildFieldNodePins(members.FieldInfoList);
@@ -322,9 +322,20 @@ namespace Nodum.Core
             }
         }
 
+        public static Node CloneNode(Node node)
+        {
+            if (node != null)
+            {
+                BinaryNodeSerializer serializer = new BinaryNodeSerializer();
+                byte[] bytes = serializer.SerializeToByteArray(node);
+                return serializer.DeserializeFromByteArray(bytes);
+            }
+            throw new Exception("Node is null");
+        }
+
         public Node Clone()
         {
-            return NodeBuilder.CloneNode(this);
+            return CloneNode(this);
         }
 
         public void Close()
