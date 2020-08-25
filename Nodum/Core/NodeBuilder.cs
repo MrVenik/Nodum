@@ -5,12 +5,6 @@ using System.Reflection;
 
 namespace Nodum.Core
 {
-    public class NodeMembersInfo
-    {
-        public List<FieldInfo> FieldInfoList { get; } = new List<FieldInfo>();
-        public List<PropertyInfo> PropertyInfoList { get; } = new List<PropertyInfo>();
-    }
-
     public static class NodeBuilder
     {
         private static Dictionary<Type, NodeMembersInfo> _nodeInfoList;
