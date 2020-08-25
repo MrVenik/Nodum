@@ -4,7 +4,7 @@
     {
         <div class="node">
             <div class="node-element">
-                @if ((VisualNodePin.NodePin.IsInput && !VisualNodePin.IsInternal) || (VisualNodePin.IsInternal && VisualNodePin.NodePin.IsOutput))
+                @if ((VisualNodePin.NodePin.IsInput && !VisualNodePin.IsInternal) || (VisualNodePin.IsInternal && VisualNodePin.NodePin.IsInternalInput))
                 {
                     <div class="node-element-content" @onclick="@(args => OnNodePinConnect(args, VisualNodePin))">
                         <span id="@VisualNodePin.InputElementId" class="iconify iconify-inputpin" data-icon="mdi:circle" data-inline="false"></span>
@@ -46,7 +46,7 @@
                     }
                 </div>
 
-                @if ((VisualNodePin.NodePin.IsOutput && !VisualNodePin.IsInternal) || (VisualNodePin.IsInternal && VisualNodePin.NodePin.IsInput))
+                @if ((VisualNodePin.NodePin.IsOutput && !VisualNodePin.IsInternal) || (VisualNodePin.IsInternal && VisualNodePin.NodePin.IsInternalOutput))
                 {
                     <div class="node-element-content" @onclick="@(args => OnNodePinSelect(args, VisualNodePin))">
                         <span id="@VisualNodePin.OutputElementId" class="iconify iconify-outputpin" data-icon="mdi:circle" data-inline="false"></span>
