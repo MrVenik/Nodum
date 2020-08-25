@@ -95,8 +95,11 @@ namespace Nodum.Core
 
         public void AddOutgoingNodePin(NodePin inputNodePin)
         {
-            OnValueChanged += inputNodePin.UpdateValue;
-            _outgoingNodePins.Add(inputNodePin);
+            if ((IsOutput || IsInternalOutput) && (inputNodePin.IsInput || inputNodePin.IsInternalInput))
+            {
+                OnValueChanged += inputNodePin.UpdateValue;
+                _outgoingNodePins.Add(inputNodePin);
+            }
         }
 
         public void RemoveOutgoingNodePin(NodePin inputNodePin)
@@ -122,13 +125,55 @@ namespace Nodum.Core
 
         public void AddIncomingNodePin(NodePin outputNodePin)
         {
+            if (IsInput)
+            {
+                if (outputNodePin.IsOutput)
+                {
+                    if (Node != outputNodePin.Node && Node.Holder == outputNodePin.Node.Holder)
+                    {
+                        TryAddIncomingNodePin(outputNodePin);
+                    }
+                }
+                else if (outputNodePin.IsInternalOutput)
+                {
+                    if (Node.Holder == outputNodePin.Node)
+                    {
+                        TryAddIncomingNodePin(outputNodePin);
+                    }
+                }
+            }
+            else if (IsInternalInput)
+            {
+                if (outputNodePin.IsOutput)
+                {
+                    if (Node == outputNodePin.Node.Holder)
+                    {
+                        TryAddIncomingNodePin(outputNodePin);
+                    }
+                }
+                else if (outputNodePin.IsInternalOutput)
+                {
+                    if (Node == outputNodePin.Node)
+                    {
+                        TryAddIncomingNodePin(outputNodePin);
+                    }
+                }
+            }
+
+
+        }
+
+        private bool TryAddIncomingNodePin(NodePin outputNodePin)
+        {
             if (CanConnectTo == null || (CanConnectTo != null && CanConnectTo(outputNodePin)))
             {
                 IncomingNodePin?.RemoveOutgoingNodePin(this);
                 IncomingNodePin = outputNodePin;
                 IncomingNodePin.AddOutgoingNodePin(this);
                 UpdateValue();
+                return true;
             }
+            else return false;
         }
 
         public void RemoveIncomingNodePin(NodePin outputNodePin)
