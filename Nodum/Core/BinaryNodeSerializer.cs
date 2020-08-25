@@ -33,11 +33,18 @@ namespace Nodum.Core
         public Node Deserialize(string path)
         {
             Node node = null;
-            using (FileStream fs = File.OpenRead($"{path}.dat"))
+            try
             {
-                BinaryFormatter formatter = new BinaryFormatter();
-                node = (Node)formatter.Deserialize(fs);
-                node?.ReConnectAllPins();
+                using (FileStream fs = File.OpenRead($"{path}.dat"))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    node = (Node)formatter.Deserialize(fs);
+                    node?.ReConnectAllPins();
+                }
+            }
+            catch (Exception)
+            {
+
             }
             return node;
         }
