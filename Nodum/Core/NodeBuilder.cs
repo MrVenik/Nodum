@@ -54,7 +54,7 @@ namespace Nodum.Core
 
                     string group = "ungrouped";
 
-                    if (attributes.FirstOrDefault(x => x is Node.BaseNodeAttribute) is Node.BaseNodeAttribute baseNodeAttribute)
+                    if (attributes.FirstOrDefault(x => x is Node.NodeAttribute) is Node.NodeAttribute baseNodeAttribute)
                     {
                         group = baseNodeAttribute.Group;
                     }

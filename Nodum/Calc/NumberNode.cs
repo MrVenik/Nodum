@@ -4,7 +4,7 @@ using System;
 namespace Nodum.Calc
 {
     [Serializable]
-    [BaseNode(Group = "Calc")]
+    [Node(Group = "Calc")]
     public class NumberNode : Node
     {
         public override bool IsEditable => false;
