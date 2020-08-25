@@ -10,7 +10,7 @@ namespace Nodum.Calc
 
         [InputOutput] public double Number;
 
-        public NumberNode(string name = "Number Node", Node holder = null) : base(name, holder)
+        public NumberNode(string name = "Number Node") : base(name)
         {
             IsBaseNode = true;
         }

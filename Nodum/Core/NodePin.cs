@@ -178,6 +178,8 @@ namespace Nodum.Core
             Value = default;
         }
 
+        public override Type ValueType => typeof(T);
+
         public new T Value
         {
             get => (T)_value;

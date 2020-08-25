@@ -5,13 +5,16 @@ using System.Reflection;
 
 namespace Nodum.Core
 {
+    public class NodeMembersInfo
+    {
+        public List<FieldInfo> FieldInfoList { get; } = new List<FieldInfo>();
+        public List<PropertyInfo> PropertyInfoList { get; } = new List<PropertyInfo>();
+    }
+
     public static class NodeBuilder
     {
-        private static Dictionary<Type, List<FieldInfo>> _nodeFields;
-        private static Dictionary<Type, List<PropertyInfo>> _nodeProperties;
-        private static bool FieldsInitialized => _nodeFields != null;
-        private static bool PropertiesInitialized => _nodeProperties != null;
-        private static bool Initialized => FieldsInitialized && PropertiesInitialized;
+        private static Dictionary<Type, NodeMembersInfo> _nodeInfoList;
+        public static List<Node> AllBaseNodes { get; } = new List<Node>();
 
         public static NodePin BuildNodePin(FieldInfo fieldInfo, Node node)
         {
@@ -45,13 +48,49 @@ namespace Nodum.Core
             return nodePin;
         }
 
-        public static void BuildNode(Node node)
+        public static NodeMembersInfo GetNodeMembers(Type type)
         {
-            if (!Initialized) BuildCache();
+            if (_nodeInfoList.ContainsKey(type))
+            {
+                return _nodeInfoList[type];
+            }
+            return null;
+        }
 
-            BuildFieldNodePins(node);
+        public static void CacheBaseNodes()
+        {
+            if (_nodeInfoList == null)
+            {
+                _nodeInfoList = new Dictionary<Type, NodeMembersInfo>();
 
-            BuildProperyNodePins(node);
+                Type baseType = typeof(Node);
+                List<Type> nodeTypes = new List<Type>();
+                Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+                foreach (Assembly assembly in assemblies)
+                {
+                    string assemblyName = assembly.GetName().Name;
+                    int index = assemblyName.IndexOf('.');
+                    if (index != -1) assemblyName = assemblyName.Substring(0, index);
+                    switch (assemblyName)
+                    {
+                        case "System":
+                        case "mscorlib":
+                        case "Microsoft":
+                            continue;
+                        default:
+                            nodeTypes.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
+                            break;
+                    }
+                }
+
+                foreach (Type type in nodeTypes)
+                {
+                    CacheNodeMembers(type);
+                    Node node = (Node)Activator.CreateInstance(type, type.Name);
+                    AllBaseNodes.Add(node);
+                }
+            }
         }
 
         public static Node CloneNode(Node node)
@@ -65,80 +104,9 @@ namespace Nodum.Core
             throw new Exception("Node is null");
         }
 
-        private static void BuildProperyNodePins(Node node)
-        {
-            Type nodeType = node.GetType();
-
-            if (_nodeProperties.TryGetValue(nodeType, out List<PropertyInfo> typeNodeProperties))
-            {
-                for (int i = 0; i < typeNodeProperties.Count; i++)
-                {
-                    PropertyInfo propertyInfo = typeNodeProperties[i];
-
-                    NodePin nodePin = BuildNodePin(propertyInfo, node);
-
-                    node.TryAddNodePin(nodePin);
-                }
-            }
-        }
-
-        private static void BuildFieldNodePins(Node node)
-        {
-            Type nodeType = node.GetType();
-
-            if (_nodeFields.TryGetValue(nodeType, out List<FieldInfo> typeNodeFields))
-            {
-                for (int i = 0; i < typeNodeFields.Count; i++)
-                {
-                    FieldInfo fieldInfo = typeNodeFields[i];
-
-                    NodePin nodePin = BuildNodePin(fieldInfo, node);
-
-                    node.TryAddNodePin(nodePin);
-                }
-            }
-        }
-
-        private static void BuildCache()
-        {
-            _nodeFields = new Dictionary<Type, List<FieldInfo>>();
-            _nodeProperties = new Dictionary<Type, List<PropertyInfo>>();
-
-            Type baseType = typeof(Node);
-            List<Type> nodeTypes = new List<Type>();
-            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            // Loop through assemblies and add node types to list
-            foreach (Assembly assembly in assemblies)
-            {
-                // Skip certain dlls to improve performance
-                string assemblyName = assembly.GetName().Name;
-                int index = assemblyName.IndexOf('.');
-                if (index != -1) assemblyName = assemblyName.Substring(0, index);
-                switch (assemblyName)
-                {
-                    // The following assemblies, and sub-assemblies (eg. UnityEngine.UI) are skipped
-                    case "System":
-                    case "mscorlib":
-                    case "Microsoft":
-                        continue;
-                    default:
-                        nodeTypes.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
-                        break;
-                }
-            }
-
-            for (int i = 0; i < nodeTypes.Count; i++)
-            {
-                CachePorts(nodeTypes[i]);
-                Console.WriteLine(nodeTypes[i]);
-            }
-        }
-
-        private static void CachePorts(Type nodeType)
+        private static void CacheNodeMembers(Type nodeType)
         {
             CacheNodeFields(nodeType);
-
             CacheNodeProperties(nodeType);
         }
 
@@ -153,11 +121,11 @@ namespace Nodum.Core
                     object[] attribs = property.GetCustomAttributes(true);
                     if (attribs.FirstOrDefault(x => x is Node.NodePinAttribute) is Node.NodePinAttribute nodePinAttribete)
                     {
-                        if (!_nodeProperties.ContainsKey(nodeType))
+                        if (!_nodeInfoList.ContainsKey(nodeType))
                         {
-                            _nodeProperties.Add(nodeType, new List<PropertyInfo>());
+                            _nodeInfoList.Add(nodeType, new NodeMembersInfo());
                         }
-                        _nodeProperties[nodeType].Add(property);
+                        _nodeInfoList[nodeType].PropertyInfoList.Add(property);
                     }
                 }
             }
@@ -172,11 +140,11 @@ namespace Nodum.Core
                 object[] attribs = field.GetCustomAttributes(true);
                 if (attribs.FirstOrDefault(x => x is Node.NodePinAttribute) is Node.NodePinAttribute nodePinAttribete)
                 {
-                    if (!_nodeFields.ContainsKey(nodeType))
+                    if (!_nodeInfoList.ContainsKey(nodeType))
                     {
-                        _nodeFields.Add(nodeType, new List<FieldInfo>());
+                        _nodeInfoList.Add(nodeType, new NodeMembersInfo());
                     }
-                    _nodeFields[nodeType].Add(field);
+                    _nodeInfoList[nodeType].FieldInfoList.Add(field);
                 }
             }
         }

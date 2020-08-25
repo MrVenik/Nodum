@@ -18,7 +18,7 @@ namespace Nodum.Calc
         private string _oldRegexOperation;
         private readonly MatchEvaluator _evaluator;
 
-        public RegexMathNode(string name = "Regex Math Node", Node holder = null) : base(name, holder)
+        public RegexMathNode(string name = "Regex Math Node") : base(name)
         {
             IsBaseNode = true;
             _evaluator = new MatchEvaluator(MatchReplacer);

@@ -8,7 +8,7 @@ namespace Nodum.Calc
     {
         public override bool IsBaseNode => false;
 
-        public EmptyNode(string name = "Empty Node", Node holder = null) : base(name, holder)
+        public EmptyNode(string name = "Empty Node") : base(name)
         {
         }
     }

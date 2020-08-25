@@ -22,8 +22,7 @@ namespace Nodum.Calc
 
         public override bool IsBaseNode { get; }
 
-        public MathNode(string name = "Math Node", Node holder = null)
-            : base(name, holder)
+        public MathNode(string name = "Math Node") : base(name)
         {
             IsBaseNode = true;
         }

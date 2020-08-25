@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 
 namespace Nodum.Core
@@ -8,11 +9,6 @@ namespace Nodum.Core
     [Serializable]
     public abstract class Node
     {
-        public Node Clone()
-        {
-            return NodeBuilder.CloneNode(this);
-        }
-
         public class NodePinAttribute : Attribute
         {
             public virtual bool IsInput { get; set; } = false;
@@ -45,7 +41,7 @@ namespace Nodum.Core
 
         public string Name { get; set; }
 
-        public Node Holder { get; private set; }
+        public Node Holder { get; set; }
         public virtual bool IsBaseNode { get; }
 
         [NonSerialized]
@@ -58,18 +54,54 @@ namespace Nodum.Core
         public IEnumerable<NodePin> AllNodePins => NodePins.Values.ToList();
         public List<Node> InternalNodes { get; private set; } = new List<Node>();
 
-        protected Node(string name, Node holder = null)
+        static Node()
+        {
+            NodeBuilder.CacheBaseNodes();
+        }
+
+        protected Node(string name)
         {
             Name = name;
-            Holder = holder;
-            NodeBuilder.BuildNode(this);
+
+            BuildNode();
+
             Update();
+        }
+
+        private void BuildNode()
+        {
+            Type nodeType = GetType();
+            NodeMembersInfo members = NodeBuilder.GetNodeMembers(nodeType);
+            if (members != null)
+            {
+                BuildFieldNodePins(members.FieldInfoList);
+                BuildPropertyNodePins(members.PropertyInfoList);
+            }
+        }
+
+        private void BuildFieldNodePins(List<FieldInfo> fields)
+        {
+            foreach (var field in fields)
+            {
+                NodePin nodePin = NodeBuilder.BuildNodePin(field, this);
+                ProtectedTryAddNodePin(nodePin);
+            }
+        }
+
+        private void BuildPropertyNodePins(List<PropertyInfo> properties)
+        {
+            foreach (var property in properties)
+            {
+                NodePin nodePin = NodeBuilder.BuildNodePin(property, this);
+                ProtectedTryAddNodePin(nodePin);
+            }
         }
 
         public void AddInternalNode(Node node)
         {
             if (!IsBaseNode)
             {
+                node.Holder = this;
                 InternalNodes.Add(node);
             }
             else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsBaseNode}");
@@ -288,6 +320,11 @@ namespace Nodum.Core
                     pin.GetNodeValue(this);
                 }
             }
+        }
+
+        public Node Clone()
+        {
+            return NodeBuilder.CloneNode(this);
         }
 
         public void Close()
