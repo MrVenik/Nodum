@@ -68,7 +68,8 @@
         if (_currentVisualNode != null)
         {
             bool isInvokeUpdate = _isInput && !_isOutput;
-            NodePin nodePin = NodeBuilder.BuildNodePin(_nodePinName, _currentVisualNode.Node, typeof(double), _isInput, _isOutput, isInvokeUpdate);
+            NodePinOptions options = new NodePinOptions() { IsInput = _isInput, IsOutput = _isOutput, IsInvokeUpdate = isInvokeUpdate };
+            NodePin nodePin = NodeBuilder.BuildNodePin(_nodePinName, _currentVisualNode.Node, typeof(double), options);
             _currentVisualNode.AddVisualNodePin(nodePin);
         }
 

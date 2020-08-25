@@ -63,6 +63,12 @@ body {
     background-color: #424242;
 }
 
+.main-node-body {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
 .main-node-header {
     position: relative;
     z-index: 3;

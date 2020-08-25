@@ -3,10 +3,15 @@
 <MainNodeComponent MainNode="@_mainNode" />
 
 @code {
-    private VisualNode _mainNode = new VisualNode("Main Mode");
+    private VisualNode _mainNode;
 
     protected override void OnInitialized()
     {
-
+        BinaryNodeSerializer nodeSerializer = new BinaryNodeSerializer();
+        Node mainNode = nodeSerializer.Deserialize("Main Mode");
+        if (mainNode != null)
+        {
+            _mainNode = new VisualNode(mainNode, null);
+        }
     }
 }

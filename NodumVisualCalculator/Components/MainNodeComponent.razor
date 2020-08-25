@@ -15,20 +15,14 @@
                     </div>
                 </DropdownTrigger>
                 <DropdownContent>
+                    <DropdownElement HideOnClick="true" OnClick="@((e) => _mainSidebar.OpenOrClose())">
+                        Open Nodes List
+                    </DropdownElement>
                     <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeEditor.Open(_currentMainNode))">
                         Edit Node
                     </DropdownElement>
-                    <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode))">
-                        Add Empty Node
-                    </DropdownElement>
-                    <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode, new MathNode() { Name = "Math Node"}))">
-                        Add Math Node
-                    </DropdownElement>
-                    <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode, new NumberNode() { Name = "Number Node"}))">
-                        Add Number Node
-                    </DropdownElement>
-                    <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode, new RegexMathNode() { Name = "Regex Math Node"}))">
-                        Add Regex Math Node
+                    <DropdownElement HideOnClick="true" OnClick="@((e) => Save())">
+                        Save Node
                     </DropdownElement>
                     @if (_isEditor)
                     {
@@ -51,37 +45,58 @@
             }
         </div>
 
-        @foreach (var connection in _allConnections)
-        {
-            <svg x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: 0;">
+        <div class="main-node-body">
+
+            <Sidebar @ref="_mainSidebar">
+                @foreach (var group in NodeBuilder.AllBaseNodes)
+                {
+                    <SidebarTab>
+                        <SidebarTabHeader>
+                            @group.Key
+                        </SidebarTabHeader>
+                        <SidebarTabElements>
+                            @foreach (var node in group.Value)
+                            {
+                                <SidebarTabElement OnClick="@((e) => _nodeCreator.Open(_currentMainNode, node.Clone()))">
+                                    Add @node.Name
+                                </SidebarTabElement>
+                            }
+                        </SidebarTabElements>
+                    </SidebarTab>
+
+                }
+            </Sidebar>
+
+            @foreach (var connection in _allConnections)
+            {
+                <svg x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: 0;">
+                    <defs>
+                        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color: green; stop-opacity: 1" />
+                            <stop offset="100%" style="stop-color: red; stop-opacity: 1" />
+                        </linearGradient>
+                    </defs>
+                    <path id="@($"{connection.FromPin.OutputElementId}+{connection.ToPin.InputElementId}")" class="node-line" fill="none" stroke="url(#grad1)" stroke-width="8" d="M 0, 0" />
+                </svg>
+            }
+
+            <svg id="main-node-line" x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: 0;">
                 <defs>
                     <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" style="stop-color: green; stop-opacity: 1" />
                         <stop offset="100%" style="stop-color: red; stop-opacity: 1" />
                     </linearGradient>
                 </defs>
-                <path id="@($"{connection.FromPin.OutputElementId}+{connection.ToPin.InputElementId}")" class="node-line" fill="none" stroke="url(#grad1)" stroke-width="8" d="M 0, 0" />
+                <path fill="none" stroke="url(#grad1)" stroke-width="3" d="@_mainLine.Curve" />
             </svg>
-        }
 
-        <svg id="main-node-line" x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: 0;">
-            <defs>
-                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" style="stop-color: green; stop-opacity: 1" />
-                    <stop offset="100%" style="stop-color: red; stop-opacity: 1" />
-                </linearGradient>
-            </defs>
-            <path fill="none" stroke="url(#grad1)" stroke-width="3" d="@_mainLine.Curve" />
-        </svg>
+            <DraggableZone Height="100%" Width="100%">
+                @foreach (var visualNode in _currentMainNode.InternalVisualNodes)
+                {
+                    <DraggableWindow @key="visualNode" X="@visualNode.Position.X" Y="@visualNode.Position.Y" AllowDrag="true" OnDragingWindow="@((w) => OnNodeDragging(w, visualNode))">
+                        <WindowHeader>
+                            <div class="node-window-header">
 
-        <DraggableZone Height="100%" Width="100%">
-            @foreach (var visualNode in _currentMainNode.InternalVisualNodes)
-            {
-                <DraggableWindow @key="visualNode" X="@visualNode.Position.X" Y="@visualNode.Position.Y" AllowDrag="true" OnDragingWindow="@((w) => OnNodeDragging(w, visualNode))">
-                    <WindowHeader>
-                        <div class="node-window-header">
-                            @if (visualNode.Editable)
-                            {
                                 <Dropdown>
                                     <DropdownTrigger>
                                         <div class="node-window-header-element">
@@ -89,26 +104,37 @@
                                         </div>
                                     </DropdownTrigger>
                                     <DropdownContent>
-                                        <DropdownElement HideOnClick="true" OnClick="@((e) => EditNode(visualNode))">
-                                            Edit Node
-                                        </DropdownElement>
+                                        @if (visualNode.Node.IsEditable)
+                                        {
+                                            <DropdownElement HideOnClick="true" OnClick="@((e) => EditNode(visualNode))">
+                                                Edit Node
+                                            </DropdownElement>
+                                        }
+                                        else
+                                        {
+                                            <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeEditor.Open(visualNode))">
+                                                Edit Node
+                                            </DropdownElement>
+                                        }
                                     </DropdownContent>
                                 </Dropdown>
-                            }
-                            <div class="node-window-header-element node-window-header-text">@visualNode.Name (@visualNode.Position.X, @visualNode.Position.Y)</div>
-                            <div class="node-window-header-element" @onclick="@(() => CloseWindow(visualNode))">
-                                <span class="iconify iconify-small" data-icon="mdi:close" data-inline="false"></span>
+
+                                <div class="node-window-header-element node-window-header-text">@visualNode.Name (@visualNode.Position.X, @visualNode.Position.Y)</div>
+                                <div class="node-window-header-element" @onclick="@(() => CloseWindow(visualNode))">
+                                    <span class="iconify iconify-small" data-icon="mdi:close" data-inline="false"></span>
+                                </div>
                             </div>
-                        </div>
-                    </WindowHeader>
-                    <WindowContent>
-                        <div class="node-window">
-                            <NodeComponent VisualNode="@visualNode" OnNodePinSelect="@((a, n) => OnNodePinSelect(a, n))" OnNodePinConnect="@((a, n) => OnNodePinConnect(a, n))" />
-                        </div>
-                    </WindowContent>
-                </DraggableWindow>
-            }
-        </DraggableZone>
+                        </WindowHeader>
+                        <WindowContent>
+                            <div class="node-window">
+                                <NodeComponent VisualNode="@visualNode" OnNodePinSelect="@((a, n) => OnNodePinSelect(a, n))" OnNodePinConnect="@((a, n) => OnNodePinConnect(a, n))" />
+                            </div>
+                        </WindowContent>
+                    </DraggableWindow>
+                }
+            </DraggableZone>
+
+        </div>
     </div>
 }
 
@@ -126,6 +152,8 @@
 
     private VisualNodePin _selectedNodePin;
 
+    private Sidebar _mainSidebar;
+
     private NodeCreatorComponent _nodeCreator;
     private NodeEditorComponent _nodeEditor;
     private NodePinCreatorComponent _nodePinCreator;
@@ -138,6 +166,12 @@
     protected override void OnInitialized()
     {
         _currentMainNode = MainNode;
+    }
+
+    private void Save()
+    {
+        BinaryNodeSerializer nodeSerializer = new BinaryNodeSerializer();
+        nodeSerializer.Serialize(_currentMainNode.Node);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

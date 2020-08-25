@@ -19,15 +19,12 @@ namespace NodumVisualCalculator.Data
         {
             Holder = holder;
             Node = new EmptyNode() { Name = name };
-            Editable = true;
         }
 
         public VisualNode(NodePin nodePin, VisualNode holder)
         {
             Holder = holder;
             Node = new EmptyNode() { Name = nodePin.Name };
-
-            Editable = false;
 
             VisualNodePin visualNodePin = new VisualNodePin()
             {
@@ -47,9 +44,15 @@ namespace NodumVisualCalculator.Data
 
             Node.OnUpdatePins += () => ReAddNodePins(false);
 
-            Editable = false;
-
             ReAddNodePins(true);
+
+            if (node.InternalNodes.Count > 0)
+            {
+                foreach (var internalNode in node.InternalNodes)
+                {
+                    InternalVisualNodes.Add(new VisualNode(internalNode, this));
+                }
+            }
         }
 
         private void ReAddNodePins(bool firstLoad)
@@ -100,42 +103,9 @@ namespace NodumVisualCalculator.Data
         }
         //public Guid Guid { get => Node.Guid; }
         public Position Position { get; set; } = new Position();
-        public bool Editable { get; set; }
         public bool Showed { get; set; }
         public bool Focused { get; set; }
         public bool MenuShowed { get; set; }
-
-
-        public void AddInputNodePin(Type pinType, string name = null)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                name = $"Input_{Node.AllInputNodePins.Count()}";
-            }
-
-            bool isInput = true;
-            bool isOutput = false;
-            bool isInvokeUpdate = true;
-
-            NodePin nodePin = NodeBuilder.BuildNodePin(name, Node, pinType, isInput, isOutput, isInvokeUpdate);
-
-            AddVisualNodePin(nodePin);
-        }
-
-        public void AddOutputNodePin(Type pinType, string name = null)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                name = $"Output_{Node.AllOutputNodePins.Count()}";
-            }
-
-            bool isInput = false;
-            bool isOutput = true;
-            bool isInvokeUpdate = false;
-
-            NodePin nodePin = NodeBuilder.BuildNodePin(name, Node, pinType, isInput, isOutput, isInvokeUpdate);
-            AddVisualNodePin(nodePin);
-        }
 
         public void AddVisualNodePin(NodePin nodePin)
         {
@@ -158,6 +128,7 @@ namespace NodumVisualCalculator.Data
         public void AddNode(VisualNode visualNode)
         {
             InternalVisualNodes.Add(visualNode);
+            Node.AddInternalNode(visualNode.Node);
         }
 
         public void AddNodes(params VisualNode[] visualNodes)
@@ -173,6 +144,7 @@ namespace NodumVisualCalculator.Data
             foreach (var node in InternalVisualNodes)
             {
                 node.Close();
+                Node.RemoveInternalNode(node.Node);
             }
             InternalVisualNodes.Clear();
         }
@@ -182,6 +154,7 @@ namespace NodumVisualCalculator.Data
             visualNode.Close();
 
             InternalVisualNodes.Remove(visualNode);
+            Node.RemoveInternalNode(visualNode.Node);
         }
 
         public void Close()
