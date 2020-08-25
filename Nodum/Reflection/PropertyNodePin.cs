@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Nodum.Core;
+using System;
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace Nodum.Core
+namespace Nodum.Reflection
 {
     [Serializable]
     public class PropertyNodePin<T> : NodePin<T>
