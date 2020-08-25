@@ -6,7 +6,7 @@ namespace Nodum.Calc
     [Serializable]
     public class EmptyNode : Node
     {
-        public override bool IsBaseNode => false;
+        public override bool IsEditable => true;
 
         public EmptyNode(string name = "Empty Node") : base(name)
         {

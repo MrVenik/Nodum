@@ -42,7 +42,7 @@ namespace Nodum.Core
         public string Name { get; set; }
 
         public Node Holder { get; set; }
-        public virtual bool IsBaseNode { get; }
+        public virtual bool IsEditable { get; }
 
         [NonSerialized]
         private Action _onUpdatePins;
@@ -99,21 +99,21 @@ namespace Nodum.Core
 
         public void AddInternalNode(Node node)
         {
-            if (!IsBaseNode)
+            if (!IsEditable)
             {
                 node.Holder = this;
                 InternalNodes.Add(node);
             }
-            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsBaseNode}");
+            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsEditable}");
         }
 
         public void RemoveInternalNode(Node node)
         {
-            if (!IsBaseNode)
+            if (!IsEditable)
             {
                 InternalNodes.Remove(node);
             }
-            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsBaseNode}");
+            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsEditable}");
         }
 
         public NodePin FindInputNodePin(Guid guid)
@@ -227,38 +227,38 @@ namespace Nodum.Core
 
         public bool TryAddNodePin(NodePin nodePin)
         {
-            if (!IsBaseNode)
+            if (!IsEditable)
             {
                 return ProtectedTryAddNodePin(nodePin);
             }
-            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsBaseNode}");
+            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsEditable}");
         }
 
         public void RemoveNodePin(NodePin nodePin)
         {
-            if (!IsBaseNode)
+            if (!IsEditable)
             {
                 ProtectedRemoveNodePin(nodePin);
             }
-            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsBaseNode}");
+            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsEditable}");
         }
 
         public void RemoveNodePin(string nodePinName)
         {
-            if (!IsBaseNode)
+            if (!IsEditable)
             {
                 ProtectedRemoveNodePin(nodePinName);
             }
-            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsBaseNode}");
+            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsEditable}");
         }
 
         public void SetNodePin(NodePin nodePin)
         {
-            if (!IsBaseNode)
+            if (!IsEditable)
             {
                 ProtectedSetNodePin(nodePin);
             }
-            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsBaseNode}");
+            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsEditable}");
         }
 
         [OnDeserialized]

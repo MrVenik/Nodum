@@ -20,11 +20,10 @@ namespace Nodum.Calc
             Root,
         }
 
-        public override bool IsBaseNode { get; }
+        public override bool IsEditable => false;
 
         public MathNode(string name = "Math Node") : base(name)
         {
-            IsBaseNode = true;
         }
 
         [NodePin(IsInvokeUpdate = true, CanSetValue = true)] public MathType Operation;
