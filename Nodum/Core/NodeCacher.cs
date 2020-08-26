@@ -50,22 +50,28 @@ namespace Nodum.Core
                 foreach (Type type in nodeTypes)
                 {
                     CacheNodeMembers(type);
-                    object[] attributes = type.GetCustomAttributes(true);
+                    object[] attributes = type.GetCustomAttributes(true);                
 
-                    string group = "ungrouped";
-
-                    if (attributes.FirstOrDefault(x => x is NodeAttribute) is NodeAttribute baseNodeAttribute)
+                    if (attributes.FirstOrDefault(x => x is NodeAttribute) is NodeAttribute nodeAttribute)
                     {
-                        group = baseNodeAttribute.Group;
-                    }
+                        if (!nodeAttribute.NodeCacherIgnore)
+                        {
+                            string group = nodeAttribute.Group;
 
-                    if (!AllBaseNodes.ContainsKey(group))
-                    {
-                        AllBaseNodes.Add(group, new List<Node>());
-                    }
+                            if (string.IsNullOrEmpty(group))
+                            {
+                                group = "ungrouped";
+                            }
 
-                    Node node = (Node)Activator.CreateInstance(type, type.Name);
-                    AllBaseNodes[group].Add(node);
+                            if (!AllBaseNodes.ContainsKey(group))
+                            {
+                                AllBaseNodes.Add(group, new List<Node>());
+                            }
+
+                            Node node = (Node)Activator.CreateInstance(type, type.Name);
+                            AllBaseNodes[group].Add(node);
+                        }
+                    }
                 }
             }
         }
