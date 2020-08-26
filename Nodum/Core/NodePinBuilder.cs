@@ -28,6 +28,8 @@ namespace Nodum.Core
 
         public static NodePin BuildNodePin(FieldInfo fieldInfo, Node node)
         {
+            CheckType(fieldInfo.FieldType);
+
             Type type = typeof(FieldNodePin<>);
             Type genericType = type.MakeGenericType(fieldInfo.FieldType);
 
@@ -38,6 +40,8 @@ namespace Nodum.Core
 
         public static NodePin BuildNodePin(PropertyInfo propertyInfo, Node node)
         {
+            CheckType(propertyInfo.PropertyType);
+
             Type type = typeof(PropertyNodePin<>);
             Type genericType = type.MakeGenericType(propertyInfo.PropertyType);
 
@@ -68,6 +72,8 @@ namespace Nodum.Core
 
         public static NodePin BuildNodePin(string name, Node node, Type valueType, NodePinOptions options)
         {
+            CheckType(valueType);
+
             Type type = typeof(NodePin<>);
             Type genericType = type.MakeGenericType(valueType);
 
