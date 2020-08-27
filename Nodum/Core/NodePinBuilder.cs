@@ -1,6 +1,7 @@
 ﻿using Nodum.Reflection;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -82,6 +83,53 @@ namespace Nodum.Core
             NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, parameters);
 
             return nodePin;
+        }
+
+        public static NodePin BuildGenericNodePin(string name, Node node, Type genericValueType, NodePinOptions options, (string, Type)[] genericArguments)
+        {
+            CheckType(genericValueType);
+
+            Type type = typeof(NodePin<>);
+            Type genericType = type.MakeGenericType(MakeGenericType(genericValueType, genericArguments));
+
+            object[] parameters = new object[] { name, node, options };
+
+            NodePin nodePin = (NodePin)Activator.CreateInstance(genericType, parameters);
+
+            return nodePin;
+        }
+
+        private static Type MakeGenericType(Type genericType, params (string, Type)[] genericArguments)
+        {
+            if (genericType.ContainsGenericParameters)
+            {
+                if (genericType.IsGenericType)
+                {
+                    List<Type> genericTypes = new List<Type>();
+                    foreach (var item in genericType.GetGenericArguments())
+                    {
+                        genericTypes.Add(MakeGenericType(item, genericArguments));
+                    }
+                    foreach (var item in genericTypes)
+                    {
+                        genericType = genericType.GetGenericTypeDefinition().MakeGenericType(genericTypes.ToArray());
+                    }
+                }
+                else
+                {
+                    if (genericType.IsArray)
+                    {
+                        Type arrayType = genericArguments.Where(a => a.Item1 == genericType.GetElementType().Name).FirstOrDefault().Item2;
+                        genericType = arrayType.MakeArrayType();
+                    }
+                    else
+                    {
+                        genericType = genericArguments.Where(a => a.Item1 == genericType.Name).FirstOrDefault().Item2;
+                    }
+                }
+            }
+
+            return genericType;
         }
 
         public static NodePin[] BuildNodePins(ParameterInfo[] parameters, Node node)
