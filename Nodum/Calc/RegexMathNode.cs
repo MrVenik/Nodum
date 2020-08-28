@@ -15,11 +15,9 @@ namespace Nodum.Calc
         [Output] public double Result { get; set; }
 
         private string _oldRegexOperation;
-        private readonly MatchEvaluator _evaluator;
 
-        public RegexMathNode(string name = "Regex Math Node") : base(name)
+        public RegexMathNode(string name = "RegexMathNode") : base(name)
         {
-            _evaluator = new MatchEvaluator(MatchReplacer);
         }
 
         public override void UpdatePins()
@@ -59,7 +57,8 @@ namespace Nodum.Calc
         {
             if (!string.IsNullOrEmpty(RegexOperation))
             {
-                string math = Regex.Replace(RegexOperation, @"\b[^\d]\w+", _evaluator).Trim();
+                MatchEvaluator evaluator = new MatchEvaluator(MatchReplacer);
+                string math = Regex.Replace(RegexOperation, @"\b[^\d]\w+", evaluator).Trim();
 
                 Result = Convert.ToDouble(new DataTable().Compute(math, ""));
             }
@@ -74,6 +73,4 @@ namespace Nodum.Calc
             return string.Empty;
         }
     }
-
-
 }
