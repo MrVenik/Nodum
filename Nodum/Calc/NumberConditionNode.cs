@@ -16,20 +16,13 @@ namespace Nodum.Calc
         }
 
         [Input] public bool Condtition { get; set; }
-        [Input] public bool InputA { get; set; }
-        [Input] public bool InputB { get; set; }
-        [Output] public bool Result { get; set; }
+        [Input] public double IfTrue { get; set; }
+        [Input] public double Else { get; set; }
+        [Output] public double Result { get; set; }
 
         public override void UpdateValue()
         {
-            if (Condtition)
-            {
-                Result = InputA;
-            }
-            else
-            {
-                Result = InputB;
-            }
+            Result = Condtition ? IfTrue : Else;
         }
     }
 }
