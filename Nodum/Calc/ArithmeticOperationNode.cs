@@ -14,7 +14,12 @@ namespace Nodum.Calc
             Subtract,
             Multiply,
             Divide,
-            Remainder
+            Remainder,
+            Power,
+            Root,
+            Log,
+            Min,
+            Max
         }
 
         public override bool IsEditable => false;
@@ -53,6 +58,28 @@ namespace Nodum.Calc
                     {
                         Result = InputA % InputB;
                     }
+                    break;
+                case ArithmeticOperationType.Power:
+                    Result = Math.Pow(InputA, InputB);
+                    break;
+                case ArithmeticOperationType.Root:
+                    Result = Math.Pow(InputA, 1.0 / InputB);
+                    break;
+                case ArithmeticOperationType.Log:
+                    if (InputB > 0)
+                    {
+                        Result = Math.Log(InputA, InputB);
+                    }
+                    else
+                    {
+                        Result = Math.Log(InputA);
+                    }
+                    break;
+                case ArithmeticOperationType.Min:
+                    Result = Math.Min(InputA, InputB);
+                    break;
+                case ArithmeticOperationType.Max:
+                    Result = Math.Max(InputA, InputB);
                     break;
             }
         }
