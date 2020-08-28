@@ -26,48 +26,16 @@ namespace Nodum.Reflection
                     _methodInfo = method;
                     if (IsInstance)
                     {
-                        if (obj == null)
-                        {
-                            NodePinOptions options = new NodePinOptions() { IsInput = true, IsInvokeUpdate = true };
-                            NodePin objectNodePin = NodePinBuilder.BuildNodePin("Object", this, typeof(object), options);
-                            ProtectedTryAddNodePin(objectNodePin);
-                        }
-                        else
-                        {
-                            _object = obj;
-                        }
+                        SetMethodInstance(obj);
                     }
                     if (IsGeneric)
                     {
-                        _genericArgumentPins = new List<NodePin>();
-
-                        Type[] genericArguments = method.GetGenericArguments();
-
-                        foreach (var arg in genericArguments)
-                        {
-                            NodePinOptions options = new NodePinOptions() { IsInput = true, IsInvokeUpdatePins = true };
-                            NodePin genericArgumentPin = NodePinBuilder.BuildNodePin(arg.Name, this, typeof(Type), options);
-                            _genericArgumentPins.Add(genericArgumentPin);
-                            ProtectedTryAddNodePin(genericArgumentPin);
-                        }
+                        CreateGenericArgumentPins();
                     }
 
-                    ParameterInfo[] parameters = _methodInfo.GetParameters();
+                    CreateParameterPins();
 
-                    foreach (var parameter in parameters)
-                    {
-                        if (!parameter.ParameterType.ContainsGenericParameters)
-                        {
-                            ProtectedTryAddNodePin(NodePinBuilder.BuildNodePin(parameter, this));
-                        }
-                    }
-
-                    if (_methodInfo.ReturnType != typeof(void) && !_methodInfo.ReturnType.ContainsGenericParameters)
-                    {
-                        NodePinOptions options = new NodePinOptions() { IsOutput = true };
-                        NodePin returnNodePin = NodePinBuilder.BuildNodePin("Return", this, _methodInfo.ReturnType, options);
-                        ProtectedTryAddNodePin(returnNodePin);
-                    }
+                    CreateReturnPin();
                 }
                 catch (Exception ex)
                 {
@@ -77,106 +45,193 @@ namespace Nodum.Reflection
             else throw new NodeException("Cant build MethodNode because MethodInfo is null");
         }
 
+        private void CreateReturnPin()
+        {
+            if (_methodInfo.ReturnType != typeof(void) && !_methodInfo.ReturnType.ContainsGenericParameters)
+            {
+                NodePinOptions options = new NodePinOptions() { IsOutput = true };
+                NodePin returnNodePin = NodePinBuilder.BuildNodePin("Return", this, _methodInfo.ReturnType, options);
+                ProtectedTryAddNodePin(returnNodePin);
+            }
+        }
+
+        private void CreateParameterPins()
+        {
+            ParameterInfo[] parameters = _methodInfo.GetParameters();
+
+            foreach (var parameter in parameters)
+            {
+                if (!parameter.ParameterType.ContainsGenericParameters)
+                {
+                    ProtectedTryAddNodePin(NodePinBuilder.BuildNodePin(parameter, this));
+                }
+            }
+        }
+
+        private void CreateGenericArgumentPins()
+        {
+            _genericArgumentPins = new List<NodePin>();
+
+            Type[] genericArguments = _methodInfo.GetGenericArguments();
+
+            foreach (var arg in genericArguments)
+            {
+                NodePinOptions options = new NodePinOptions() { IsInput = true, IsInvokeUpdatePins = true };
+                NodePin genericArgumentPin = NodePinBuilder.BuildNodePin(arg.Name, this, typeof(Type), options);
+                _genericArgumentPins.Add(genericArgumentPin);
+                ProtectedTryAddNodePin(genericArgumentPin);
+            }
+        }
+
+        private void SetMethodInstance(object obj)
+        {
+            if (obj == null)
+            {
+                NodePinOptions options = new NodePinOptions() { IsInput = true, IsInvokeUpdate = true };
+                NodePin objectNodePin = NodePinBuilder.BuildNodePin("Object", this, _methodInfo.ReflectedType, options);
+                ProtectedTryAddNodePin(objectNodePin);
+            }
+            else
+            {
+                _object = obj;
+            }
+        }
+
         public override void UpdatePins()
         {
             if (IsGeneric)
             {
                 (string, Type)[] genericArguments = new (string, Type)[_genericArgumentPins.Count];
 
-                bool isGenericArgumentsSetted = true;
-
-                for (int i = 0; i < _genericArgumentPins.Count; i++)
-                {
-                    NodePin arg = _genericArgumentPins[i];
-                    if (arg.Value != null)
-                    {
-                        genericArguments[i] = (arg.Name, (Type)arg.Value);
-                    }
-                    else
-                    {
-                        isGenericArgumentsSetted = false;
-                        break;
-                    }
-                }
+                bool isGenericArgumentsSetted = TrySetGenericArguments(genericArguments);
 
                 if (isGenericArgumentsSetted)
                 {
-                    ParameterInfo[] parameters = _methodInfo.GetParameters();
+                    CreateGenericParameterPins(genericArguments);
 
-                    foreach (var parameter in parameters)
-                    {
-                        if (parameter.ParameterType.ContainsGenericParameters)
-                        {
-                            NodePinOptions options = new NodePinOptions() { IsInput = true, IsInvokeUpdate = true };
-                            NodePin genericParameterNodePin = NodePinBuilder.BuildGenericNodePin(parameter.Name, this, parameter.ParameterType, options, genericArguments);
-                            ProtectedTryAddNodePin(genericParameterNodePin);
-                        }
-                    }
-
-                    if (_methodInfo.ReturnType != typeof(void) && _methodInfo.ReturnType.ContainsGenericParameters)
-                    {
-                        NodePinOptions options = new NodePinOptions() { IsOutput = true };
-                        NodePin returnNodePin = NodePinBuilder.BuildGenericNodePin("Return", this, _methodInfo.ReturnType, options, genericArguments);
-                        ProtectedTryAddNodePin(returnNodePin);
-                    }
+                    CreateGenericReturnPin(genericArguments);
                 }
             }
+        }
+
+        private void CreateGenericReturnPin((string, Type)[] genericArguments)
+        {
+            if (_methodInfo.ReturnType != typeof(void) && _methodInfo.ReturnType.ContainsGenericParameters)
+            {
+                NodePinOptions options = new NodePinOptions() { IsOutput = true };
+                NodePin returnNodePin = NodePinBuilder.BuildGenericNodePin("Return", this, _methodInfo.ReturnType, options, genericArguments);
+                ProtectedTryAddNodePin(returnNodePin);
+            }
+        }
+
+        private void CreateGenericParameterPins((string, Type)[] genericArguments)
+        {
+            ParameterInfo[] parameters = _methodInfo.GetParameters();
+
+            foreach (var parameter in parameters)
+            {
+                if (parameter.ParameterType.ContainsGenericParameters)
+                {
+                    NodePinOptions options = new NodePinOptions() { IsInput = true, IsInvokeUpdate = true };
+                    NodePin genericParameterNodePin = NodePinBuilder.BuildGenericNodePin(parameter.Name, this, parameter.ParameterType, options, genericArguments);
+                    ProtectedTryAddNodePin(genericParameterNodePin);
+                }
+            }
+        }
+
+        private bool TrySetGenericArguments((string, Type)[] genericArguments)
+        {
+            bool isGenericArgumentsSetted = true;
+
+            for (int i = 0; i < _genericArgumentPins.Count; i++)
+            {
+                NodePin arg = _genericArgumentPins[i];
+                if (arg.Value != null)
+                {
+                    genericArguments[i] = (arg.Name, (Type)arg.Value);
+                }
+                else
+                {
+                    isGenericArgumentsSetted = false;
+                    break;
+                }
+            }
+
+            return isGenericArgumentsSetted;
         }
 
         public override void UpdateValue()
         {
             if (_methodInfo != null)
             {
-                bool isCanInvoke = true;
-
                 List<object> parameterValues = new List<object>();
 
-                ParameterInfo[] parameters = _methodInfo.GetParameters();
-                foreach (var parameter in parameters)
-                {
-                    if (NodePins.TryGetValue(parameter.Name, out NodePin nodePin))
-                    {
-                        parameterValues.Add(nodePin.Value);
-                    }
-                    else
-                    {
-                        isCanInvoke = false;
-                        break;
-                    }
-                }
-
+                bool isCanInvoke = TrySetParameterValues(parameterValues);
 
                 if (IsInstance && _object == null)
                 {
-                    if (NodePins.TryGetValue("Object", out NodePin objectNodePin))
-                    {
-                        _object = objectNodePin.Value;
-                        if (_object == null)
-                        {
-                            isCanInvoke = false;
-                        }
-                    }
-                    else
-                    {
-                        isCanInvoke = false;
-                    }
+                    isCanInvoke = TrySetObjectValue();
                 }
 
                 if (isCanInvoke)
                 {
-                    if (_methodInfo.ReturnType != typeof(void))
-                    {
-                        if (NodePins.TryGetValue("Return", out NodePin returnNodePin))
-                        {
-                            returnNodePin.Value = _methodInfo.Invoke(_object, parameterValues.ToArray());
-                        }
-                    }
-                    else
-                    {
-                        _methodInfo.Invoke(_object, parameterValues.ToArray());
-                    }
+                    InvokeMethod(parameterValues.ToArray());
                 }
             }
+        }
+
+        private void InvokeMethod(object[] parameterValues)
+        {
+            if (_methodInfo.ReturnType != typeof(void))
+            {
+                if (NodePins.TryGetValue("Return", out NodePin returnNodePin))
+                {
+                    returnNodePin.Value = _methodInfo.Invoke(_object, parameterValues);
+                }
+            }
+            else
+            {
+                _methodInfo.Invoke(_object, parameterValues);
+            }
+        }
+
+        private bool TrySetObjectValue()
+        {
+            bool isCanInvoke = true;
+            if (NodePins.TryGetValue("Object", out NodePin objectNodePin))
+            {
+                _object = objectNodePin.Value;
+                if (_object == null)
+                {
+                    isCanInvoke = false;
+                }
+            }
+            else
+            {
+                isCanInvoke = false;
+            }
+
+            return isCanInvoke;
+        }
+
+        private bool TrySetParameterValues(List<object> parameterValues)
+        {
+            bool isCanInvoke = true;
+            ParameterInfo[] parameters = _methodInfo.GetParameters();
+            foreach (var parameter in parameters)
+            {
+                if (NodePins.TryGetValue(parameter.Name, out NodePin nodePin))
+                {
+                    parameterValues.Add(nodePin.Value);
+                }
+                else
+                {
+                    isCanInvoke = false;
+                    break;
+                }
+            }
+
+            return isCanInvoke;
         }
     }
 }
