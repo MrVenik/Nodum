@@ -5,15 +5,14 @@ namespace Nodum.Calc
 {
     [Serializable]
     [Node(Group = "Calc")]
-    public class NumberNode : Node
+    public class BooleanNode : Node
     {
         public override bool IsEditable => false;
 
-        [InputOutput] public double Number { get; set; }
+        [InputOutput] public bool Boolean { get; set; }
 
-        public NumberNode(string name = "NumberNode") : base(name)
+        public BooleanNode(string name = "BooleanNode") : base(name)
         {
         }
-
     }
 }

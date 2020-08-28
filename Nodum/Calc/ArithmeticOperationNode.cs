@@ -1,33 +1,29 @@
 ﻿using Nodum.Core;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Nodum.Calc
 {
     [Serializable]
     [Node(Group = "Calc")]
-    public class MathNode : Node
+    public class ArithmeticOperationNode : Node
     {
         [Serializable]
-        public enum MathType
+        public enum ArithmeticOperationType
         {
             Add,
             Subtract,
             Multiply,
             Divide,
-            Remainder,
-            Pow,
-            Root,
+            Remainder
         }
 
         public override bool IsEditable => false;
 
-        public MathNode(string name = "Math Node") : base(name)
+        public ArithmeticOperationNode(string name = "ArithmeticOperationNode") : base(name)
         {
         }
 
-        [NodePin(IsInvokeUpdate = true, CanSetValue = true)] public MathType Operation;
+        [NodePin(IsOption = true, IsInvokeUpdate = true, CanSetValue = true)] public ArithmeticOperationType Operation { get; set; }
         [Input] public double InputA { get; set; }
         [Input] public double InputB { get; set; }
         [Output] public double Result { get; set; }
@@ -37,32 +33,26 @@ namespace Nodum.Calc
             Result = 0;
             switch (Operation)
             {
-                case MathType.Add:
+                case ArithmeticOperationType.Add:
                     Result = InputA + InputB;
                     break;
-                case MathType.Subtract:
+                case ArithmeticOperationType.Subtract:
                     Result = InputA - InputB;
                     break;
-                case MathType.Multiply:
+                case ArithmeticOperationType.Multiply:
                     Result = InputA * InputB;
                     break;
-                case MathType.Divide:
+                case ArithmeticOperationType.Divide:
                     if (InputB != 0)
                     {
                         Result = InputA / InputB;
                     }
                     break;
-                case MathType.Remainder:
+                case ArithmeticOperationType.Remainder:
                     if (InputB != 0)
                     {
                         Result = InputA % InputB;
                     }
-                    break;
-                case MathType.Pow:
-                    Result = Math.Pow(InputA, InputB);
-                    break;
-                case MathType.Root:
-                    Result = Math.Pow(InputA, 1.0 / InputB);
                     break;
             }
         }
