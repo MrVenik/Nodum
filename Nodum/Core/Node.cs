@@ -42,19 +42,34 @@ namespace Nodum.Core
 
         public string Name { get; set; }
 
+        public double PositionX { get; set; }
+        public double PositionY { get; set; }
+
         public Node Holder { get; set; }
         public virtual bool IsEditable { get; }
+        public bool IsInternal => Holder != null;
 
         [NonSerialized]
         private Action _onUpdatePins;
         public Action OnUpdatePins { get => _onUpdatePins; set => _onUpdatePins = value; }
 
-        public Dictionary<string, NodePin> NodePins { get; } = new Dictionary<string, NodePin>();
+        [NonSerialized]
+        private Action _onNodeChanged;
+        public Action OnNodeChanged { get => _onNodeChanged; set => _onNodeChanged = value; }
+
+        public Dictionary<string, NodePin> NodePins { get; protected set; } = new Dictionary<string, NodePin>();
         public IEnumerable<NodePin> AllInputNodePins => NodePins.Values.Where(p => p.IsInput);
         public IEnumerable<NodePin> AllOutputNodePins => NodePins.Values.Where(p => p.IsOutput);
         public IEnumerable<NodePin> AllOptionNodePins => NodePins.Values.Where(p => p.IsOption);
         public IEnumerable<NodePin> AllNodePins => NodePins.Values.ToList();
-        public List<Node> InternalNodes { get; private set; } = new List<Node>();
+        public List<Node> InternalNodes { get; protected set; } = new List<Node>();
+
+        public List<NodePinConnection> IncomingConnections { get; protected set; } = new List<NodePinConnection>();
+        public List<NodePinConnection> InternalIncomingConnections { get; protected set; } = new List<NodePinConnection>();
+        public List<NodePinConnection> OutgoingConnections { get; protected set; } = new List<NodePinConnection>();
+
+        private List<Node> _clones = new List<Node>();
+        public IReadOnlyList<Node> Clones => _clones;
 
         static Node()
         {
@@ -105,8 +120,9 @@ namespace Nodum.Core
             {
                 node.Holder = this;
                 InternalNodes.Add(node);
+                OnNodeChanged?.Invoke();
             }
-            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsEditable}");
+            else throw new Exception($"Can't modify Node. Node.IsEditable = {IsEditable}");
         }
 
         public void RemoveInternalNode(Node node)
@@ -114,8 +130,9 @@ namespace Nodum.Core
             if (IsEditable)
             {
                 InternalNodes.Remove(node);
+                OnNodeChanged?.Invoke();
             }
-            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsEditable}");
+            else throw new Exception($"Can't modify Node. Node.IsEditable = {IsEditable}");
         }
 
         public NodePin FindInputNodePin(Guid guid)
@@ -166,6 +183,8 @@ namespace Nodum.Core
             {
                 nodePin.OnValueChanged += UpdateAllPins;
             }
+
+            nodePin.OnNodePinChanged += () => OnNodeChanged?.Invoke();
         }
 
         public void ReConnectAllPins()
@@ -181,6 +200,15 @@ namespace Nodum.Core
                     node.ReConnectAllPins();
                 }
             }
+        }
+
+        public void ReConnectClones()
+        {
+            foreach (var clone in _clones)
+            {
+                OnNodeChanged += () => clone.ChangeNode(CloneNode(this));
+            }
+            OnNodeChanged?.Invoke();
         }
 
         protected bool ProtectedTryAddNodePin(NodePin nodePin)
@@ -200,6 +228,7 @@ namespace Nodum.Core
             {
                 NodePins[nodePin.Name].Close();
                 NodePins.Remove(nodePin.Name);
+                OnNodeChanged?.Invoke();
             }
         }
 
@@ -209,6 +238,7 @@ namespace Nodum.Core
             {
                 NodePins[nodePinName].Close();
                 NodePins.Remove(nodePinName);
+                OnNodeChanged?.Invoke();
             }
         }
 
@@ -224,6 +254,8 @@ namespace Nodum.Core
                 {
                     nodePin.OnValueChanged += Update;
                 }
+
+                OnNodeChanged?.Invoke();
             }
         }
 
@@ -233,7 +265,7 @@ namespace Nodum.Core
             {
                 return ProtectedTryAddNodePin(nodePin);
             }
-            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsEditable}");
+            else throw new Exception($"Can't modify Node. Node.IsEditable = {IsEditable}");
         }
 
         public void RemoveNodePin(NodePin nodePin)
@@ -242,7 +274,7 @@ namespace Nodum.Core
             {
                 ProtectedRemoveNodePin(nodePin);
             }
-            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsEditable}");
+            else throw new Exception($"Can't modify Node. Node.IsEditable = {IsEditable}");
         }
 
         public void RemoveNodePin(string nodePinName)
@@ -251,7 +283,7 @@ namespace Nodum.Core
             {
                 ProtectedRemoveNodePin(nodePinName);
             }
-            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsEditable}");
+            else throw new Exception($"Can't modify Node. Node.IsEditable = {IsEditable}");
         }
 
         public void SetNodePin(NodePin nodePin)
@@ -260,11 +292,11 @@ namespace Nodum.Core
             {
                 ProtectedSetNodePin(nodePin);
             }
-            else throw new Exception($"Can't modify BaseNode. Node.IsBaseNode = {IsEditable}");
+            else throw new Exception($"Can't modify Node. Node.IsEditable = {IsEditable}");
         }
 
         [OnDeserialized]
-        public void OnDeserialized(StreamingContext context)
+        public virtual void OnDeserialized(StreamingContext context)
         {
 
         }
@@ -335,9 +367,42 @@ namespace Nodum.Core
             throw new Exception("Node is null");
         }
 
-        public Node Clone()
+        public virtual Node Clone()
         {
-            return CloneNode(this);
+            Node clone = CloneNode(this);
+            _clones.Add(clone);
+            OnNodeChanged += () => clone.ChangeNode(CloneNode(this));
+            return clone;
+        }
+
+        public void ChangeNode(Node originalNode)
+        {
+            foreach (var nodePin in originalNode.AllNodePins)
+            {
+                nodePin.Node = this;
+                if (!ProtectedTryAddNodePin(nodePin))
+                {
+                    NodePin oldNodePinIncomingPin = NodePins[nodePin.Name].IncomingNodePin;
+                    ProtectedSetNodePin(nodePin);
+                    NodePins[nodePin.Name].AddIncomingNodePin(oldNodePinIncomingPin);
+                }
+            }
+
+            InternalNodes.Clear();
+            foreach (var node in originalNode.InternalNodes)
+            {
+                AddInternalNode(node);
+            }
+
+            IncomingConnections.Clear();
+            InternalIncomingConnections.Clear();
+
+            foreach (var node in InternalNodes)
+            {
+                node.ReConnectAllPins();
+            }
+
+            ReConnectAllPins();
         }
 
         public void Close()

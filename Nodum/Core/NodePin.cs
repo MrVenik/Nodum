@@ -20,7 +20,9 @@ namespace Nodum.Core
 
         public Guid Guid { get; private set; }
         public string Name { get; set; }
-        public Node Node { get; private set; }
+        public Node Node { get; set; }
+
+        private NodePinConnection _connection;
 
         public NodePin(string name, Node node, object[] attributes)
         {
@@ -84,6 +86,10 @@ namespace Nodum.Core
         private Action _onValueChanged;
         public Action OnValueChanged { get => _onValueChanged; set => _onValueChanged = value; }
 
+        [NonSerialized]
+        private Action _onNodePinChanged;
+        public Action OnNodePinChanged { get => _onNodePinChanged; set => _onNodePinChanged = value; }
+
 
         [NonSerialized]
         private Func<NodePin, bool> _canConnectTo;
@@ -102,6 +108,8 @@ namespace Nodum.Core
             {
                 OnValueChanged += inputNodePin.UpdateValue;
                 _outgoingNodePins.Add(inputNodePin);
+
+                OnNodePinChanged?.Invoke();
             }
         }
 
@@ -109,6 +117,8 @@ namespace Nodum.Core
         {
             OnValueChanged -= inputNodePin.UpdateValue;
             _outgoingNodePins.Remove(inputNodePin);
+
+            OnNodePinChanged?.Invoke();
         }
 
         public void RemoveAllOutgoingNodePins()
@@ -124,56 +134,81 @@ namespace Nodum.Core
             }
 
             _outgoingNodePins.Clear();
+
+            OnNodePinChanged?.Invoke();
         }
 
         public void AddIncomingNodePin(NodePin outputNodePin)
         {
+            if (outputNodePin != null)
+            {
+                if (IsInput)
+                {
+                    if (outputNodePin.IsOutput)
+                    {
+                        if (Node != outputNodePin.Node && Node.Holder == outputNodePin.Node.Holder)
+                        {
+                            TryAddIncomingNodePin(outputNodePin);
+                        }
+                    }
+                    else if (outputNodePin.IsInternalOutput)
+                    {
+                        if (Node.Holder == outputNodePin.Node)
+                        {
+                            TryAddIncomingNodePin(outputNodePin);
+                        }
+                    }
+                }
+                else if (IsInternalInput)
+                {
+                    if (outputNodePin.IsOutput)
+                    {
+                        if (Node == outputNodePin.Node.Holder)
+                        {
+                            TryAddIncomingNodePin(outputNodePin);
+                        }
+                    }
+                    else if (outputNodePin.IsInternalOutput)
+                    {
+                        if (Node == outputNodePin.Node)
+                        {
+                            TryAddIncomingNodePin(outputNodePin);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CreateConnection(NodePin outputNodePin)
+        {
             if (IsInput)
             {
-                if (outputNodePin.IsOutput)
-                {
-                    if (Node != outputNodePin.Node && Node.Holder == outputNodePin.Node.Holder)
-                    {
-                        TryAddIncomingNodePin(outputNodePin);
-                    }
-                }
-                else if (outputNodePin.IsInternalOutput)
-                {
-                    if (Node.Holder == outputNodePin.Node)
-                    {
-                        TryAddIncomingNodePin(outputNodePin);
-                    }
-                }
+                _connection = new NodePinConnection(outputNodePin, this);
+                Node.IncomingConnections.Add(_connection);
             }
             else if (IsInternalInput)
             {
-                if (outputNodePin.IsOutput)
-                {
-                    if (Node == outputNodePin.Node.Holder)
-                    {
-                        TryAddIncomingNodePin(outputNodePin);
-                    }
-                }
-                else if (outputNodePin.IsInternalOutput)
-                {
-                    if (Node == outputNodePin.Node)
-                    {
-                        TryAddIncomingNodePin(outputNodePin);
-                    }
-                }
+                _connection = new NodePinConnection(outputNodePin, this);
+                Node.InternalIncomingConnections.Add(_connection);
             }
-
-
         }
 
         private bool TryAddIncomingNodePin(NodePin outputNodePin)
         {
             if (CanConnectTo == null || (CanConnectTo != null && CanConnectTo(outputNodePin)))
             {
+                RemoveConnection();
+
                 IncomingNodePin?.RemoveOutgoingNodePin(this);
                 IncomingNodePin = outputNodePin;
                 IncomingNodePin.AddOutgoingNodePin(this);
+
+                CreateConnection(outputNodePin);
+
+                OnNodePinChanged?.Invoke();
+
                 UpdateValue();
+
                 return true;
             }
             else return false;
@@ -183,8 +218,26 @@ namespace Nodum.Core
         {
             if (IncomingNodePin == outputNodePin)
             {
+                RemoveConnection();
+
+                IncomingNodePin?.RemoveOutgoingNodePin(this);
                 IncomingNodePin = null;
+
+                OnNodePinChanged?.Invoke();
+
                 UpdateValue();
+            }
+        }
+
+        private void RemoveConnection()
+        {
+            if (IsInternalInput)
+            {
+                Node.InternalIncomingConnections.Remove(_connection);
+            }
+            else
+            {
+                Node.IncomingConnections.Remove(_connection);
             }
         }
 

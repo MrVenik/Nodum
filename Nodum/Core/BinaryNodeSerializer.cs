@@ -26,37 +26,30 @@ namespace Nodum.Core
                 BinaryFormatter formatter = new BinaryFormatter();
                 node = (Node)formatter.Deserialize(ms);
                 node?.ReConnectAllPins();
+                node?.Update();
             }
             return node;
         }
 
-        public Node Deserialize(string path)
+        public Node Deserialize(string nodeName)
         {
             Node node = null;
             try
             {
-                using (FileStream fs = File.OpenRead($"{path}.dat"))
+                using (FileStream fs = File.OpenRead($"{nodeName}.dat"))
                 {
                     BinaryFormatter formatter = new BinaryFormatter();
                     node = (Node)formatter.Deserialize(fs);
                     node?.ReConnectAllPins();
+                    node?.ReConnectClones();
+                    node?.Update();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.Error.WriteLine(ex.Message);
             }
             return node;
-        }
-
-        public Dictionary<string, List<Node>> DeserializeAllGroups(string groupFolderPath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Node> DeserializeGroup(string groupPath)
-        {
-            throw new NotImplementedException();
         }
 
         public void Serialize(Node node)
@@ -68,14 +61,41 @@ namespace Nodum.Core
             }
         }
 
-        public void SerializeAllGroups(Dictionary<string, List<Node>> nodeGroups)
+        public void SerializeProject(NodumProject project)
         {
-            throw new NotImplementedException();
+            using (FileStream fs = File.Create($"{project.Name}.dat"))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(fs, project);
+            }
         }
 
-        public void SerializeGroup(string groupName, params Node[] nodes)
+        public NodumProject DeserializeProject(string nodumProjectName)
         {
-            throw new NotImplementedException();
+            NodumProject nodumProject = null;
+            try
+            {
+                using (FileStream fs = File.OpenRead($"{nodumProjectName}.dat"))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    nodumProject = (NodumProject)formatter.Deserialize(fs);
+
+                    foreach (var group in nodumProject.BaseNodeGroups)
+                    {
+                        foreach (var node in group.Value)
+                        {
+                            node?.ReConnectAllPins();
+                            node?.ReConnectClones();
+                            node?.Update();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+            }
+            return nodumProject;
         }
     }
 }

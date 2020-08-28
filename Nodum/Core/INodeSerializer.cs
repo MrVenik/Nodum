@@ -7,10 +7,9 @@ namespace Nodum.Core
     public interface INodeSerializer
     {
         void Serialize(Node node);
-        void SerializeGroup(string groupName, params Node[] nodes);
-        void SerializeAllGroups(Dictionary<string, List<Node>> nodeGroups);
-        Node Deserialize(string nodePath);
-        List<Node> DeserializeGroup(string groupPath);
-        Dictionary<string, List<Node>> DeserializeAllGroups(string allGroupsPath);
+        Node Deserialize(string nodeName);
+
+        void SerializeProject(NodumProject project);
+        NodumProject DeserializeProject(string nodumProjectName);
     }
 }
