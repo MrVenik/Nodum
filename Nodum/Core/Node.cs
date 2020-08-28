@@ -13,6 +13,7 @@ namespace Nodum.Core
         {
             public virtual bool IsInput { get; set; } = false;
             public virtual bool IsOutput { get; set; } = false;
+            public virtual bool IsOption { get; set; } = false;
             public virtual bool IsInternalInput { get; set; } = false;
             public virtual bool IsInternalOutput { get; set; } = false;
             public virtual bool IsInvokeUpdate { get; set; } = false;

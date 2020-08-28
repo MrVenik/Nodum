@@ -4,6 +4,7 @@
     {
         public bool IsInput { get; set; }
         public bool IsOutput { get; set; }
+        public bool IsOption { get; set; }
         public bool IsInternalInput { get; set; }
         public bool IsInternalOutput { get; set; }
         public bool IsInvokeUpdate { get; set; }

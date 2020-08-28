@@ -10,6 +10,7 @@ namespace Nodum.Core
     {
         public bool IsInput { get; private set; }
         public bool IsOutput { get; private set; }
+        public bool IsOption { get; private set; }
         public bool IsInternalInput { get; private set; }
         public bool IsInternalOutput { get; private set; }
         public bool IsInvokeUpdate { get; private set; }
@@ -33,6 +34,7 @@ namespace Nodum.Core
                 {
                     IsInput = nodePinAttribute.IsInput;
                     IsOutput = nodePinAttribute.IsOutput;
+                    IsOption = nodePinAttribute.IsOption;
                     IsInternalInput = nodePinAttribute.IsInternalInput;
                     IsInternalOutput = nodePinAttribute.IsInternalOutput;
                     IsInvokeUpdate = nodePinAttribute.IsInvokeUpdate;
@@ -41,7 +43,7 @@ namespace Nodum.Core
                     CanGetValue = nodePinAttribute.CanGetValue;
                 }
             }
-            else throw new Exception("Node is null");
+            else throw new NodePinException("Node is null");
         }
 
         public NodePin(string name, Node node, NodePinOptions options)
@@ -54,6 +56,7 @@ namespace Nodum.Core
 
                 IsInput = options.IsInput;
                 IsOutput = options.IsOutput;
+                IsOption = options.IsOption;
                 IsInternalInput = options.IsInternalInput;
                 IsInternalOutput = options.IsInternalOutput;
                 IsInvokeUpdate = options.IsInvokeUpdate;
@@ -61,7 +64,7 @@ namespace Nodum.Core
                 CanSetValue = options.CanSetValue;
                 CanGetValue = options.CanGetValue;
             }
-            else throw new Exception("Node is null");
+            else throw new NodePinException("Node is null");
         }
 
         protected object _value;
