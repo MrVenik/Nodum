@@ -11,6 +11,6 @@ namespace Nodum.Core
         void SerializeAllGroups(Dictionary<string, List<Node>> nodeGroups);
         Node Deserialize(string nodePath);
         List<Node> DeserializeGroup(string groupPath);
-        Dictionary<string, List<Node>> DeserializeAllGroups(string groupFolderPath);
+        Dictionary<string, List<Node>> DeserializeAllGroups(string allGroupsPath);
     }
 }

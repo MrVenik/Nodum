@@ -9,7 +9,10 @@ namespace Nodum.Core
     public static class NodeCacher
     {
         private static Dictionary<Type, NodeMembersInfo> _nodeInfoList;
-        public static Dictionary<string, List<Node>> AllBaseNodes { get; } = new Dictionary<string, List<Node>>();
+
+        private static Dictionary<string, List<Node>> _allBaseNodeGroups = new Dictionary<string, List<Node>>();
+
+        public static IReadOnlyDictionary<string, List<Node>> AllBaseNodeGroups => _allBaseNodeGroups;
 
         public static NodeMembersInfo GetNodeMembers(Type type)
         {
@@ -63,13 +66,13 @@ namespace Nodum.Core
                                 group = "ungrouped";
                             }
 
-                            if (!AllBaseNodes.ContainsKey(group))
+                            if (!_allBaseNodeGroups.ContainsKey(group))
                             {
-                                AllBaseNodes.Add(group, new List<Node>());
+                                _allBaseNodeGroups.Add(group, new List<Node>());
                             }
 
                             Node node = (Node)Activator.CreateInstance(type, type.Name);
-                            AllBaseNodes[group].Add(node);
+                            _allBaseNodeGroups[group].Add(node);
                         }
                     }
                 }
