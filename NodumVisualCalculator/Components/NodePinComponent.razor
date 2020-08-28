@@ -1,60 +1,65 @@
 ﻿@if (NodePin != null)
 {
-    if (!NodePin.IsOption)
-    {
-        <div class="node">
-            <div class="node-element">
-                @if ((NodePin.IsInput && NodePin.Node.IsInternal) || (!NodePin.Node.IsInternal && NodePin.IsInternalInput))
-                {
-                    <div class="node-element-content" @onclick="@(args => OnNodePinConnect(args, NodePin))">
-                        <span id="@NodePin.GetInputElementId()" class="iconify iconify-inputpin" data-icon="mdi:circle" data-inline="false"></span>
-                    </div>
-                }
-                <div class="node-element-content input-container">
-                    <label>@NodePin.Name</label>
-                    @if (NodePin is NodePin<double> doubleNodePin)
-                    {
-                        <input type="number" @bind-value="doubleNodePin.Value" />
-                    }
-                    else if (NodePin is NodePin<int> intNodePin)
-                    {
-                        <input type="number" @bind-value="intNodePin.Value" />
-                    }
-                    else if (NodePin is NodePin<float> floatNodePin)
-                    {
-                        <input type="number" @bind-value="floatNodePin.Value" />
-                    }
-                    else if (NodePin is NodePin<string> stringNodePin)
-                    {
-                        <input type="text" @bind-value="stringNodePin.Value" />
-                    }
-                    else if (NodePin.Value is Enum)
-                    {
-                        <select @onchange="(e) => NodePin.Value = Enum.Parse(NodePin.ValueType, e.Value.ToString())">
-                            @foreach (var enumValue in Enum.GetValues(NodePin.ValueType))
-                            {
-                                if ((int)NodePin.Value == (int)enumValue)
-                                {
-                                    <option selected value="@((int)enumValue)">@enumValue.ToString()</option>
-                                }
-                                else
-                                {
-                                    <option value="@((int)enumValue)">@enumValue.ToString()</option>
-                                }
-                            }
-                        </select>
-                    }
+    <div class="node">
+        <div class="node-element">
+            @if ((NodePin.IsInput && NodePin.Node.IsInternal) || (!NodePin.Node.IsInternal && NodePin.IsInternalInput))
+            {
+                <div class="node-element-content" @onclick="@(args => OnNodePinConnect(args, NodePin))">
+                    <span id="@NodePin.GetInputElementId()" class="iconify iconify-inputpin" data-icon="mdi:circle" data-inline="false"></span>
                 </div>
-
-                @if ((NodePin.IsOutput && NodePin.Node.IsInternal) || (!NodePin.Node.IsInternal && NodePin.IsInternalOutput))
+            }
+            <div class="node-element-content input-container">
+                @if (NodePin is NodePin<double> doubleNodePin)
                 {
-                    <div class="node-element-content" @onclick="@(args => OnNodePinSelect(args, NodePin))">
-                        <span id="@NodePin.GetOutputElementId()" class="iconify iconify-outputpin" data-icon="mdi:circle" data-inline="false"></span>
-                    </div>
+                    <label>@NodePin.ValueType.Name @NodePin.Name</label>
+                    <input type="number" @bind-value="doubleNodePin.Value" />
+                }
+                else if (NodePin is NodePin<int> intNodePin)
+                {
+                    <label>@NodePin.ValueType.Name @NodePin.Name</label>
+                    <input type="number" @bind-value="intNodePin.Value" />
+                }
+                else if (NodePin is NodePin<float> floatNodePin)
+                {
+                    <label>@NodePin.ValueType.Name @NodePin.Name</label>
+                    <input type="number" @bind-value="floatNodePin.Value" />
+                }
+                else if (NodePin is NodePin<string> stringNodePin)
+                {
+                    <label>@NodePin.ValueType.Name @NodePin.Name</label>
+                    <input type="text" @bind-value="stringNodePin.Value" />
+                }
+                else if (NodePin.Value is Enum)
+                {
+                    <label>@NodePin.Name</label>
+                    <select @onchange="(e) => NodePin.Value = Enum.Parse(NodePin.ValueType, e.Value.ToString())">
+                        @foreach (var enumValue in Enum.GetValues(NodePin.ValueType))
+                        {
+                            if ((int)NodePin.Value == (int)enumValue)
+                            {
+                                <option selected value="@((int)enumValue)">@enumValue.ToString()</option>
+                            }
+                            else
+                            {
+                                <option value="@((int)enumValue)">@enumValue.ToString()</option>
+                            }
+                        }
+                    </select>
+                }
+                else
+                {
+                    <span style="font-size: 12px; color: #fff;">@NodePin.ValueType.Name @NodePin.Name = @NodePin.Value.ToString()</span>
                 }
             </div>
+
+            @if ((NodePin.IsOutput && NodePin.Node.IsInternal) || (!NodePin.Node.IsInternal && NodePin.IsInternalOutput))
+            {
+                <div class="node-element-content" @onclick="@(args => OnNodePinSelect(args, NodePin))">
+                    <span id="@NodePin.GetOutputElementId()" class="iconify iconify-outputpin" data-icon="mdi:circle" data-inline="false"></span>
+                </div>
+            }
         </div>
-    }
+    </div>
 }
 
 @code {
