@@ -1,39 +1,39 @@
-﻿@if (VisualNodePin != null && VisualNodePin.NodePin != null)
+﻿@if (NodePin != null)
 {
-    if (VisualNodePin.Showed)
+    if (!NodePin.IsOption)
     {
         <div class="node">
             <div class="node-element">
-                @if ((VisualNodePin.NodePin.IsInput && !VisualNodePin.IsInternal) || (VisualNodePin.IsInternal && VisualNodePin.NodePin.IsInternalInput))
+                @if ((NodePin.IsInput && NodePin.Node.IsInternal) || (!NodePin.Node.IsInternal && NodePin.IsInternalInput))
                 {
-                    <div class="node-element-content" @onclick="@(args => OnNodePinConnect(args, VisualNodePin))">
-                        <span id="@VisualNodePin.InputElementId" class="iconify iconify-inputpin" data-icon="mdi:circle" data-inline="false"></span>
+                    <div class="node-element-content" @onclick="@(args => OnNodePinConnect(args, NodePin))">
+                        <span id="@NodePin.GetInputElementId()" class="iconify iconify-inputpin" data-icon="mdi:circle" data-inline="false"></span>
                     </div>
                 }
                 <div class="node-element-content input-container">
-                    <label>@VisualNodePin.NodePin.Name</label>
-                    @if (VisualNodePin.NodePin is NodePin<double> doubleNodePin)
+                    <label>@NodePin.Name</label>
+                    @if (NodePin is NodePin<double> doubleNodePin)
                     {
                         <input type="number" @bind-value="doubleNodePin.Value" />
                     }
-                    else if (VisualNodePin.NodePin is NodePin<int> intNodePin)
+                    else if (NodePin is NodePin<int> intNodePin)
                     {
                         <input type="number" @bind-value="intNodePin.Value" />
                     }
-                    else if (VisualNodePin.NodePin is NodePin<float> floatNodePin)
+                    else if (NodePin is NodePin<float> floatNodePin)
                     {
                         <input type="number" @bind-value="floatNodePin.Value" />
                     }
-                    else if (VisualNodePin.NodePin is NodePin<string> stringNodePin)
+                    else if (NodePin is NodePin<string> stringNodePin)
                     {
                         <input type="text" @bind-value="stringNodePin.Value" />
                     }
-                    else if (VisualNodePin.NodePin.Value is Enum)
+                    else if (NodePin.Value is Enum)
                     {
-                        <select @onchange="(e) => VisualNodePin.NodePin.Value = Enum.Parse(VisualNodePin.NodePin.ValueType, e.Value.ToString())">
-                            @foreach (var enumValue in Enum.GetValues(VisualNodePin.NodePin.ValueType))
+                        <select @onchange="(e) => NodePin.Value = Enum.Parse(NodePin.ValueType, e.Value.ToString())">
+                            @foreach (var enumValue in Enum.GetValues(NodePin.ValueType))
                             {
-                                if ((int)VisualNodePin.NodePin.Value == (int)enumValue)
+                                if ((int)NodePin.Value == (int)enumValue)
                                 {
                                     <option selected value="@((int)enumValue)">@enumValue.ToString()</option>
                                 }
@@ -46,10 +46,10 @@
                     }
                 </div>
 
-                @if ((VisualNodePin.NodePin.IsOutput && !VisualNodePin.IsInternal) || (VisualNodePin.IsInternal && VisualNodePin.NodePin.IsInternalOutput))
+                @if ((NodePin.IsOutput && NodePin.Node.IsInternal) || (!NodePin.Node.IsInternal && NodePin.IsInternalOutput))
                 {
-                    <div class="node-element-content" @onclick="@(args => OnNodePinSelect(args, VisualNodePin))">
-                        <span id="@VisualNodePin.OutputElementId" class="iconify iconify-outputpin" data-icon="mdi:circle" data-inline="false"></span>
+                    <div class="node-element-content" @onclick="@(args => OnNodePinSelect(args, NodePin))">
+                        <span id="@NodePin.GetOutputElementId()" class="iconify iconify-outputpin" data-icon="mdi:circle" data-inline="false"></span>
                     </div>
                 }
             </div>
@@ -59,9 +59,9 @@
 
 @code {
     [Parameter]
-    public VisualNodePin VisualNodePin { get; set; }
+    public NodePin NodePin { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, VisualNodePin> OnNodePinSelect { get; set; }
+    public Action<MouseEventArgs, NodePin> OnNodePinSelect { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, VisualNodePin> OnNodePinConnect { get; set; }
+    public Action<MouseEventArgs, NodePin> OnNodePinConnect { get; set; }
 }

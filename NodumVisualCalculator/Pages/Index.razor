@@ -1,17 +1,12 @@
-﻿@page "/"
+﻿@inject NodumCalcService NodumCalcService
 
-<MainNodeComponent MainNode="@_mainNode" />
+@page "/"
+
+<MainNodeComponent MainNode="@NodumCalcService.MainProject.MainNode" />
 
 @code {
-    private VisualNode _mainNode = new VisualNode("Main Node");
-
     protected override void OnInitialized()
     {
-        BinaryNodeSerializer nodeSerializer = new BinaryNodeSerializer();
-        Node mainNode = nodeSerializer.Deserialize("Main Node");
-        if (mainNode != null)
-        {
-            _mainNode = new VisualNode(mainNode, null);
-        }
+
     }
 }

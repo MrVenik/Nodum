@@ -1,7 +1,7 @@
 ﻿<ModalWindow @ref="_modalWindow">
     <div class="modal-window">
         <div class="modal-header">
-            <div class="modal-header-element modal-header-text">Edit @_currentVisualNode?.Name</div>
+            <div class="modal-header-element modal-header-text">Edit @_currentNode?.Name</div>
             <div class="modal-header-element" @onclick="() => _modalWindow.Close()">
                 <span class="iconify iconify-main" data-icon="mdi:close" data-inline="false"></span>
             </div>
@@ -21,27 +21,27 @@
 </ModalWindow>
 
 @code {
-    private VisualNode _currentVisualNode;
+    private Node _currentNode;
 
     private ModalWindow _modalWindow;
 
     private string _nodeName;
 
-    public void Open(VisualNode visualNode)
+    public void Open(Node node)
     {
-        _currentVisualNode = visualNode;
+        _currentNode = node;
         _modalWindow.Open();
     }
 
     private void SaveNode()
     {
-        if (_currentVisualNode != null)
+        if (_currentNode != null)
         {
-            _currentVisualNode.Name = _nodeName;
+            _currentNode.Name = _nodeName;
         }
 
         _nodeName = string.Empty;
         _modalWindow.Close();
-        _currentVisualNode = null;
+        _currentNode = null;
     }
 }

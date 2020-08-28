@@ -1,4 +1,6 @@
 ﻿@inject IJSRuntime JSRuntime
+@inject NodumCalcService NodumCalcService
+
 
 <NodeCreatorComponent @ref="_nodeCreator" />
 <NodeEditorComponent @ref="_nodeEditor" />
@@ -18,22 +20,22 @@
                     <DropdownElement HideOnClick="true" OnClick="@((e) => _mainSidebar.OpenOrClose())">
                         Open Nodes List
                     </DropdownElement>
+                    <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open())">
+                        Create New Node
+                    </DropdownElement>
                     <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeEditor.Open(_currentMainNode))">
                         Edit Node
                     </DropdownElement>
                     <DropdownElement HideOnClick="true" OnClick="@((e) => Save())">
                         Save Node
                     </DropdownElement>
-                    @if (_isEditor)
-                    {
-                        <DropdownElement HideOnClick="true" OnClick="@((e) => _nodePinCreator.Open(_currentMainNode))">
-                            Add New NodePin
-                        </DropdownElement>
-                    }
+                    <DropdownElement HideOnClick="true" Showed="_isEditor" OnClick="@((e) => _nodePinCreator.Open(_currentMainNode))">
+                        Add New NodePin
+                    </DropdownElement>
                 </DropdownContent>
             </Dropdown>
 
-            <div class="main-node-header-element" style="display: @(_currentMainNode == MainNode ? "none" : "block")" @onclick="() => EditNode(_currentMainNode.Holder)">
+            <div class="main-node-header-element" style="display: @(_currentMainNode == MainNode ? "none" : "block")" @onclick="() => EditNode(MainNode)">
                 <span class="iconify iconify-main" data-icon="mdi:arrow-left" data-inline="false"></span>
             </div>
             <div class="main-node-header-element main-node-header-text">@_currentMainNode.Name</div>
@@ -48,7 +50,7 @@
         <div class="main-node-body">
 
             <Sidebar @ref="_mainSidebar">
-                @foreach (var group in NodeCacher.AllBaseNodes)
+                @foreach (var group in NodumCalcService.MainProject.BaseNodeGroups)
                 {
                     <SidebarTab>
                         <SidebarTabHeader>
@@ -57,9 +59,68 @@
                         <SidebarTabElements>
                             @foreach (var node in group.Value)
                             {
-                                <SidebarTabElement OnClick="@((e) => _nodeCreator.Open(_currentMainNode, node.Clone()))">
-                                    Add @node.Name
-                                </SidebarTabElement>
+                                @if (node.IsEditable)
+                                {
+                                    <SidebarTabElement>
+                                        <Dropdown>
+                                            <DropdownTrigger>
+                                                @node.Name
+                                            </DropdownTrigger>
+                                            <DropdownContent>
+                                                <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode, node.Clone()))">
+                                                    Create
+                                                </DropdownElement>
+                                                <DropdownElement HideOnClick="true" OnClick="@((e) => EditNode(node))">
+                                                    Edit
+                                                </DropdownElement>
+                                            </DropdownContent>
+                                        </Dropdown>
+                                    </SidebarTabElement>
+                                }
+                                else
+                                {
+                                    <SidebarTabElement OnClick="@((e) => _nodeCreator.Open(_currentMainNode, node.Clone()))">
+                                        @node.Name
+                                    </SidebarTabElement>
+                                }
+                            }
+                        </SidebarTabElements>
+                    </SidebarTab>
+
+                }
+                @foreach (var group in NodumCalcService.MainProject.NodeGroups)
+                {
+                    <SidebarTab>
+                        <SidebarTabHeader>
+                            @group.Key
+                        </SidebarTabHeader>
+                        <SidebarTabElements>
+                            @foreach (var node in group.Value)
+                            {
+                                @if (node.IsEditable)
+                                {
+                                    <SidebarTabElement>
+                                        <Dropdown>
+                                            <DropdownTrigger>
+                                                @node.Name
+                                            </DropdownTrigger>
+                                            <DropdownContent>
+                                                <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode, node.Clone()))">
+                                                    Create
+                                                </DropdownElement>
+                                                <DropdownElement HideOnClick="true" OnClick="@((e) => EditNode(node))">
+                                                    Edit
+                                                </DropdownElement>
+                                            </DropdownContent>
+                                        </Dropdown>
+                                    </SidebarTabElement>
+                                }
+                                else
+                                {
+                                    <SidebarTabElement OnClick="@((e) => _nodeCreator.Open(_currentMainNode, node.Clone()))">
+                                        @node.Name
+                                    </SidebarTabElement>
+                                }
                             }
                         </SidebarTabElements>
                     </SidebarTab>
@@ -76,7 +137,7 @@
                             <stop offset="100%" style="stop-color: red; stop-opacity: 1" />
                         </linearGradient>
                     </defs>
-                    <path id="@($"{connection.FromPin.OutputElementId}+{connection.ToPin.InputElementId}")" class="node-line" fill="none" stroke="url(#grad1)" stroke-width="8" d="M 0, 0" />
+                    <path id="@($"{connection.FromPin.GetOutputElementId()}+{connection.ToPin.GetInputElementId()}")" class="node-line" fill="none" stroke="url(#grad1)" stroke-width="8" d="M 0, 0" />
                 </svg>
             }
 
@@ -87,13 +148,13 @@
                         <stop offset="100%" style="stop-color: red; stop-opacity: 1" />
                     </linearGradient>
                 </defs>
-                <path fill="none" stroke="url(#grad1)" stroke-width="3" d="@_mainLine.Curve" />
+                <path fill="none" stroke="url(#grad1)" stroke-width="3 " d="@_mainLine.Curve" />
             </svg>
 
             <DraggableZone Height="100%" Width="100%">
-                @foreach (var visualNode in _currentMainNode.InternalVisualNodes)
+                @foreach (var node in _currentMainNode.InternalNodes)
                 {
-                    <DraggableWindow @key="visualNode" X="@visualNode.Position.X" Y="@visualNode.Position.Y" AllowDrag="true" OnDragingWindow="@((w) => OnNodeDragging(w, visualNode))">
+                    <DraggableWindow @key="node" X="@node.PositionX" Y="@node.PositionY" AllowDrag="true" OnDragingWindow="@((w) => OnNodeDragging(w, node))">
                         <WindowHeader>
                             <div class="node-window-header">
 
@@ -104,35 +165,30 @@
                                         </div>
                                     </DropdownTrigger>
                                     <DropdownContent>
-                                        @if (visualNode.Node.IsEditable)
-                                        {
-                                            <DropdownElement HideOnClick="true" OnClick="@((e) => EditNode(visualNode))">
-                                                Edit Node
-                                            </DropdownElement>
-                                        }
-                                        else
-                                        {
-                                            <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeEditor.Open(visualNode))">
-                                                Edit Node
-                                            </DropdownElement>
-                                        }
+                                        <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeEditor.Open(node))">
+                                            Edit Node
+                                        </DropdownElement>
+                                        <DropdownElement HideOnClick="true" OnClick="@((e) => EditNode(node))">
+                                            Debug Node
+                                        </DropdownElement>
                                     </DropdownContent>
                                 </Dropdown>
 
-                                <div class="node-window-header-element node-window-header-text">@visualNode.Name (@visualNode.Position.X, @visualNode.Position.Y)</div>
-                                <div class="node-window-header-element" @onclick="@(() => CloseWindow(visualNode))">
+                                <div class="node-window-header-element node-window-header-text">@node.Name (@node.PositionX, @node.PositionY)</div>
+                                <div class="node-window-header-element" @onclick="@(() => CloseNode(node))">
                                     <span class="iconify iconify-small" data-icon="mdi:close" data-inline="false"></span>
                                 </div>
                             </div>
                         </WindowHeader>
                         <WindowContent>
                             <div class="node-window">
-                                <NodeComponent VisualNode="@visualNode" OnNodePinSelect="@((a, n) => OnNodePinSelect(a, n))" OnNodePinConnect="@((a, n) => OnNodePinConnect(a, n))" />
+                                <NodeComponent Node="@node" OnNodePinSelect="@((a, n) => OnNodePinSelect(a, n))" OnNodePinConnect="@((a, n) => OnNodePinConnect(a, n))" />
                             </div>
                         </WindowContent>
                     </DraggableWindow>
                 }
             </DraggableZone>
+
 
         </div>
     </div>
@@ -140,7 +196,7 @@
 
 @code {
     [Parameter]
-    public VisualNode MainNode { get; set; }
+    public Node MainNode { get; set; }
     [Parameter]
     public bool CloseButtonShowed { get; set; }
     [Parameter]
@@ -148,9 +204,9 @@
 
     private bool _isEditor = false;
 
-    private VisualNode _currentMainNode;
+    private Node _currentMainNode;
 
-    private VisualNodePin _selectedNodePin;
+    private NodePin _selectedNodePin;
 
     private Sidebar _mainSidebar;
 
@@ -171,7 +227,8 @@
     private void Save()
     {
         BinaryNodeSerializer nodeSerializer = new BinaryNodeSerializer();
-        nodeSerializer.Serialize(_currentMainNode.Node);
+        nodeSerializer.Serialize(_currentMainNode);
+        NodumCalcService.Save();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -180,20 +237,21 @@
         //await UpdateLines();
     }
 
-    private void OnNodePinSelect(MouseEventArgs args, VisualNodePin visualNodePin)
+    private void OnNodePinSelect(MouseEventArgs args, NodePin nodePin)
     {
-        _mainLine.From = new Position() { X = args.ClientX, Y = args.ClientY };
+        _mainLine.FromX = args.ClientX;
+        _mainLine.FromY = args.ClientY;
 
         _isMainLineDrawing = true;
 
-        _selectedNodePin = visualNodePin;
+        _selectedNodePin = nodePin;
     }
 
-    private async void OnNodePinConnect(MouseEventArgs args, VisualNodePin visualNodePin)
+    private async void OnNodePinConnect(MouseEventArgs args, NodePin nodePin)
     {
         StopDrawingMainLine(args);
 
-        visualNodePin.ConnectToNodePin(_selectedNodePin);
+        nodePin.AddIncomingNodePin(_selectedNodePin);
 
         UpdateConnections();
 
@@ -204,7 +262,8 @@
     {
         if (_isMainLineDrawing)
         {
-            _mainLine.To = new Position() { X = args.ClientX, Y = args.ClientY };
+            _mainLine.ToX = args.ClientX;
+            _mainLine.ToY = args.ClientY;
         }
     }
 
@@ -225,32 +284,28 @@
     private void UpdateConnections()
     {
         _allConnections.Clear();
-        foreach (var visualNode in _currentMainNode.InternalVisualNodes)
+        _allConnections.AddRange(_currentMainNode.InternalIncomingConnections);
+        foreach (var node in _currentMainNode.InternalNodes)
         {
-            _allConnections.AddRange(visualNode.IncomingConnections);
+            _allConnections.AddRange(node.IncomingConnections);
         }
 
         StateHasChanged();
     }
 
-    private void CreateNewNode(Node node)
+    private void CloseNode(Node node)
     {
-        _currentMainNode.AddNode(new VisualNode(node, _currentMainNode));
-    }
-
-    private void CloseWindow(VisualNode window)
-    {
-        _currentMainNode.RemoveNode(window);
+        _currentMainNode.RemoveInternalNode(node);
 
         UpdateConnections();
     }
 
-    private async void EditNode(VisualNode nodeHolder)
+    private async void EditNode(Node node = null)
     {
-        if (nodeHolder != null)
+        if (node != null && node != MainNode)
         {
             _isEditor = true;
-            _currentMainNode = nodeHolder;
+            _currentMainNode = node;
         }
         else
         {
@@ -262,10 +317,10 @@
         await UpdateLines();
     }
 
-    private void OnNodeDragging(DraggableWindow nodeWindow, VisualNode node)
+    private void OnNodeDragging(DraggableWindow nodeWindow, Node node)
     {
-        node.Position.X = nodeWindow.PositionX;
-        node.Position.Y = nodeWindow.PositionY;
+        node.PositionX = nodeWindow.PositionX;
+        node.PositionY = nodeWindow.PositionY;
 
         UpdateConnections();
     }

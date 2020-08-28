@@ -1,16 +1,16 @@
-﻿@if (VisualNode != null)
+﻿@if (Node != null)
 {
-    foreach (var pin in VisualNode.VisualNodePins)
+    foreach (var pin in Node.AllNodePins)
     {
-        <NodePinComponent @key="pin" VisualNodePin="@pin" OnNodePinSelect="@((a, n) => OnNodePinSelect(a, n))" OnNodePinConnect="@((a, n) => OnNodePinConnect(a, n))" />
+        <NodePinComponent @key="pin" NodePin="@pin" OnNodePinSelect="@((a, n) => OnNodePinSelect(a, n))" OnNodePinConnect="@((a, n) => OnNodePinConnect(a, n))" />
     }
 }
 
 @code {
     [Parameter]
-    public VisualNode VisualNode { get; set; }
+    public Node Node { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, VisualNodePin> OnNodePinSelect { get; set; }
+    public Action<MouseEventArgs, NodePin> OnNodePinSelect { get; set; }
     [Parameter]
-    public Action<MouseEventArgs, VisualNodePin> OnNodePinConnect { get; set; }
+    public Action<MouseEventArgs, NodePin> OnNodePinConnect { get; set; }
 }

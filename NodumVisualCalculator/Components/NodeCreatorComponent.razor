@@ -1,4 +1,6 @@
-﻿<ModalWindow @ref="_modalWindow">
+﻿@inject NodumCalcService NodumCalcService
+
+<ModalWindow @ref="_modalWindow">
     <div class="modal-window">
         <div class="modal-header">
             <div class="modal-header-element modal-header-text">Create New Node</div>
@@ -9,7 +11,7 @@
         <div class="modal-window-element">
             <div class="modal-window-element-content input-container">
                 <div class="node-header-text">Name: </div>
-                <input type="text" @bind-value="_nodeName" />
+                <input type="text" @bind-value="_nodeToAddName" />
             </div>
         </div>
         <div class="modal-window-element">
@@ -21,46 +23,45 @@
 </ModalWindow>
 
 @code {
-    private VisualNode _currentVisualNode;
     private Node _nodeToAdd;
+    private Node _node;
 
     private ModalWindow _modalWindow;
 
-    private string _nodeName;
+    private string _nodeToAddName;
 
-    public void Open(VisualNode visualNode)
+    public void Open()
     {
-        _currentVisualNode = visualNode;
+        _nodeToAdd = new EmptyNode();
         _modalWindow.Open();
     }
 
-    public void Open(VisualNode visualNode, Node node)
+    public void Open(Node node, Node nodeToAdd)
     {
-        _currentVisualNode = visualNode;
-        _nodeToAdd = node;
-        _nodeName = node.Name;
+        _node = node;
+        _nodeToAdd = nodeToAdd;
         _modalWindow.Open();
     }
 
     private void CreateNewNode()
     {
-        if (_currentVisualNode != null)
+        if (_nodeToAdd != null)
         {
-            if (_nodeToAdd != null)
+            _nodeToAdd.Name = _nodeToAddName;
+            if (_node != null)
             {
-                _nodeToAdd.Name = _nodeName;
-                _currentVisualNode.AddNode(new VisualNode(_nodeToAdd, _currentVisualNode));
+                _node.AddInternalNode(_nodeToAdd);
             }
             else
             {
-                _currentVisualNode.AddNode(new VisualNode(_nodeName, _currentVisualNode));
+                NodumCalcService.MainProject.AddNode(_nodeToAdd, "Custom");
             }
         }
 
 
-        _nodeName = string.Empty;
+        _nodeToAddName = string.Empty;
         _nodeToAdd = null;
+        _node = null;
         _modalWindow.Close();
-        _currentVisualNode = null;
     }
 }

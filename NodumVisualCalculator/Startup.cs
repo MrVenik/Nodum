@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Nodum.Core;
 using NodumVisualCalculator.Services;
 
 namespace NodumVisualCalculator
@@ -28,6 +29,7 @@ namespace NodumVisualCalculator
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddScoped<INodeSerializer, BinaryNodeSerializer>();
             services.AddScoped<NodumCalcService>();
         }
 

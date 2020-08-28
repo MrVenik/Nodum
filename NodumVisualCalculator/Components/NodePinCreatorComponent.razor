@@ -48,7 +48,7 @@
 </ModalWindow>
 
 @code {
-    private VisualNode _currentVisualNode;
+    private Node _currentNode;
 
     private ModalWindow _modalWindow;
 
@@ -57,26 +57,30 @@
     private bool _isInput;
     private bool _isOutput;
 
-    public void Open(VisualNode visualNode)
+    public void Open(Node node)
     {
-        _currentVisualNode = visualNode;
+        _currentNode = node;
         _modalWindow.Open();
     }
 
     private void CreateNewNodePin()
     {
-        if (_currentVisualNode != null)
+        if (_currentNode != null)
         {
             bool isInvokeUpdate = _isInput && !_isOutput;
             NodePinOptions options = new NodePinOptions() { IsInput = _isInput, IsOutput = _isOutput, IsInternalInput = _isOutput, IsInternalOutput = _isInput, IsInvokeUpdate = isInvokeUpdate };
-            NodePin nodePin = NodePinBuilder.BuildNodePin(_nodePinName, _currentVisualNode.Node, typeof(double), options);
-            _currentVisualNode.AddVisualNodePin(nodePin);
+            NodePin nodePin = NodePinBuilder.BuildNodePin(_nodePinName, _currentNode, typeof(double), options);
+
+            if (_currentNode.TryAddNodePin(nodePin))
+            {
+                _currentNode.AddInternalNode(new NodePinNode(nodePin));
+            }
         }
 
         _nodePinName = string.Empty;
         _isInput = false;
         _isOutput = false;
         _modalWindow.Close();
-        _currentVisualNode = null;
+        _currentNode = null;
     }
 }

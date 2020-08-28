@@ -9,7 +9,7 @@
     <div class="dropdown-content" style="@(_dropdownShowed ? "display: block;" : "display: none;")">
         @foreach (var element in Elements)
         {
-            <div class="dropdown-content-element" @onclick="@((e) => OnElementClick(element, e))">
+            <div class="dropdown-content-element" style="@(element.Showed ? "display: block;" : "display: none;")" @onclick="@((e) => OnElementClick(element, e))">
                 @element.ChildContent
             </div>
         }
