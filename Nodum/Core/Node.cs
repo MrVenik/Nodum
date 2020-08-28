@@ -52,6 +52,7 @@ namespace Nodum.Core
         public Dictionary<string, NodePin> NodePins { get; } = new Dictionary<string, NodePin>();
         public IEnumerable<NodePin> AllInputNodePins => NodePins.Values.Where(p => p.IsInput);
         public IEnumerable<NodePin> AllOutputNodePins => NodePins.Values.Where(p => p.IsOutput);
+        public IEnumerable<NodePin> AllOptionNodePins => NodePins.Values.Where(p => p.IsOption);
         public IEnumerable<NodePin> AllNodePins => NodePins.Values.ToList();
         public List<Node> InternalNodes { get; private set; } = new List<Node>();
 
