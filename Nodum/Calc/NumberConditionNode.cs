@@ -5,6 +5,8 @@ using System.Text;
 
 namespace Nodum.Calc
 {
+    [Serializable]
+    [Node(Group = "Calc")]
     public class NumberConditionNode : Node
     {
         public override bool IsEditable => false;
