@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Nodum.Core
 {
+    [Serializable]
     public class NodumProject
     {
         public string Name { get; set; }
