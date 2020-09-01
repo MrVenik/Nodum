@@ -15,14 +15,30 @@ namespace Nodum.Calc
         {
         }
 
-        [Input] public bool Condtition { get; set; }
-        [Input] public double IfTrue { get; set; }
-        [Input] public double Else { get; set; }
+        [Input] public bool IfCondtition { get; set; }
+        [Input] public double IfTrueValue { get; set; }
+
+        [Input] public bool ElseIfCondtition { get; set; }
+        [Input] public double ElseIfTrueValue { get; set; }
+
+        [Input] public double ElseValue { get; set; }
+
         [Output] public double Result { get; set; }
 
         public override void UpdateValue()
         {
-            Result = Condtition ? IfTrue : Else;
+            if (IfCondtition)
+            {
+                Result = IfTrueValue;
+            }
+            else if (ElseIfCondtition)
+            {
+                Result = ElseIfTrueValue;
+            }
+            else
+            {
+                Result = ElseValue;
+            }
         }
     }
 }

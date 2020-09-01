@@ -96,10 +96,6 @@ namespace Nodum.Core
             {
                 _baseNodeGroups = new Dictionary<string, List<Node>>();
             }
-            if (_nodeGroups == null)
-            {
-                _nodeGroups = new Dictionary<string, List<Node>>();
-            }
         }
     }
 }

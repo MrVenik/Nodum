@@ -60,7 +60,14 @@ namespace Nodum.Calc
                 MatchEvaluator evaluator = new MatchEvaluator(MatchReplacer);
                 string math = Regex.Replace(RegexOperation, @"\b[^\d]\w+", evaluator).Trim();
 
-                Result = Convert.ToDouble(new DataTable().Compute(math, ""));
+                try
+                {
+                    Result = Convert.ToDouble(new DataTable().Compute(math, ""));
+                }
+                catch (Exception)
+                {
+                }
+
             }
         }
 
