@@ -1,89 +1,79 @@
 ﻿using System;
-using Nodum.Node;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
+using Nodum.Core;
+using Nodum.Calc;
+using Nodum.Reflection;
+using System.Reflection;
 
 namespace NodumConsoleApp
 {
-    public class MathNode : Node
-    {
-        public enum MathType
-        {
-            Add,
-            Subtract,
-            Multiply,
-            Divide
-        }
-
-        [NodePin(IsInvokeUpdate = true)] public MathType Type;
-        [Input] public int InputA;
-        [Input] public int InputB;
-        [Output] public int Result;
-
-        public MathNode()
-            : base()
-        {
-        }
-
-        public override void UpdateValue()
-        {
-            Result = 0;
-            switch (Type)
-            {
-                case MathType.Add:
-                    Result = InputA + InputB;
-                    break;
-                case MathType.Subtract:
-                    Result = InputA - InputB;
-                    break;
-                case MathType.Multiply:
-                    Result = InputA * InputB;
-                    break;
-                case MathType.Divide:
-                    if (InputB != 0)
-                    {
-                        Result = InputA / InputB;
-                    }
-                    break;
-            }
-        }
-    }
-
-    public class IntNode : Node
-    {
-        [InputOutput] public int Number;
-    }
-
     class Program
     {
         static void Main(string[] args)
         {
-            MathNode math = new MathNode();
-            IntNode intNode = new IntNode();
-            IntNode intNode1 = new IntNode();
+            List<Node> nodes = new List<Node>();
 
-            Debug(math);
-            Debug(intNode);
-            Debug(intNode1);
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            intNode.AllNodePins[0].Value = 20;
-            math.AllNodePins[1].AddIncomingNodePin(intNode.AllNodePins[0]);
-            math.AllNodePins[2].AddIncomingNodePin(intNode.AllNodePins[0]);
-            intNode1.AllNodePins[0].AddIncomingNodePin(math.AllNodePins[3]);
+            Type type = typeof(Math);
+            
+            nodes.AddRange(CreateMethodNodesForType(type, Console.Out));
 
-            Debug(math);
-            Debug(intNode);
-            Debug(intNode1);
+            foreach (var node in nodes)
+            {
+                Debug(node);
+            }
         }
 
-        private static void Debug(Node node)
+        private static List<Node> CreateMethodNodesForType(Type type, TextWriter errorStrem)
         {
+            List<Node> nodes = new List<Node>();
+            MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            foreach (var method in methods)
+            {
+                try
+                {
+                    nodes.Add(new MethodNode(method, null));
+                }
+                catch (Exception ex)
+                {
+                    errorStrem.WriteLine(ex.Message);
+                }
+            }
+            return nodes;
+        }
+
+        private static void Debug(Node node, bool withGuid = false)
+        {
+            string nodeStr = GetNodeString(node, withGuid);
+            Console.WriteLine(nodeStr);
+        }
+
+        private static string GetNodeString(Node node, bool withGuid = false)
+        {
+            string nodeStr = $"\n{node.GetType()} {node.Name} {{\n";
             foreach (var pin in node.AllNodePins)
             {
-                Console.WriteLine($"{pin.GetType()}");
-                Console.WriteLine($"{pin.Name}");
-                Console.WriteLine($"{pin.Value}");
-                Console.WriteLine($"{pin.ValueType}");
-                Console.WriteLine();
+                if (withGuid)
+                {
+                    nodeStr += $"\t{pin.ValueType} {pin.Name}_{pin.Guid} = {pin.Value};\n";
+                }
+                else
+                {
+                    nodeStr += $"\t{pin.ValueType} {pin.Name} = {pin.Value};\n";
+                }
             }
+            foreach (var item in node.InternalNodes)
+            {
+                nodeStr += GetNodeString(item, withGuid);
+            }
+            nodeStr += "}\n";
+            return nodeStr;
         }
     }
 }
