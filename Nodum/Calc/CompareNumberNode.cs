@@ -56,7 +56,27 @@ namespace Nodum.Calc
                 default:
                     break;
             }
+        }
 
+        public override string GetStringForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                if (nodePin.Name == "Result")
+                {
+                    return Operation switch
+                    {
+                        CompareOperationType.Equals => $"({GetStringForNodePin(NodePins["InputA"])} == {GetStringForNodePin(NodePins["InputB"])})",
+                        CompareOperationType.NotEquals => $"({GetStringForNodePin(NodePins["InputA"])} != {GetStringForNodePin(NodePins["InputB"])})",
+                        CompareOperationType.LessThan => $"({GetStringForNodePin(NodePins["InputA"])} < {GetStringForNodePin(NodePins["InputB"])})",
+                        CompareOperationType.GreaterThan => $"({GetStringForNodePin(NodePins["InputA"])} > {GetStringForNodePin(NodePins["InputB"])})",
+                        CompareOperationType.LessThanOrEqual => $"({GetStringForNodePin(NodePins["InputA"])} <= {GetStringForNodePin(NodePins["InputB"])})",
+                        CompareOperationType.GreaterThanOrEqual => $"({GetStringForNodePin(NodePins["InputA"])} >= {GetStringForNodePin(NodePins["InputB"])})",
+                        _ => $"({GetStringForNodePin(NodePins["InputA"])} == {GetStringForNodePin(NodePins["InputB"])})",
+                    };
+                }
+            }
+            return base.GetStringForNodePin(nodePin);
         }
     }
 }

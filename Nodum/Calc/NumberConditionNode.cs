@@ -40,5 +40,17 @@ namespace Nodum.Calc
                 Result = ElseValue;
             }
         }
+
+        public override string GetStringForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                if (nodePin.Name == "Result")
+                {
+                    return $"({GetStringForNodePin(NodePins["IfCondtition"])} ? {GetStringForNodePin(NodePins["IfTrueValue"])} : ({GetStringForNodePin(NodePins["ElseIfCondtition"])} ? {GetStringForNodePin(NodePins["ElseIfTrueValue"])} : {GetStringForNodePin(NodePins["ElseValue"])}))";
+                }
+            }
+            return base.GetStringForNodePin(nodePin);
+        }
     }
 }

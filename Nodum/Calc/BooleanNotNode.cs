@@ -7,8 +7,8 @@ namespace Nodum.Calc
     [Node(Group = "Calc")]
     public class BooleanNotNode : Node
     {
-        [Input] public double Boolean { get; set; }
-        [Output] public double Not { get; set; }
+        [Input] public bool Boolean { get; set; }
+        [Output] public bool Not { get; set; }
 
         public BooleanNotNode(string name = "BooleanNotNode") : base(name)
         {
@@ -16,7 +16,19 @@ namespace Nodum.Calc
 
         public override void UpdateValue()
         {
-            Not = -Boolean;
+            Not = !Boolean;
+        }
+
+        public override string GetStringForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                if (nodePin.Name == "Not")
+                {
+                    return $"!{GetStringForNodePin(NodePins["Boolean"])}";
+                }
+            }
+            return base.GetStringForNodePin(nodePin);
         }
     }
 }

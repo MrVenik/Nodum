@@ -20,5 +20,17 @@ namespace Nodum.Calc
         {
             Negate = -Number;
         }
+
+        public override string GetStringForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                if (nodePin.Name == "Negate")
+                {
+                    return $"-{GetStringForNodePin(NodePins["Number"])}";
+                }
+            }
+            return base.GetStringForNodePin(nodePin);
+        }
     }
 }

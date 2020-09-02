@@ -405,6 +405,15 @@ namespace Nodum.Core
             ReConnectAllPins();
         }
 
+        public virtual string GetStringForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                return nodePin.IncomingNodePin == null ? nodePin.Name : nodePin.IncomingNodePin.Node.GetStringForNodePin(nodePin.IncomingNodePin);
+            }
+            else throw new NodeException($"Can't get string for nodePin {nodePin.Name}. NodePin is not in this Node");
+        }
+
         public void Close()
         {
             foreach (var pin in AllNodePins)

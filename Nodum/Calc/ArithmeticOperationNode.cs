@@ -83,5 +83,30 @@ namespace Nodum.Calc
                     break;
             }
         }
+
+        public override string GetStringForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                if (nodePin.Name == "Result")
+                {
+                    return Operation switch
+                    {
+                        ArithmeticOperationType.Add => $"({GetStringForNodePin(NodePins["InputA"])} + {GetStringForNodePin(NodePins["InputB"])})",
+                        ArithmeticOperationType.Subtract => $"({GetStringForNodePin(NodePins["InputA"])} - {GetStringForNodePin(NodePins["InputB"])})",
+                        ArithmeticOperationType.Multiply => $"({ GetStringForNodePin(NodePins["InputA"])} * { GetStringForNodePin(NodePins["InputB"])} )",
+                        ArithmeticOperationType.Divide => $"({ GetStringForNodePin(NodePins["InputA"])} / { GetStringForNodePin(NodePins["InputB"])} )",
+                        ArithmeticOperationType.Remainder => $"({ GetStringForNodePin(NodePins["InputA"])} % { GetStringForNodePin(NodePins["InputB"])})",
+                        ArithmeticOperationType.Power => $"System.Math.Pow({GetStringForNodePin(NodePins["InputA"])}, {GetStringForNodePin(NodePins["InputB"])})",
+                        ArithmeticOperationType.Root => $"System.Math.Pow({GetStringForNodePin(NodePins["InputA"])}, 1.0 / {GetStringForNodePin(NodePins["InputB"])})",
+                        ArithmeticOperationType.Log => $"System.Math.Log({GetStringForNodePin(NodePins["InputA"])}, {GetStringForNodePin(NodePins["InputB"])})",
+                        ArithmeticOperationType.Min => $"System.Math.Min({GetStringForNodePin(NodePins["InputA"])}, {GetStringForNodePin(NodePins["InputB"])})",
+                        ArithmeticOperationType.Max => $"System.Math.Max({GetStringForNodePin(NodePins["InputA"])}, {GetStringForNodePin(NodePins["InputB"])})",
+                        _ => $"{GetStringForNodePin(NodePins["InputA"])} + {GetStringForNodePin(NodePins["InputB"])}",
+                    };
+                }                             
+            }
+            return base.GetStringForNodePin(nodePin);
+        }
     }
 }

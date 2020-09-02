@@ -71,6 +71,21 @@ namespace Nodum.Calc
             }
         }
 
+        public override string GetStringForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                if (nodePin.Name == "Result")
+                {
+                    if (!string.IsNullOrEmpty(RegexOperation))
+                    {
+                        return RegexOperation;
+                    }
+                }
+            }
+            return base.GetStringForNodePin(nodePin);
+        }
+
         private string MatchReplacer(Match match)
         {
             if (NodePins.TryGetValue(match.Value, out NodePin input))

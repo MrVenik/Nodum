@@ -42,5 +42,22 @@ namespace Nodum.Calc
             }
 
         }
+
+        public override string GetStringForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                if (nodePin.Name == "Result")
+                {
+                    return Operation switch
+                    {
+                        LogicalOperationType.And => $"({GetStringForNodePin(NodePins["InputA"])} && {GetStringForNodePin(NodePins["InputB"])})",
+                        LogicalOperationType.Or => $"({GetStringForNodePin(NodePins["InputA"])} || {GetStringForNodePin(NodePins["InputB"])})",
+                        _ => $"({GetStringForNodePin(NodePins["InputA"])} && {GetStringForNodePin(NodePins["InputB"])})",
+                    };
+                }
+            }
+            return base.GetStringForNodePin(nodePin);
+        }
     }
 }
