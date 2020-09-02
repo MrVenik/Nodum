@@ -409,7 +409,7 @@ namespace Nodum.Core
         {
             if (nodePin.Node == this)
             {
-                return nodePin.IncomingNodePin == null ? nodePin.Name : nodePin.IncomingNodePin.Node.GetStringForNodePin(nodePin.IncomingNodePin);
+                return nodePin.IncomingNodePin == null ? ((nodePin.Node.Holder != null && nodePin.Node.Holder != this ) ? nodePin.Value.ToString() : nodePin.Name) : nodePin.IncomingNodePin.Node.GetStringForNodePin(nodePin.IncomingNodePin);
             }
             else throw new NodeException($"Can't get string for nodePin {nodePin.Name}. NodePin is not in this Node");
         }
