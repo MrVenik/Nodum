@@ -24,9 +24,12 @@ namespace NodumConsoleApp
             
             nodes.AddRange(CreateMethodNodesForType(type, Console.Out));
 
+            NodumNodeCompiler nc = new NodumNodeCompiler("Test");
+
             foreach (var node in nodes)
             {
                 Debug(node);
+                Console.WriteLine(nc.BuildNodeClassString(node));
             }
         }
 

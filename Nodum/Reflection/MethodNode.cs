@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 
 namespace Nodum.Reflection
 {
@@ -232,6 +233,35 @@ namespace Nodum.Reflection
             }
 
             return isCanInvoke;
+        }
+
+        public override string GetStringForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                if (nodePin.Name == "Return")
+                {
+                    StringBuilder stringBuilder = new StringBuilder();
+
+                    ParameterInfo[] parameters = _methodInfo.GetParameters();
+
+                    if (NodePins.ContainsKey("Object"))
+                    {
+                        stringBuilder.Append($"{GetStringForNodePin(NodePins["Object"])}.");
+                    }
+
+                    stringBuilder.Append($"{_methodInfo.Name}(");
+
+                    foreach (var parameter in parameters)
+                    {
+                        stringBuilder.Append($"{GetStringForNodePin(NodePins[parameter.Name])}, ");
+                    }
+                    stringBuilder.Append(")");
+
+                    return stringBuilder.ToString();
+                }
+            }
+            return base.GetStringForNodePin(nodePin);
         }
     }
 }
