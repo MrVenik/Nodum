@@ -23,14 +23,50 @@ namespace Nodum.Core
             return null;
         }
 
+        public static void CacheBaseNodes(Assembly assembly)
+        {
+            Type baseType = typeof(Node);
+
+            List<Type> nodeTypes = new List<Type>();
+
+            nodeTypes.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
+
+            foreach (Type type in nodeTypes)
+            {
+                CacheNodeMembers(type);
+                object[] attributes = type.GetCustomAttributes(true);
+
+                if (attributes.FirstOrDefault(x => x is NodeAttribute) is NodeAttribute nodeAttribute)
+                {
+                    if (!nodeAttribute.NodeCacherIgnore)
+                    {
+                        string group = nodeAttribute.Group;
+
+                        if (string.IsNullOrEmpty(group))
+                        {
+                            group = "ungrouped";
+                        }
+
+                        if (!_allBaseNodeGroups.ContainsKey(group))
+                        {
+                            _allBaseNodeGroups.Add(group, new List<Node>());
+                        }
+
+                        Node node = (Node)Activator.CreateInstance(type, type.Name);
+                        _allBaseNodeGroups[group].Add(node);
+                    }
+                }
+            }
+        }
+
         public static void CacheBaseNodes()
         {
             if (_nodeInfoList == null)
             {
                 _nodeInfoList = new Dictionary<Type, NodeMembersInfo>();
 
-                Type baseType = typeof(Node);
-                List<Type> nodeTypes = new List<Type>();
+                
+                
                 Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
                 foreach (Assembly assembly in assemblies)
@@ -45,35 +81,8 @@ namespace Nodum.Core
                         case "Microsoft":
                             continue;
                         default:
-                            nodeTypes.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
+                            CacheBaseNodes(assembly);
                             break;
-                    }
-                }
-
-                foreach (Type type in nodeTypes)
-                {
-                    CacheNodeMembers(type);
-                    object[] attributes = type.GetCustomAttributes(true);                
-
-                    if (attributes.FirstOrDefault(x => x is NodeAttribute) is NodeAttribute nodeAttribute)
-                    {
-                        if (!nodeAttribute.NodeCacherIgnore)
-                        {
-                            string group = nodeAttribute.Group;
-
-                            if (string.IsNullOrEmpty(group))
-                            {
-                                group = "ungrouped";
-                            }
-
-                            if (!_allBaseNodeGroups.ContainsKey(group))
-                            {
-                                _allBaseNodeGroups.Add(group, new List<Node>());
-                            }
-
-                            Node node = (Node)Activator.CreateInstance(type, type.Name);
-                            _allBaseNodeGroups[group].Add(node);
-                        }
                     }
                 }
             }
