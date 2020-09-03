@@ -1,6 +1,7 @@
 ﻿using Nodum.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace Nodum.Calc
@@ -18,9 +19,6 @@ namespace Nodum.Calc
         [Input] public bool IfCondtition { get; set; }
         [Input] public double IfTrueValue { get; set; }
 
-        [Input] public bool ElseIfCondtition { get; set; }
-        [Input] public double ElseIfTrueValue { get; set; }
-
         [Input] public double ElseValue { get; set; }
 
         [Output] public double Result { get; set; }
@@ -30,10 +28,6 @@ namespace Nodum.Calc
             if (IfCondtition)
             {
                 Result = IfTrueValue;
-            }
-            else if (ElseIfCondtition)
-            {
-                Result = ElseIfTrueValue;
             }
             else
             {
@@ -47,10 +41,22 @@ namespace Nodum.Calc
             {
                 if (nodePin.Name == "Result")
                 {
-                    return $"({GetStringForNodePin(NodePins["IfCondtition"])} ? {GetStringForNodePin(NodePins["IfTrueValue"])} : ({GetStringForNodePin(NodePins["ElseIfCondtition"])} ? {GetStringForNodePin(NodePins["ElseIfTrueValue"])} : {GetStringForNodePin(NodePins["ElseValue"])}))";
+                    return $"({GetStringForNodePin(NodePins["IfCondtition"])} ? {GetStringForNodePin(NodePins["IfTrueValue"])} : {GetStringForNodePin(NodePins["ElseValue"])}))";
                 }
             }
             return base.GetStringForNodePin(nodePin);
+        }
+
+        public override Expression GetExpressionForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                if (nodePin.Name == "Result")
+                {
+                    return Expression.IfThenElse(GetExpressionForNodePin(NodePins["IfCondtition"]), GetExpressionForNodePin(NodePins["IfTrueValue"]), GetExpressionForNodePin(NodePins["ElseValue"]));
+                }
+            }
+            return base.GetExpressionForNodePin(nodePin);
         }
     }
 }
