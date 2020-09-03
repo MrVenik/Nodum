@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Serialization;
 
@@ -67,9 +68,6 @@ namespace Nodum.Core
         public List<NodePinConnection> IncomingConnections { get; protected set; } = new List<NodePinConnection>();
         public List<NodePinConnection> InternalIncomingConnections { get; protected set; } = new List<NodePinConnection>();
         public List<NodePinConnection> OutgoingConnections { get; protected set; } = new List<NodePinConnection>();
-
-        private List<Node> _clones = new List<Node>();
-        public IReadOnlyList<Node> Clones => _clones;
 
         static Node()
         {
@@ -183,8 +181,6 @@ namespace Nodum.Core
             {
                 nodePin.OnValueChanged += UpdateAllPins;
             }
-
-            nodePin.OnNodePinChanged += () => OnNodeChanged?.Invoke();
         }
 
         public void ReConnectAllPins()
@@ -200,15 +196,6 @@ namespace Nodum.Core
                     node.ReConnectAllPins();
                 }
             }
-        }
-
-        public void ReConnectClones()
-        {
-            foreach (var clone in _clones)
-            {
-                OnNodeChanged += () => clone.ChangeNode(CloneNode(this));
-            }
-            OnNodeChanged?.Invoke();
         }
 
         protected bool ProtectedTryAddNodePin(NodePin nodePin)
@@ -228,7 +215,6 @@ namespace Nodum.Core
             {
                 NodePins[nodePin.Name].Close();
                 NodePins.Remove(nodePin.Name);
-                OnNodeChanged?.Invoke();
             }
         }
 
@@ -238,7 +224,6 @@ namespace Nodum.Core
             {
                 NodePins[nodePinName].Close();
                 NodePins.Remove(nodePinName);
-                OnNodeChanged?.Invoke();
             }
         }
 
@@ -246,7 +231,7 @@ namespace Nodum.Core
         {
             if (NodePins.ContainsKey(nodePin.Name))
             {
-                RemoveNodePin(nodePin);
+                ProtectedRemoveNodePin(nodePin);
 
                 NodePins.Add(nodePin.Name, nodePin);
 
@@ -254,8 +239,6 @@ namespace Nodum.Core
                 {
                     nodePin.OnValueChanged += Update;
                 }
-
-                OnNodeChanged?.Invoke();
             }
         }
 
@@ -263,7 +246,9 @@ namespace Nodum.Core
         {
             if (IsEditable)
             {
-                return ProtectedTryAddNodePin(nodePin);
+                bool succes = ProtectedTryAddNodePin(nodePin);
+                OnNodeChanged?.Invoke();
+                return succes;
             }
             else throw new Exception($"Can't modify Node. Node.IsEditable = {IsEditable}");
         }
@@ -273,6 +258,7 @@ namespace Nodum.Core
             if (IsEditable)
             {
                 ProtectedRemoveNodePin(nodePin);
+                OnNodeChanged?.Invoke();
             }
             else throw new Exception($"Can't modify Node. Node.IsEditable = {IsEditable}");
         }
@@ -282,6 +268,7 @@ namespace Nodum.Core
             if (IsEditable)
             {
                 ProtectedRemoveNodePin(nodePinName);
+                OnNodeChanged?.Invoke();
             }
             else throw new Exception($"Can't modify Node. Node.IsEditable = {IsEditable}");
         }
@@ -291,6 +278,7 @@ namespace Nodum.Core
             if (IsEditable)
             {
                 ProtectedSetNodePin(nodePin);
+                OnNodeChanged?.Invoke();
             }
             else throw new Exception($"Can't modify Node. Node.IsEditable = {IsEditable}");
         }
@@ -369,40 +357,7 @@ namespace Nodum.Core
 
         public virtual Node Clone()
         {
-            Node clone = CloneNode(this);
-            _clones.Add(clone);
-            OnNodeChanged += () => clone.ChangeNode(CloneNode(this));
-            return clone;
-        }
-
-        public void ChangeNode(Node originalNode)
-        {
-            foreach (var nodePin in originalNode.AllNodePins)
-            {
-                nodePin.Node = this;
-                if (!ProtectedTryAddNodePin(nodePin))
-                {
-                    NodePin oldNodePinIncomingPin = NodePins[nodePin.Name].IncomingNodePin;
-                    ProtectedSetNodePin(nodePin);
-                    NodePins[nodePin.Name].AddIncomingNodePin(oldNodePinIncomingPin);
-                }
-            }
-
-            InternalNodes.Clear();
-            foreach (var node in originalNode.InternalNodes)
-            {
-                AddInternalNode(node);
-            }
-
-            IncomingConnections.Clear();
-            InternalIncomingConnections.Clear();
-
-            foreach (var node in InternalNodes)
-            {
-                node.ReConnectAllPins();
-            }
-
-            ReConnectAllPins();
+            return CloneNode(this);
         }
 
         public virtual string GetStringForNodePin(NodePin nodePin)
@@ -417,6 +372,29 @@ namespace Nodum.Core
                     nodePin.IncomingNodePin.Node.GetStringForNodePin(nodePin.IncomingNodePin);
             }
             else throw new NodeException($"Can't get string for nodePin {nodePin.Name}. NodePin is not in this Node");
+        }
+
+        public virtual Expression GetExpressionForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                if (nodePin.IncomingNodePin == null)
+                {
+                    if (nodePin.Node.Holder != null && nodePin.Node.Holder != this)
+                    {
+                        return Expression.Constant(nodePin.Value, nodePin.ValueType);
+                    }
+                    else
+                    {
+                        return Expression.Parameter(nodePin.ValueType, nodePin.Name);
+                    }
+                }
+                else
+                {
+                    return nodePin.IncomingNodePin.Node.GetExpressionForNodePin(nodePin.IncomingNodePin);
+                }
+            }
+            else throw new NodeException($"Can't get Expression for nodePin {nodePin.Name}. NodePin is not in this Node");
         }
 
         public void Close()
