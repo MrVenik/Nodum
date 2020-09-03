@@ -100,14 +100,14 @@ namespace Nodum.Core
         public virtual void GetNodeValue(Node node) { }
 
         public NodePin IncomingNodePin { get; private set; }
-        private List<NodePin> _outgoingNodePins = new List<NodePin>();
+        public List<NodePin> OutgoingNodePins { get; private set; } = new List<NodePin>();
 
         public void AddOutgoingNodePin(NodePin inputNodePin)
         {
             if ((IsOutput || IsInternalOutput) && (inputNodePin.IsInput || inputNodePin.IsInternalInput))
             {
                 OnValueChanged += inputNodePin.UpdateValue;
-                _outgoingNodePins.Add(inputNodePin);
+                OutgoingNodePins.Add(inputNodePin);
 
                 OnNodePinChanged?.Invoke();
             }
@@ -116,7 +116,7 @@ namespace Nodum.Core
         public void RemoveOutgoingNodePin(NodePin inputNodePin)
         {
             OnValueChanged -= inputNodePin.UpdateValue;
-            _outgoingNodePins.Remove(inputNodePin);
+            OutgoingNodePins.Remove(inputNodePin);
 
             OnNodePinChanged?.Invoke();
         }
@@ -125,15 +125,15 @@ namespace Nodum.Core
         {
             OnValueChanged = null;
 
-            for (int i = 0; i < _outgoingNodePins.Count; i++)
+            for (int i = 0; i < OutgoingNodePins.Count; i++)
             {
-                NodePin inputNodePin = _outgoingNodePins[i];
+                NodePin inputNodePin = OutgoingNodePins[i];
 
                 inputNodePin.RemoveIncomingNodePin(this);
 
             }
 
-            _outgoingNodePins.Clear();
+            OutgoingNodePins.Clear();
 
             OnNodePinChanged?.Invoke();
         }

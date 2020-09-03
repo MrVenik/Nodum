@@ -27,6 +27,30 @@ namespace Nodum.Core
             return canBuildNodePin;
         }
 
+        public static NodePin CloneNodePin(NodePin originalNodePin, Node node)
+        {
+            Type type = originalNodePin.GetType();
+
+            NodePinOptions options = new NodePinOptions()
+            {
+                IsInput = originalNodePin.IsInput,
+                IsOutput = originalNodePin.IsOutput,
+                IsOption = originalNodePin.IsOption,
+                IsInternalInput = originalNodePin.IsInternalInput,
+                IsInternalOutput = originalNodePin.IsInternalOutput,
+                IsInvokeUpdate = originalNodePin.IsInvokeUpdate,
+                IsInvokeUpdatePins = originalNodePin.IsInvokeUpdatePins,
+                CanSetValue = originalNodePin.CanSetValue,
+                CanGetValue = originalNodePin.CanGetValue,
+            };
+
+            object[] parameters = new object[] { originalNodePin.Name, node, options };
+
+            NodePin nodePin = (NodePin)Activator.CreateInstance(type, parameters);
+
+            return nodePin;
+        }
+
         public static NodePin BuildNodePin(FieldInfo fieldInfo, Node node)
         {
             CheckType(fieldInfo.FieldType);
