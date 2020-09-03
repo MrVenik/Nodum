@@ -15,7 +15,7 @@ namespace Nodum.Calc
 
         public override bool IsEditable => false;
 
-        public ExpressionNode(string name, Node node) : base(name)
+        public ExpressionNode(Node node, string name = "ExpressionNode") : base(name)
         {
             _parentNode = node;
 
