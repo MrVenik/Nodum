@@ -181,6 +181,8 @@ namespace Nodum.Core
             {
                 nodePin.OnValueChanged += UpdateAllPins;
             }
+
+            nodePin.OnNodePinChanged += () => OnNodeChanged?.Invoke();
         }
 
         public void ReConnectAllPins()
