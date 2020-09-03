@@ -1,6 +1,7 @@
 ﻿using Nodum.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace Nodum.Calc
@@ -77,6 +78,27 @@ namespace Nodum.Calc
                 }
             }
             return base.GetStringForNodePin(nodePin);
+        }
+
+        public override Expression GetExpressionForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                if (nodePin.Name == "Result")
+                {
+                    return Operation switch
+                    {
+                        CompareOperationType.Equals => Expression.Equal(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        CompareOperationType.NotEquals => Expression.NotEqual(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        CompareOperationType.LessThan => Expression.LessThan(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        CompareOperationType.GreaterThan => Expression.GreaterThan(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        CompareOperationType.LessThanOrEqual => Expression.LessThanOrEqual(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        CompareOperationType.GreaterThanOrEqual => Expression.GreaterThanOrEqual(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        _ => throw new NotImplementedException(),
+                    };
+                }
+            }
+            return base.GetExpressionForNodePin(nodePin);
         }
     }
 }

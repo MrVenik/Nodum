@@ -1,5 +1,6 @@
 ﻿using Nodum.Core;
 using System;
+using System.Linq.Expressions;
 
 namespace Nodum.Calc
 {
@@ -58,6 +59,23 @@ namespace Nodum.Calc
                 }
             }
             return base.GetStringForNodePin(nodePin);
+        }
+
+        public override Expression GetExpressionForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                if (nodePin.Name == "Result")
+                {
+                    return Operation switch
+                    {
+                        LogicalOperationType.And => Expression.And(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        LogicalOperationType.Or => Expression.Or(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        _ => throw new NotImplementedException(),
+                    };
+                }
+            }
+            return base.GetExpressionForNodePin(nodePin);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Nodum.Core;
 using System;
+using System.Linq.Expressions;
 
 namespace Nodum.Calc
 {
@@ -107,6 +108,31 @@ namespace Nodum.Calc
                 }                             
             }
             return base.GetStringForNodePin(nodePin);
+        }
+
+        public override Expression GetExpressionForNodePin(NodePin nodePin)
+        {
+            if (nodePin.Node == this)
+            {
+                if (nodePin.Name == "Result")
+                {
+                    return Operation switch
+                    {
+                        ArithmeticOperationType.Add => Expression.Add(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        ArithmeticOperationType.Subtract => Expression.Subtract(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        ArithmeticOperationType.Multiply => Expression.Multiply(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        ArithmeticOperationType.Divide => Expression.Divide(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        ArithmeticOperationType.Remainder => Expression.Modulo(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        ArithmeticOperationType.Power => Expression.Power(GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        ArithmeticOperationType.Root => Expression.Power(GetExpressionForNodePin(NodePins["InputA"]), Expression.Divide(Expression.Constant(1.0), GetExpressionForNodePin(NodePins["InputB"]))),
+                        ArithmeticOperationType.Log => Expression.Call(typeof(Math).GetMethod("Log", new Type[] { typeof(double), typeof(double) }), GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        ArithmeticOperationType.Min => Expression.Call(typeof(Math).GetMethod("Min", new Type[] { typeof(double), typeof(double) }), GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        ArithmeticOperationType.Max => Expression.Call(typeof(Math).GetMethod("Max", new Type[] { typeof(double), typeof(double) }), GetExpressionForNodePin(NodePins["InputA"]), GetExpressionForNodePin(NodePins["InputB"])),
+                        _ => throw new NotImplementedException(),
+                    };
+                }
+            }
+            return base.GetExpressionForNodePin(nodePin);
         }
     }
 }
