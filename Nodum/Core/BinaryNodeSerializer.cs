@@ -41,7 +41,6 @@ namespace Nodum.Core
                     BinaryFormatter formatter = new BinaryFormatter();
                     node = (Node)formatter.Deserialize(fs);
                     node?.ReConnectAllPins();
-                    node?.ReConnectClones();
                     node?.Update();
                 }
             }
@@ -85,7 +84,6 @@ namespace Nodum.Core
                         foreach (var node in group.Value)
                         {
                             node?.ReConnectAllPins();
-                            node?.ReConnectClones();
                             node?.Update();
                         }
                     }
