@@ -45,10 +45,33 @@ namespace Nodum.Core
                     }
                 }
             }
+            if (expr is ConditionalExpression conditionalExpression)
+            {
+                var prmts = conditionalExpression.GetParameters();
+
+                foreach (var parameter in prmts)
+                {
+                    if (!parameters.Contains(parameter))
+                    {
+                        parameters.Add(parameter);
+                    }
+                }
+            }
             if (expr is ParameterExpression paramExpr)
             {
                 parameters.Add(paramExpr);
             }
+
+            return parameters.ToArray();
+        }
+
+        public static ParameterExpression[] GetParameters(this ConditionalExpression conditionalExpression)
+        {
+            List<ParameterExpression> parameters = new List<ParameterExpression>();
+
+            parameters.AddRange(GetParameters(conditionalExpression.Test));
+            parameters.AddRange(GetParameters(conditionalExpression.IfTrue));
+            parameters.AddRange(GetParameters(conditionalExpression.IfFalse));
 
             return parameters.ToArray();
         }
