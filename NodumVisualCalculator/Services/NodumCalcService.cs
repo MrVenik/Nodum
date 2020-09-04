@@ -2,6 +2,7 @@
 using Nodum.Core;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace NodumVisualCalculator.Services
 
         public NodumCalcService(INodeSerializer nodeSerializer)
         {
+            Stopwatch stopWatch = Stopwatch.StartNew();
             _nodeSerializer = nodeSerializer;
 
             MainProject = _nodeSerializer.DeserializeProject("CalcProject");
@@ -26,11 +28,16 @@ namespace NodumVisualCalculator.Services
             }
 
             MainProject.GetBaseNodeGroups();
+            stopWatch.Stop();
+            Console.WriteLine($"NodumCalcService: Initialization: {stopWatch.ElapsedMilliseconds}ms");
         }
 
         public void Save()
         {
+            Stopwatch stopWatch = Stopwatch.StartNew();
             _nodeSerializer.SerializeProject(MainProject);
+            stopWatch.Stop();
+            Console.WriteLine($"NodumCalcService: Serialization: {stopWatch.ElapsedMilliseconds}ms");
         }
     }
 }
