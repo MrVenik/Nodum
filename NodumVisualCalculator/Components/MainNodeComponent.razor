@@ -67,7 +67,7 @@
                                                 @node.Name
                                             </DropdownTrigger>
                                             <DropdownContent>
-                                                <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode, node.Clone()))">
+                                                <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode, new ExpressionNode(node)))">
                                                     Create
                                                 </DropdownElement>
                                                 <DropdownElement HideOnClick="true" OnClick="@((e) => EditNode(node))">
@@ -105,7 +105,7 @@
                                                 @node.Name
                                             </DropdownTrigger>
                                             <DropdownContent>
-                                                <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode, node.Clone()))">
+                                                <DropdownElement HideOnClick="true" OnClick="@((e) => _nodeCreator.Open(_currentMainNode, new ExpressionNode(node)))">
                                                     Create
                                                 </DropdownElement>
                                                 <DropdownElement HideOnClick="true" OnClick="@((e) => EditNode(node))">
