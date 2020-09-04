@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading.Tasks;
 using Nodum.Core;
-using Nodum.Calc;
 using Nodum.Reflection;
 using System.Reflection;
 
@@ -15,23 +10,9 @@ namespace NodumConsoleApp
     class Program
     {
         static void Main(string[] args)
-        {
-            List<Node> nodes = new List<Node>();
-
-            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            Type type = typeof(Math);
-            
-            nodes.AddRange(CreateMethodNodesForType(type, Console.Out));
-
-            NodumNodeCompiler nc = new NodumNodeCompiler("Test");
-
-            foreach (var node in nodes)
-            {
-                Debug(node);
-                Console.WriteLine(nc.BuildNodeClassString(node));
-            }
+        {       
         }
+
 
         private static List<Node> CreateMethodNodesForType(Type type, TextWriter errorStrem)
         {
