@@ -376,6 +376,9 @@ namespace Nodum.Core
             else throw new NodeException($"Can't get string for nodePin {nodePin.Name}. NodePin is not in this Node");
         }
 
+        [NonSerialized]
+        protected Dictionary<string, ParameterExpression> Parameters;
+
         public virtual Expression GetExpressionForNodePin(NodePin nodePin)
         {
             if (nodePin.Node == this)
@@ -388,7 +391,14 @@ namespace Nodum.Core
                     }
                     else
                     {
-                        return Expression.Parameter(nodePin.ValueType, nodePin.Name);
+                        Parameters ??= new Dictionary<string, ParameterExpression>();
+
+                        if (!Parameters.ContainsKey(nodePin.Name))
+                        {
+                            Parameters.Add(nodePin.Name, Expression.Parameter(nodePin.ValueType, nodePin.Name));
+                        }
+
+                        return Parameters[nodePin.Name];
                     }
                 }
                 else

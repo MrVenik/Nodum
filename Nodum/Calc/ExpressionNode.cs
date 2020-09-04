@@ -84,59 +84,32 @@ namespace Nodum.Calc
 
                 List<object> values = new List<object>();
 
-                ParameterExpression[] parameters = GetParametersForExpression(expr);
+                ParameterExpression[] parameters = expr.GetParameters();
                 foreach (var parameter in parameters)
                 {
                     values.Add(NodePins[parameter.Name].Value);
                 }
 
-                Delegate func = Expression.Lambda(expr, parameters).Compile();
+                LambdaExpression lambda = Expression.Lambda(expr, parameters);
+
+                Delegate func = lambda.Compile();
 
                 nodePin.Value = func.DynamicInvoke(values.ToArray());
             }
         }
 
-        private static ParameterExpression[] GetParametersForExpression(Expression expr)
+        public override Expression GetExpressionForNodePin(NodePin nodePin)
         {
-            List<ParameterExpression> parameters = new List<ParameterExpression>();
+            if (nodePin.Node == this)
+            {
+                if (nodePin.IsOutput)
+                {
+                    ParameterExpressionChanger parameterChanger = new ParameterExpressionChanger();
 
-            if (expr is BinaryExpression binaryExpression)
-            {
-                parameters.AddRange(GetParametersForBinaryExpression(binaryExpression));
+                    return parameterChanger.Modify(_parentNode.GetExpressionForNodePin(_parentNode.NodePins[nodePin.Name]), this);
+                }
             }
-            if (expr is MethodCallExpression methodExpression)
-            {
-                parameters.AddRange(GetParametersForMethodExpression(methodExpression));
-            }
-            if (expr is ParameterExpression paramExpr)
-            {
-                parameters.Add(paramExpr);
-            }
-
-            return parameters.ToArray();
+            return base.GetExpressionForNodePin(nodePin);
         }
-
-        private static ParameterExpression[] GetParametersForBinaryExpression(BinaryExpression binaryExpression)
-        {
-            List<ParameterExpression> parameters = new List<ParameterExpression>();
-
-            parameters.AddRange(GetParametersForExpression(binaryExpression.Left));
-            parameters.AddRange(GetParametersForExpression(binaryExpression.Right));
-
-            return parameters.ToArray();
-        }
-
-        private static ParameterExpression[] GetParametersForMethodExpression(MethodCallExpression methodExpression)
-        {
-            List<ParameterExpression> parameters = new List<ParameterExpression>();
-
-            foreach (var argExpr in methodExpression.Arguments)
-            {
-                parameters.AddRange(GetParametersForExpression(argExpr));
-            }
-
-            return parameters.ToArray();
-        }
-
     }
 }

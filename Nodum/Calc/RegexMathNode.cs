@@ -1,7 +1,9 @@
 ﻿using Nodum.Core;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 
 namespace Nodum.Calc
@@ -14,7 +16,7 @@ namespace Nodum.Calc
         [NodePin(IsInvokeUpdatePins = true, CanSetValue = true)] public string RegexOperation { get; set; }
         [Output] public double Result { get; set; }
 
-        private string _oldRegexOperation;
+        private string _oldOperation;
 
         public RegexMathNode(string name = "RegexMathNode") : base(name)
         {
@@ -22,33 +24,37 @@ namespace Nodum.Calc
 
         public override void UpdatePins()
         {
-            if (!string.IsNullOrEmpty(RegexOperation) && RegexOperation != _oldRegexOperation)
+            if (!string.IsNullOrEmpty(RegexOperation) && RegexOperation != _oldOperation)
             {
-                string[] matches = Regex.Matches(RegexOperation, @"\b[^\d]\w+").OfType<Match>().Select(m => m.Groups[0].Value).ToArray();
+                Expression expression = ExpressionParser.ParseExpression(RegexOperation);
 
-                if (!string.IsNullOrEmpty(_oldRegexOperation))
+                ParameterExpression[] parameters = expression.GetParameters();
+
+                if (!string.IsNullOrEmpty(_oldOperation))
                 {
-                    string[] oldMatches = Regex.Matches(_oldRegexOperation, @"\b[^\d]\w+").OfType<Match>().Select(m => m.Groups[0].Value).ToArray();
-                    foreach (string match in oldMatches)
+                    ParameterExpression[] oldParameters = ExpressionParser.ParseExpression(_oldOperation).GetParameters();
+
+                    foreach (var oldParameter in oldParameters)
                     {
-                        if (!matches.Any(m => m == match))
+                        if (!parameters.Any(p => p == oldParameter))
                         {
-                            RemoveNodePin(match);
+                            ProtectedRemoveNodePin(oldParameter.Name);
                         }
                     }
                 }
 
-                foreach (string match in matches)
+                foreach (var parameter in parameters)
                 {
-                    if (!NodePins.ContainsKey(match))
+                    if (!NodePins.ContainsKey(parameter.Name))
                     {
-                        NodePin inputNodePin = NodePinBuilder.BuildNodePin(match, this, typeof(double), new NodePinOptions() { IsInput = true, IsInvokeUpdate = true });
+                        NodePin inputNodePin = NodePinBuilder.BuildNodePin(parameter.Name, this, typeof(double), new NodePinOptions() { IsInput = true, IsInvokeUpdate = true });
 
                         ProtectedTryAddNodePin(inputNodePin);
                     }
                 }
 
-                _oldRegexOperation = RegexOperation;
+                _oldOperation = RegexOperation;
+
                 OnUpdatePins?.Invoke();
             }
         }
@@ -57,16 +63,22 @@ namespace Nodum.Calc
         {
             if (!string.IsNullOrEmpty(RegexOperation))
             {
-                MatchEvaluator evaluator = new MatchEvaluator(MatchReplacer);
-                string math = Regex.Replace(RegexOperation, @"\b[^\d]\w+", evaluator).Trim();
+                Expression expression = ExpressionParser.ParseExpression(RegexOperation);
 
-                try
+                ParameterExpression[] parameters = expression.GetParameters();
+
+                List<object> values = new List<object>();
+
+                foreach (var parameter in parameters)
                 {
-                    Result = Convert.ToDouble(new DataTable().Compute(math, ""));
+                    values.Add(NodePins[parameter.Name].Value);
                 }
-                catch (Exception)
-                {
-                }
+
+                LambdaExpression lambda = Expression.Lambda(expression, parameters);
+
+                Delegate func = lambda.Compile();
+
+                Result = (double)func.DynamicInvoke(values.ToArray());
 
             }
         }
@@ -86,13 +98,20 @@ namespace Nodum.Calc
             return base.GetStringForNodePin(nodePin);
         }
 
-        private string MatchReplacer(Match match)
+        public override Expression GetExpressionForNodePin(NodePin nodePin)
         {
-            if (NodePins.TryGetValue(match.Value, out NodePin input))
+            if (nodePin.Node == this)
             {
-                return input.Value.ToString();
+                if (nodePin.Name == "Result")
+                {
+                    Expression expression = ExpressionParser.ParseExpression(RegexOperation);
+
+                    ParameterExpressionChanger parameterChanger = new ParameterExpressionChanger();
+
+                    return parameterChanger.Modify(expression, this);
+                }
             }
-            return string.Empty;
+            return base.GetExpressionForNodePin(nodePin);
         }
     }
 }
