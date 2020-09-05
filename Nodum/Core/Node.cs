@@ -409,7 +409,7 @@ namespace Nodum.Core
             else throw new NodeException($"Can't get Expression for nodePin {nodePin.Name}. NodePin is not in this Node");
         }
 
-        public void Close()
+        public virtual void Close()
         {
             foreach (var pin in AllNodePins)
             {

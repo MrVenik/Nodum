@@ -297,6 +297,8 @@
     {
         _currentMainNode.RemoveInternalNode(node);
 
+        node.Close();
+
         UpdateConnections();
     }
 
