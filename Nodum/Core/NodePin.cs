@@ -125,7 +125,7 @@ namespace Nodum.Core
         {
             OnValueChanged = null;
 
-            for (int i = 0; i < OutgoingNodePins.Count; i++)
+            for (int i = OutgoingNodePins.Count - 1; i >= 0; i--)
             {
                 NodePin inputNodePin = OutgoingNodePins[i];
 
