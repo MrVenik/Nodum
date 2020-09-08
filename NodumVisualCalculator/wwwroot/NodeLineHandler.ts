@@ -21,7 +21,7 @@ class Line {
 
 class NodeLineHandler {
     public constructor() {
-        draggableWindowHandler.OnDragging = this.UpdateLines;
+        //draggableWindowHandler.OnDragging = this.UpdateLines;
     }
 
     public UpdateLines() {

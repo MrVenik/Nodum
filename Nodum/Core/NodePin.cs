@@ -22,8 +22,6 @@ namespace Nodum.Core
         public string Name { get; set; }
         public Node Node { get; set; }
 
-        private NodePinConnection _connection;
-
         public NodePin(string name, Node node, object[] attributes)
         {
             if (node != null)
@@ -179,31 +177,13 @@ namespace Nodum.Core
             }
         }
 
-        private void CreateConnection(NodePin outputNodePin)
-        {
-            if (IsInput)
-            {
-                _connection = new NodePinConnection(outputNodePin, this);
-                Node.IncomingConnections.Add(_connection);
-            }
-            else if (IsInternalInput)
-            {
-                _connection = new NodePinConnection(outputNodePin, this);
-                Node.InternalIncomingConnections.Add(_connection);
-            }
-        }
-
         private bool TryAddIncomingNodePin(NodePin outputNodePin)
         {
             if (CanConnectTo == null || (CanConnectTo != null && CanConnectTo(outputNodePin)))
             {
-                RemoveConnection();
-
                 IncomingNodePin?.RemoveOutgoingNodePin(this);
                 IncomingNodePin = outputNodePin;
                 IncomingNodePin.AddOutgoingNodePin(this);
-
-                CreateConnection(outputNodePin);
 
                 OnNodePinChanged?.Invoke();
 
@@ -218,26 +198,12 @@ namespace Nodum.Core
         {
             if (IncomingNodePin == outputNodePin)
             {
-                RemoveConnection();
-
                 IncomingNodePin?.RemoveOutgoingNodePin(this);
                 IncomingNodePin = null;
 
                 OnNodePinChanged?.Invoke();
 
                 UpdateValue();
-            }
-        }
-
-        private void RemoveConnection()
-        {
-            if (IsInternalInput)
-            {
-                Node.InternalIncomingConnections.Remove(_connection);
-            }
-            else
-            {
-                Node.IncomingConnections.Remove(_connection);
             }
         }
 

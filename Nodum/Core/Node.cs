@@ -65,10 +65,6 @@ namespace Nodum.Core
         public IEnumerable<NodePin> AllNodePins => NodePins.Values.ToList();
         public List<Node> InternalNodes { get; protected set; } = new List<Node>();
 
-        public List<NodePinConnection> IncomingConnections { get; protected set; } = new List<NodePinConnection>();
-        public List<NodePinConnection> InternalIncomingConnections { get; protected set; } = new List<NodePinConnection>();
-        public List<NodePinConnection> OutgoingConnections { get; protected set; } = new List<NodePinConnection>();
-
         static Node()
         {
             NodeCacher.CacheBaseNodes();

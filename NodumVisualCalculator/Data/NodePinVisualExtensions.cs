@@ -6,5 +6,6 @@ namespace NodumVisualCalculator.Data
     {
         public static string GetInputElementId(this NodePin nodePin) => $"{nodePin.Name}_{nodePin.Guid}_Input";
         public static string GetOutputElementId(this NodePin nodePin) => $"{nodePin.Name}_{nodePin.Guid}_Output";
+        public static string GetLineElementId(this NodePin nodePin) => $"{nodePin.IncomingNodePin?.GetOutputElementId()}+{nodePin.GetInputElementId()}";
     }
 }

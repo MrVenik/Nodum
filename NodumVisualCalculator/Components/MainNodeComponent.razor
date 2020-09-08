@@ -128,17 +128,24 @@
                 }
             </Sidebar>
 
-            @foreach (var connection in _allConnections)
+            @foreach (var node in _currentMainNode.InternalNodes)
             {
-                <svg x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: 0;">
-                    <defs>
-                        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" style="stop-color: green; stop-opacity: 1" />
-                            <stop offset="100%" style="stop-color: red; stop-opacity: 1" />
-                        </linearGradient>
-                    </defs>
-                    <path id="@($"{connection.FromPin.GetOutputElementId()}+{connection.ToPin.GetInputElementId()}")" class="node-line" fill="none" stroke="url(#grad1)" stroke-width="8" d="M 0, 0" />
-                </svg>
+                foreach (var pin in node.AllInputNodePins)
+                {
+                    if (pin.IncomingNodePin != null)
+                    {
+                        <svg x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: 0;">
+                            <defs>
+                                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color: green; stop-opacity: 1" />
+                                    <stop offset="100%" style="stop-color: red; stop-opacity: 1" />
+                                </linearGradient>
+                            </defs>
+                            <path id="@(pin.GetLineElementId())" class="node-line" fill="none" stroke="url(#grad1)" stroke-width="8" d="M 0, 0" />
+                        </svg>
+                    }
+                }
+
             }
 
             <svg id="main-node-line" x="0" y="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: 0;">
@@ -214,8 +221,6 @@
     private NodeEditorComponent _nodeEditor;
     private NodePinCreatorComponent _nodePinCreator;
 
-    private List<NodePinConnection> _allConnections = new List<NodePinConnection>();
-
     private Line _mainLine = new Line();
     private bool _isMainLineDrawing = false;
 
@@ -226,15 +231,13 @@
 
     private void Save()
     {
-        BinaryNodeSerializer nodeSerializer = new BinaryNodeSerializer();
-        nodeSerializer.Serialize(_currentMainNode);
         NodumCalcService.Save();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         //TODO: Create normal method to update lines when something changes
-        //await UpdateLines();
+        await UpdateLines();
     }
 
     private void OnNodePinSelect(MouseEventArgs args, NodePin nodePin)
@@ -253,9 +256,7 @@
 
         nodePin.AddIncomingNodePin(_selectedNodePin);
 
-        UpdateConnections();
-
-        await UpdateLines();
+        StateHasChanged();
     }
 
     private void DrawMainLine(MouseEventArgs args)
@@ -281,25 +282,13 @@
         await JSRuntime.InvokeVoidAsync("nodeLineHandler.UpdateLines");
     }
 
-    private void UpdateConnections()
-    {
-        _allConnections.Clear();
-        _allConnections.AddRange(_currentMainNode.InternalIncomingConnections);
-        foreach (var node in _currentMainNode.InternalNodes)
-        {
-            _allConnections.AddRange(node.IncomingConnections);
-        }
-
-        StateHasChanged();
-    }
-
     private void CloseNode(Node node)
     {
         _currentMainNode.RemoveInternalNode(node);
 
         node.Close();
 
-        UpdateConnections();
+        StateHasChanged();
     }
 
     private async void EditNode(Node node = null)
@@ -315,8 +304,7 @@
             _currentMainNode = MainNode;
         }
 
-        UpdateConnections();
-        await UpdateLines();
+        StateHasChanged();
     }
 
     private void OnNodeDragging(DraggableWindow nodeWindow, Node node)
@@ -324,6 +312,6 @@
         node.PositionX = nodeWindow.PositionX;
         node.PositionY = nodeWindow.PositionY;
 
-        UpdateConnections();
+        StateHasChanged();
     }
 }

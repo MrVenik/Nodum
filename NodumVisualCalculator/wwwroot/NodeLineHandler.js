@@ -5,7 +5,7 @@ var Line = /** @class */ (function () {
 }());
 var NodeLineHandler = /** @class */ (function () {
     function NodeLineHandler() {
-        draggableWindowHandler.OnDragging = this.UpdateLines;
+        //draggableWindowHandler.OnDragging = this.UpdateLines;
     }
     NodeLineHandler.prototype.UpdateLines = function () {
         var lineElements = document.getElementsByClassName("node-line");
