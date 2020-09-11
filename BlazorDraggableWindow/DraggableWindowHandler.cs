@@ -20,7 +20,6 @@ namespace BlazorDraggableWindow
 
         public DraggableWindowHandler(IJSRuntime jsRuntime)
         {
-            Console.WriteLine("Creating!");
             _dotnetObject = DotNetObjectReference.Create(this);
             _jsRuntime = jsRuntime;
             _draggableWindows = new Dictionary<string, DraggableWindow>();
@@ -28,7 +27,6 @@ namespace BlazorDraggableWindow
 
         public async Task Initialize()
         {
-            Console.WriteLine("Initializing!");
             await _jsRuntime.InvokeVoidAsync("draggableWindowHandler.Initialize", _dotnetObject);
         }
 
@@ -86,7 +84,6 @@ namespace BlazorDraggableWindow
 
         public void Dispose()
         {
-            Console.WriteLine("Disposing!");
             _dotnetObject.Dispose();
         }
     }
