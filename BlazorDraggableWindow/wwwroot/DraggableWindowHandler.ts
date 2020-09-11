@@ -46,7 +46,7 @@ class DraggableWindowHandler {
             document.onmousemove = ((ev) => this.DragWindow(ev));
             document.onmouseup = ((ev) => this.StopDraggingWindow(ev));
 
-            this.dotNetObject.invokeMethodAsync("StartDragWindow", this.draggableWindow.id, e.clientX, e.clientY);
+            this.dotNetObject.invokeMethodAsync("StartDragWindow", this.draggableWindow.id);
         }
     }
 
@@ -79,7 +79,7 @@ class DraggableWindowHandler {
             document.onmousemove = null;
             document.onmouseup = null;
 
-            this.dotNetObject.invokeMethodAsync("StopDragWindow", e.clientX, e.clientY);
+            this.dotNetObject.invokeMethodAsync("StopDragWindow");
         }
     }
 }

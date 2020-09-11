@@ -44,14 +44,11 @@ namespace BlazorDraggableWindow
         }
 
         [JSInvokable]
-        public void StartDragWindow(string windowId, double x, double y)
+        public void StartDragWindow(string windowId)
         {
             if (_draggableWindows.TryGetValue(windowId, out DraggableWindow window))
             {
                 _selectedWindow = window;
-
-                _selectedWindow.PositionX = x;
-                _selectedWindow.PositionY = y;
 
                 _selectedWindow.OnStartDragingWindow?.Invoke(_selectedWindow);
             }
@@ -70,14 +67,12 @@ namespace BlazorDraggableWindow
         }
 
         [JSInvokable]
-        public void StopDragWindow(double x, double y)
+        public void StopDragWindow()
         {
             if (_selectedWindow != null)
             {
-                _selectedWindow.PositionX = x;
-                _selectedWindow.PositionY = y;
-
                 _selectedWindow.OnStopDragingWindow?.Invoke(_selectedWindow);
+
                 _selectedWindow = null;
             }
         }

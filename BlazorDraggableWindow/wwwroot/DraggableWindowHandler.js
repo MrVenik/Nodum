@@ -27,7 +27,7 @@ var DraggableWindowHandler = /** @class */ (function () {
             this.isDragging = true;
             document.onmousemove = (function (ev) { return _this.DragWindow(ev); });
             document.onmouseup = (function (ev) { return _this.StopDraggingWindow(ev); });
-            this.dotNetObject.invokeMethodAsync("StartDragWindow", this.draggableWindow.id, e.clientX, e.clientY);
+            this.dotNetObject.invokeMethodAsync("StartDragWindow", this.draggableWindow.id);
         }
     };
     DraggableWindowHandler.prototype.DragWindow = function (e) {
@@ -50,7 +50,7 @@ var DraggableWindowHandler = /** @class */ (function () {
             this.startY = 0;
             document.onmousemove = null;
             document.onmouseup = null;
-            this.dotNetObject.invokeMethodAsync("StopDragWindow", e.clientX, e.clientY);
+            this.dotNetObject.invokeMethodAsync("StopDragWindow");
         }
     };
     return DraggableWindowHandler;
