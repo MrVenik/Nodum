@@ -1,16 +1,22 @@
-﻿<div id="draggablezone" class="draggablezone" style="height: @(Height); width:@(Width);">
+﻿@implements IDisposable
+
+@inject DraggableWindowHandler _draggableWIndowHandler
+
+
+
+<div id="draggablezone" style="position: relative; height: @(Height); width: @(Width);">
     <CascadingValue Value="this">
         @ChildContent
     </CascadingValue>
 
-    @if (DraggableWindows.Count > 0)
+    @if (_draggableWIndowHandler.DraggableWindows.Count > 0)
     {
-        @foreach (var window in DraggableWindows.Values)
+        @foreach (var window in _draggableWIndowHandler.DraggableWindows.Values)
         {
             if (window.AllowDrag)
             {
-                <div @key="window" id="@window.WindowId" class="draggablewindow" style="top: @($"{window.Y}px"); left: @($"{window.X}px");">
-                    <div class="draggablewindowheader" onmousedown="draggableWindowHandler.StartDragging(event)">
+                <div @key="window" id="@window.WindowId" style="position: absolute;">
+                    <div style="cursor: move;" onmousedown="draggableWindowHandler.StartDragging(event)">
                         <CascadingValue Value="window">
                             @window.WindowHeader
                         </CascadingValue>
@@ -22,8 +28,8 @@
             }
             else
             {
-                <div @key="window" id="@window.WindowId" class="draggablewindow" style="top: @($"{window.Y}px"); left: @($"{window.X}px");">
-                    <div class="draggablewindowheader" @onmousedown:preventDefault>
+                <div @key="window" id="@window.WindowId" style="position: absolute;">
+                    <div style="cursor: move;" @onmousedown:preventDefault>
                         <CascadingValue Value="window">
                             @window.WindowHeader
                         </CascadingValue>
@@ -47,46 +53,36 @@
     [Parameter]
     public string Name { get; set; }
 
-    private static DraggableWindow _selectedWindow;
+    private bool _isRendered = false;
 
-    public static Dictionary<string, DraggableWindow> DraggableWindows { get; } = new Dictionary<string, DraggableWindow>();
-
-    [Microsoft.JSInterop.JSInvokable]
-    public static void StartDragWindow(string windowId, double x, double y)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (DraggableWindows.TryGetValue(windowId, out DraggableWindow window))
+        if (firstRender)
         {
-            _selectedWindow = window;
-
-            _selectedWindow.PositionX = x;
-            _selectedWindow.PositionY = y;
-
-            _selectedWindow.OnStartDragingWindow?.Invoke(_selectedWindow);
+            _isRendered = true;
+            await _draggableWIndowHandler.Initialize();
         }
     }
 
-    [Microsoft.JSInterop.JSInvokable]
-    public static void DragWindow(double x, double y)
+    public void AddWindow(DraggableWindow window)
     {
-        if (_selectedWindow != null)
-        {
-            _selectedWindow.PositionX = x;
-            _selectedWindow.PositionY = y;
+        _draggableWIndowHandler.AddDraggableWindow(window);
 
-            _selectedWindow?.OnDragingWindow?.Invoke(_selectedWindow);
+        StateHasChanged();
+    }
+
+    public void RemoveWindow(DraggableWindow window)
+    {
+        _draggableWIndowHandler.RemoveDraggableWindow(window);
+
+        if (_isRendered)
+        {
+            StateHasChanged();
         }
     }
 
-    [Microsoft.JSInterop.JSInvokable]
-    public static void StopDragWindow(double x, double y)
+    public void Dispose()
     {
-        if (_selectedWindow != null)
-        {
-            _selectedWindow.PositionX = x;
-            _selectedWindow.PositionY = y;
-
-            _selectedWindow.OnStopDragingWindow?.Invoke(_selectedWindow);
-            _selectedWindow = null;
-        }
+        _isRendered = false;
     }
 }

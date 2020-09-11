@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlazorDraggableWindow;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -29,6 +30,7 @@ namespace NodumVisualCalculator
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddScoped<DraggableWindowHandler>();
             services.AddScoped<INodeSerializer, BinaryNodeSerializer>();
             services.AddScoped<NodumCalcService>();
         }

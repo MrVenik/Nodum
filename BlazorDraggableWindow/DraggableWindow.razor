@@ -1,5 +1,7 @@
 ﻿@implements IDisposable
 
+@inject IJSRuntime _jsRuntime
+
 @code {
     [CascadingParameter]
     public DraggableZone DraggableZone { get; set; }
@@ -41,15 +43,20 @@
 
         Guid = Guid.NewGuid();
 
-        if (!DraggableZone.DraggableWindows.ContainsKey(WindowId))
+        DraggableZone.AddWindow(this);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            DraggableZone.DraggableWindows.Add(WindowId, this);
+            await _jsRuntime.InvokeVoidAsync("draggableWindowHandler.PositionWindow", WindowId, X, Y);
         }
     }
 
     public void Dispose()
     {
-        DraggableZone.DraggableWindows.Remove(WindowId);
+        DraggableZone.RemoveWindow(this);
         OnDispose?.Invoke(this);
     }
 }

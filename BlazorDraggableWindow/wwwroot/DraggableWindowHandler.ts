@@ -8,12 +8,9 @@ class DraggableWindowHandler {
 
     private isDragging: boolean;
 
-    private draggableZone: HTMLElement;
-    private draggableWindow: HTMLElement;
+    private draggableWindow: HTMLElement = undefined;
 
-    public OnStartDragging: IMouseEventCallback;
-    public OnDragging: IMouseEventCallback;
-    public OnStopDragging: IMouseEventCallback;
+    private dotNetObject = undefined;
 
     public constructor() {
         this.startX = 0;
@@ -21,33 +18,40 @@ class DraggableWindowHandler {
         this.isDragging = false;
     }
 
+    public Initialize(obj) {
+        this.dotNetObject = obj;
+    }
+
+    public PositionWindow(windowId: string, x: number, y: number) {
+        var window: HTMLElement = document.getElementById(windowId);
+
+        if (window) {
+            window.style.left = x + "px";
+            window.style.top = y + "px";
+        }
+    }
+
     public StartDragging(e: MouseEvent) {
-        e = (e || window.event) as MouseEvent;
-        e.preventDefault();
+        if (this.dotNetObject) {
+            e = (e || window.event) as MouseEvent;
+            e.preventDefault();
 
-        if (this.draggableZone == null) {
-            this.draggableZone = document.getElementById("draggablezone");
+            this.draggableWindow = (e.currentTarget as HTMLElement).parentElement;
+
+            this.startX = e.clientX;
+            this.startY = e.clientY;
+
+            this.isDragging = true;
+
+            document.onmousemove = ((ev) => this.DragWindow(ev));
+            document.onmouseup = ((ev) => this.StopDraggingWindow(ev));
+
+            this.dotNetObject.invokeMethodAsync("StartDragWindow", this.draggableWindow.id, e.clientX, e.clientY);
         }
-
-        this.draggableWindow = (e.currentTarget as HTMLElement).parentElement;
-
-        this.startX = e.clientX;
-        this.startY = e.clientY;
-
-        this.isDragging = true;
-
-        if (this.OnStartDragging) {
-            this.OnStartDragging(e);
-        }
-
-        this.draggableZone.onmousemove = ((ev) => this.DragWindow(ev));
-        this.draggableZone.onmouseup = ((ev) => this.StopDraggingWindow(ev));
-
-        globalThis.DotNet.invokeMethodAsync("BlazorDraggableWindow", "StartDragWindow", this.draggableWindow.id, e.clientX, e.clientY);
     }
 
     public DragWindow(e: MouseEvent) {
-        if (this.isDragging && this.draggableWindow) {
+        if (this.dotNetObject && this.isDragging && this.draggableWindow) {
             e = (e || window.event) as MouseEvent;
             e.preventDefault();
 
@@ -60,28 +64,23 @@ class DraggableWindowHandler {
             this.startX = e.clientX;
             this.startY = e.clientY;
 
-            if (this.OnDragging) {
-                this.OnDragging(e);
-            }
-
-            globalThis.DotNet.invokeMethodAsync("BlazorDraggableWindow", "DragWindow", x, y);
+            this.dotNetObject.invokeMethodAsync("DragWindow", x, y);
         }
 
     }
 
     public StopDraggingWindow(e: MouseEvent) {
-        this.isDragging = false;
-        this.startX = 0;
-        this.startY = 0;
+        if (this.dotNetObject) {
 
-        if (this.OnStopDragging) {
-            this.OnStopDragging(e);
+            this.isDragging = false;
+            this.startX = 0;
+            this.startY = 0;
+
+            document.onmousemove = null;
+            document.onmouseup = null;
+
+            this.dotNetObject.invokeMethodAsync("StopDragWindow", e.clientX, e.clientY);
         }
-
-        this.draggableZone.onmousemove = null;
-        this.draggableZone.onmouseup = null;
-
-        globalThis.DotNet.invokeMethodAsync("BlazorDraggableWindow", "StopDragWindow", e.clientX, e.clientY);
     }
 }
 
