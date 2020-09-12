@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodumVisualCalculator", "No
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorDraggableWindow", "BlazorDraggableWindow\BlazorDraggableWindow.csproj", "{57D8342F-207A-4028-BAB2-EBDC3DB4B2BA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodumVisualCalculator.Web", "NodumVisualCalculator.Web\NodumVisualCalculator.Web.csproj", "{8867D038-E5FE-4C5B-8417-A920E3F8411B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{57D8342F-207A-4028-BAB2-EBDC3DB4B2BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57D8342F-207A-4028-BAB2-EBDC3DB4B2BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57D8342F-207A-4028-BAB2-EBDC3DB4B2BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8867D038-E5FE-4C5B-8417-A920E3F8411B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8867D038-E5FE-4C5B-8417-A920E3F8411B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8867D038-E5FE-4C5B-8417-A920E3F8411B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8867D038-E5FE-4C5B-8417-A920E3F8411B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

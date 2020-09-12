@@ -1,0 +1,228 @@
+﻿* {
+    font-family: 'Ubuntu', sans-serif;
+    --shadow1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    --shadow2: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    --shadow3: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+    --shadow4: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    --shadow5: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+    --shadow: var(--shadow3);
+    /*
+    Dark
+    */
+    --primary-color: #212121;
+    --primary-text-color: #ffffff;
+    --primary-hover-color: #0A121F;
+    --secondary-color: #424242;
+    --secondary-text-color: #ffffff;
+    --secondary-hover-color: #333333;
+    /*
+    Dark Blue
+    */
+    /*
+
+    --primary-color: #05090F;
+    --primary-text-color: #ffffff;
+    --primary-hover-color: #0A121F;
+
+    --secondary-color: #141D29;
+    --secondary-text-color: #ffffff;
+    --secondary-hover-color: #0D131B;
+
+    */
+    /*
+    Light Blue
+    */
+    /*
+
+    --primary-color: #1D3557;
+    --primary-text-color: #ffffff;
+    --primary-hover-color: #0A121F;
+
+    --secondary-color: #E2F3F3;
+    --secondary-text-color: #000000;
+    --secondary-hover-color: #0D131B;
+
+    */
+    /*
+    Green
+    */
+    /*
+
+    --primary-color: #173A31;
+    --primary-text-color: #ffffff;
+    --primary-hover-color: #0A121F;
+
+    --secondary-color: #F1FAEE;
+    --secondary-text-color: #000000;
+    --secondary-hover-color: #0D131B;
+
+    */
+    /*
+    Purple
+    */
+    /*
+
+    --primary-color: #0E0029;
+    --primary-text-color: #ffffff;
+    --primary-hover-color: #0A121F;
+
+    --secondary-color: #E0AAFF;
+    --secondary-text-color: #000000;
+    --secondary-hover-color: #0D131B;
+
+    */
+    /*
+    Orange
+    */
+    /*
+
+    --primary-color: #B54703;
+    --primary-text-color: #ffffff;
+    --primary-hover-color: #0A121F;
+
+    --secondary-color: #FFE8AD;
+    --secondary-text-color: #000000;
+    --secondary-hover-color: #0D131B;
+
+    */
+}
+
+body {
+    overflow: hidden;
+    height: 100%;
+    margin: 0;
+}
+
+.iconify {
+    cursor: pointer;
+}
+
+.iconify-small {
+    color: #fff;
+    width: 24px;
+    height: 24px;
+}
+
+.iconify-main {
+    vertical-align: middle;
+    color: #fff;
+    font-size: 48px;
+}
+
+.main {
+    background-color: var(--secondary-color);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.body {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: row;
+}
+
+.header {
+    color: var(--primary-text-color);
+    background-color: var(--primary-color);
+    font-size: 32px;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 100vw;
+    box-shadow: var(--shadow);
+}
+
+.header-element {
+    margin-left: 25px;
+    margin-right: 25px;
+}
+
+.header-title {
+    position: absolute;
+    text-align: center;
+    width: 100vw;
+    z-index: -1;
+}
+
+.footer {
+    color: var(--primary-text-color);
+    background-color: var(--primary-color);
+    font-size: 32px;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 100vw;
+}
+
+.body-center {
+    background-size: 1em 1em;
+    background-image: linear-gradient(to right, var(--secondary-hover-color) 1px, transparent 1px), linear-gradient(to bottom, var(--secondary-hover-color) 1px, transparent 1px);
+    width: 100%;
+}
+
+#panzoom {
+    width: 100%;
+    height: 100%;
+}
+
+.sidebar {
+    color: var(--secondary-text-color);
+    background-color: var(--secondary-color);
+    z-index: 1;
+    height: 100%;
+    min-width: 250px;
+    position: relative;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: var(--shadow);
+}
+
+.sidebar-tab {
+    color: var(--secondary-text-color);
+    background-color: var(--secondary-color);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-shadow: var(--shadow);
+}
+
+.sidebar-tab-header {
+    color: var(--primary-text-color);
+    background-color: var(--primary-color);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.sidebar-tab-element {
+    padding: 10px;
+    cursor: pointer;
+}
+
+    .sidebar-tab-element:hover {
+        background-color: var(--secondary-hover-color);
+    }
